@@ -8,6 +8,10 @@
 #include"main.h"
 #include"Application.h"
 
+//メモリリークのチェック
+#define _CRTDBG_MAP_ALLOC
+#include <crtdbg.h>
+
 //*****************************************************************************
 // 定数定義
 //*****************************************************************************
@@ -36,6 +40,9 @@ CApplication*pApplication;
 //=============================================================================
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/, LPSTR /*lpCmdLine*/, int nCmdShow)
 {
+	//メモリリークのチェック
+	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
+
 	//動的確保
 	pApplication = new CApplication;
 
@@ -144,6 +151,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/, LPSTR /*lpC
 			}
 		}
 	}
+	//メモリーリーク表示
+	_CrtDumpMemoryLeaks();
 
 	// 終了処理
 	pApplication->Uninit();

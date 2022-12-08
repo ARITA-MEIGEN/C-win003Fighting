@@ -19,46 +19,6 @@
 #define MIN_SPEED		(0.1f)	//摩擦による最低速度
 #define NUM_MODELPARTS	(1)		//モデルのパーツ数
 
-//グローバル変数
-CPlayer::KEY_SET g_aKeySet[]	//キーの数あとでメンバ変数に
-{
-	{//最初
-		60,
-		{
-		{ 0.0f,0.0f,0.0f ,0.0f,0.0f,0.0f },		//胴体
-		{ 0.0f,0.0f,0.0f ,0.0f,0.0f,0.0f },		//脚の土台
-		{ 0.0f,0.0f,0.0f ,0.0f,0.0f,0.0f },		//1関節
-		{ 0.0f,0.0f,0.0f ,0.0f,0.0f,0.0f },		//1太もも
-		{ 0.0f,0.0f,0.0f ,0.0f,0.0f,0.0f },		//1足
-		{ 0.0f,0.0f,0.0f ,0.0f,0.0f,0.0f },		//2関節
-		{ 0.0f,0.0f,0.0f ,0.0f,0.0f,0.0f },		//2太もも
-		{ 0.0f,0.0f,0.0f ,0.0f,0.0f,0.0f },		//2足
-		{ 0.0f,0.0f,0.0f ,0.0f,0.0f,0.0f },		//3関節
-		{ 0.0f,0.0f,0.0f ,0.0f,0.0f,0.0f },		//3太もも
-		{ 0.0f,0.0f,0.0f ,0.0f,0.0f,0.0f }, 	//3足
-		{ 0.0f,0.0f,0.0f ,0.0f,0.0f,0.0f },		//4関節
-		{ 0.0f,0.0f,0.0f ,0.0f,0.0f,0.0f },		//4太もも
-		{ 0.0f,0.0f,0.0f ,0.0f,0.0f,0.0f }}		//4足
-	},
-	{//2個
-		60,
-		{
-		{ 0.0f,-10.0f,0.0f ,0.0f,0.0f,0.0f },		//胴体
-		{ 0.0f,0.0f,0.0f ,0.0f,0.0f,0.0f },		//脚の土台
-		{ 0.0f,0.0f,0.0f ,0.0f,0.0f,0.0f },		//1関節
-		{ 0.0f,0.0f,0.0f ,0.0f,0.0f,0.0f },		//1太もも
-		{ 0.0f,0.0f,0.0f ,0.0f,0.0f,0.0f },		//1足
-		{ 0.0f,0.0f,0.0f ,0.0f,0.0f,0.0f },		//2関節
-		{ 0.0f,0.0f,0.0f ,0.0f,0.0f,0.0f },		//2太もも
-		{ 0.0f,0.0f,0.0f ,0.0f,0.0f,0.0f },		//2足
-		{ 0.0f,0.0f,0.0f ,0.0f,0.0f,0.0f },		//3関節
-		{ 0.0f,0.0f,0.0f ,0.0f,0.0f,0.0f },		//3太もも
-		{ 0.0f,0.0f,0.0f ,0.0f,0.0f,0.0f }, 	//3足
-		{ 0.0f,0.0f,0.0f ,0.0f,0.0f,0.0f },		//4関節
-		{ 0.0f,0.0f,0.0f ,0.0f,0.0f,0.0f },		//4太もも
-		{ 0.0f,0.0f,0.0f ,0.0f,0.0f,0.0f }}		//4足
-	},
-};
 //===========================
 //コンストラクタ
 //===========================
@@ -80,33 +40,16 @@ CPlayer::~CPlayer()
 //===========================
 HRESULT CPlayer::Init()
 {
-	m_nNumKey = 1;
-
-	for (int i = 0; i < NUM_PLAYERPARTS; i++)
+	for (int i = 0; i < NUM_PARTS; i++)
 	{//プレイヤーの生成
-		m_apModel[i] = CModel::Create(D3DXVECTOR3(0.0f, 0.0f, 0.0f), i);
+		m_apModel[i] = CModel::Create();
 	}
 
-	//親の設定
-	//脚の土台
-	m_apModel[1]->SetParent(m_apModel[0]);
-	for (int i = 0; i < 4; i++)
-	{//4つの脚
-		for (int j = 0; j < 2; j++)
-		{//脚の親設定(3パーツで1脚)親パーツは第一関節
-			m_apModel[(i * 3) + 3+j]->SetParent(m_apModel[(i * 3) + 2]);
-		}
-		//第一関節の作成(親は脚の土台)
-		m_apModel[(i * 3) + 2]->SetParent(m_apModel[1]);
-	}
-
-	while ((sizeof(g_aKeySet) / sizeof(KEY_SET)) > m_nNumKey)
-	{//キーの最大数の確認
-		m_nNumKey++;
-	}
+	//モデルとモーションの読み込み
+	ReadMotion();
 
 	//回転マトリックスの初期化
-	D3DXMatrixIdentity(&m_mtxRot);
+	//D3DXMatrixIdentity(&m_mtxRot);
 
 	return S_OK;
 }
@@ -116,6 +59,14 @@ HRESULT CPlayer::Init()
 //===========================
 void CPlayer::Uninit(void)
 {
+
+	for (int i = 0; i < NUM_PARTS; i++)
+	{//プレイヤーの生成
+		m_apModel[i]->Uninit();
+		delete m_apModel[i];
+		m_apModel[i] = nullptr;
+	}
+
 	CObject::Release();
 }
 
@@ -137,6 +88,8 @@ void CPlayer::Update(void)
 	////移動量更新(減衰させる)
 	//m_move.x += (0.0f - m_move.x)*MIN_SPEED;
 	//m_move.z += (0.0f - m_move.z)*MIN_SPEED;
+
+	CDebugProc::Print("現在のプレイヤーの座標:%f %f %f", m_pos.x, m_pos.y, m_pos.z);
 }
 
 //===========================
@@ -157,18 +110,18 @@ void CPlayer::Draw(void)
 	D3DXMatrixIdentity(&m_mtxWorld);
 
 	//クォータニオンの設定
-	D3DXQuaternionRotationAxis(&m_quat, &m_vecAxis, m_fRolling);
+	//D3DXQuaternionRotationAxis(&m_quat, &m_vecAxis, m_fRolling);
 
 	//回転用マトリックスの生成
-	D3DXMatrixRotationQuaternion(&mtxRot, &m_quat);
+	//D3DXMatrixRotationQuaternion(&mtxRot, &m_quat);
 
 	//パーツのモデルの向きを反映
-	D3DXMatrixMultiply(&m_mtxRot, &m_mtxRot, &mtxRot);					//クォータニオンの反映
-	//D3DXMatrixRotationYawPitchRoll(&mtxRot, m_rot.y, m_rot.x, m_rot.z);
-	D3DXMatrixMultiply(&m_mtxWorld, &m_mtxWorld, &m_mtxRot);
+	//D3DXMatrixMultiply(&m_mtxRot, &m_mtxRot, &mtxRot);					//クォータニオンの反映
+	D3DXMatrixRotationYawPitchRoll(&mtxRot, m_rot.y, m_rot.x, m_rot.z);
+	D3DXMatrixMultiply(&m_mtxWorld, &m_mtxWorld, &mtxRot);
 
 	//パーツのモデルの位置を反映
-	D3DXMatrixTranslation(&mtxTrans, m_pos.x, m_pos.y+ 10.0f, m_pos.z);
+	D3DXMatrixTranslation(&mtxTrans, m_pos.x, m_pos.y, m_pos.z);
 	D3DXMatrixMultiply(&m_mtxWorld, &m_mtxWorld, &mtxTrans);
 
 	//Shadow();
@@ -176,7 +129,7 @@ void CPlayer::Draw(void)
 	//ワールドマトリックスの設定
 	pDevice->SetTransform(D3DTS_WORLD, &m_mtxWorld);
 
-	for (int i = 0; i < 1; i++)
+	for (int i = 0; i < NUM_PARTS; i++)
 	{
 		m_apModel[i]->Draw(m_mtxWorld);
 	}
@@ -238,16 +191,16 @@ void CPlayer::ControlPlayer(void)
 		m_rot.y += D3DX_PI * 2;
 	}
 
-	rolling();
+	//rolling();
 }
 
 //===========================
 //操作
 //===========================
-CPlayer * CPlayer::Create(D3DXVECTOR3 pos, int Priority)
+CPlayer * CPlayer::Create()
 {
 	CPlayer*pPlayer;
-	pPlayer = new CPlayer(Priority);
+	pPlayer = new CPlayer(CObject::OBJTYPE_MODEL);
 	pPlayer->Init();
 
 	return pPlayer;
@@ -259,6 +212,199 @@ CPlayer * CPlayer::Create(D3DXVECTOR3 pos, int Priority)
 D3DXMATRIX CPlayer::GetMtx()
 {
 	return m_mtxWorld;
+}
+
+//===========================
+//モーション読み込み
+//===========================
+void CPlayer::ReadMotion()
+{
+	const int lenLine = 2048;	//1単語の最大数
+	char strLine[lenLine];		//読み込み用の文字列
+	char Read[lenLine];			//読み取る用
+	int	modelnumber = 0;		//モデルの番号
+	int motionnumber = 0;		//モーションの番号
+	int nNumKey = 0;			//1モーションのキーの総数
+	int key = 0;
+	int model = 0;
+	int Idx = 0;
+
+
+	//ファイル読み込み
+	FILE*fp = fopen("data/TXT/Motion.txt", "r");		//ファイル読み込み
+	if (fp == nullptr)
+	{//開けなかった時用
+		assert(false);
+	}
+	if (fp != NULL)
+	{
+		while (fgets(Read, lenLine, fp) != nullptr)
+		{
+			//文字列の分析
+			sscanf(Read, "%s", &strLine);
+			if (strcmp(&strLine[0], "SCRIPT") == 0)	//比較して一致するかどうか調べる
+			{
+				while (fgets(Read, lenLine, fp) != nullptr)	//読み込み用ループ(一行読み込み)
+				{//モデルの初期設定
+					ZeroMemory(strLine,sizeof(char)* 2048);	//文字列リセット
+
+					//文字列の分析
+					sscanf(Read, "%s", &strLine);
+
+					if (strcmp(&strLine[0], "END_SCRIPT") == 0)
+					{
+						break;
+					}
+					else if (strcmp(&strLine[0], "NUM_MODEL") == 0)
+					{
+						sscanf(Read, "%s = %d", &strLine, &m_nNumModel);	//読み込んだ文字ごとに設定する
+					}
+					else if (strcmp(&strLine[0], "MODEL_FILENAME") == 0)
+					{
+						sscanf(Read, "%s = %s", &strLine, &m_nModelpass[0]);	//モデルのパスの設定
+
+						m_apModel[modelnumber]->SetModel(&m_nModelpass[0]);
+						modelnumber++;
+					}
+					else if (strcmp(&strLine[0], "CHARACTERSET") == 0)
+					{//初期位置の設定
+						while (fgets(Read, lenLine, fp) != nullptr)//一行読み込み
+						{//キャラクターの設定
+							//文字列の分析
+							ZeroMemory(strLine, sizeof(char) * 2048);	//文字列リセット
+
+							sscanf(Read, "%s", &strLine);
+							if (strcmp(&strLine[0], "END_CHARACTERSET") == 0)
+							{
+								break;
+							}
+							if (strcmp(&strLine[0], "PARTSSET") == 0)
+							{
+								while (fgets(Read, lenLine, fp) != nullptr)	//読み込みループ //一行読み込み
+								{//パーツの設定	
+									ZeroMemory(strLine, sizeof(char) * 2048);	//文字列リセット
+
+									//文字列の分析
+									sscanf(Read, "%s", &strLine);
+									if (strcmp(&strLine[0], "END_PARTSSET") == 0)
+									{//パーツの設定終了
+										Idx++;
+										break;
+									}
+									else if (strcmp(&strLine[0], "INDEX") == 0)
+									{//インデックスの設定
+										sscanf(Read, "%s = %d", &strLine, &Idx);	//モデルのパスの設定
+									}
+									else if (strcmp(&strLine[0], "PARENT") == 0)
+									{//親モデルの設定
+										int Parent;
+										sscanf(Read, "%s = %d", &strLine, &Parent);	//モデルのパスの設定
+										m_apModel[Idx]->SetParent(m_apModel[Parent]);
+									}
+									else if (strcmp(&strLine[0], "POS") == 0)
+									{//位置
+										D3DXVECTOR3 pos;
+										sscanf(Read, "%s = %f%f%f", &strLine, &pos.x, &pos.y, &pos.z);	//座標の取得
+										m_apModel[Idx]->SetPos(pos);
+									}
+									else if (strcmp(&strLine[0], "ROT") == 0)
+									{//向き
+										D3DXVECTOR3 rot;
+										sscanf(Read, "%s = %f%f%f", &strLine, &rot.x, &rot.y, &rot.z);
+										m_apModel[Idx]->SetRot(rot);
+									}
+								}
+							}
+						}
+					}
+					else if (strcmp(&strLine[0], "MOTIONSET") == 0)
+					{
+						while (fgets(Read, lenLine, fp) != nullptr)	//読み込み用ループ
+						{
+							ZeroMemory(strLine, sizeof(char) * 2048);	//文字列リセット
+
+							//文字列の分析
+							sscanf(Read, "%s", &strLine);
+							if (strcmp(&strLine[0], "END_MOTIONSET") == 0)
+							{
+								//モーションの番号繰り上げ
+								motionnumber++;
+								break;
+							}
+							else if (strcmp(&strLine[0], "NUM_KEY") == 0)
+							{
+								sscanf(Read, "%s = %d", &strLine, &m_apMotion[motionnumber].nNumKey);	//キーの総数
+							}
+							else if (strcmp(&strLine[0], "LOOP") == 0)
+							{//ループするかしないか
+								sscanf(Read, "%s = %d", &strLine, (int*)&m_apMotion[motionnumber].bLoop);	//ループするかどうか
+							}
+							else if (strcmp(&strLine[0], "KEYSET") == 0)
+							{
+								while (fgets(Read, lenLine, fp) != nullptr)
+								{
+									ZeroMemory(strLine, sizeof(char) * 2048);	//文字列リセット
+
+									//文字列の分析
+									sscanf(Read, "%s", &strLine);
+
+									//keyはモデルのキーの番号
+									if (strcmp(&strLine[0], "END_KEYSET") == 0)
+									{
+										key++;
+										break;
+									}
+									else if (strcmp(&strLine[0], "FRAME") == 0)
+									{//キーの再生時間の設定
+										sscanf(Read, "%s = %d", &strLine, &m_apMotion[motionnumber].aModelKey[0].nFrame);	//再生時間の設定
+									}
+									else if (strcmp(&strLine[0], "KEY") == 0)
+									{//キー設定
+										while (fgets(Read, lenLine, fp) != nullptr)
+										{
+											ZeroMemory(strLine, sizeof(char) * 2048);	//文字列リセット
+
+											//文字列の分析
+											sscanf(Read, "%s", &strLine);
+
+											if (strcmp(&strLine[0], "END_KEY") == 0)
+											{
+												model++;
+												break;
+											}
+											else if (strcmp(&strLine[0], "POS") == 0)
+											{
+												sscanf(Read, "%s = %f %f %f", &strLine,
+													&m_apMotion[motionnumber].aModelKey[key].aKey[model].fPosX,
+													&m_apMotion[motionnumber].aModelKey[key].aKey[model].fPosY,
+													&m_apMotion[motionnumber].aModelKey[key].aKey[model].fPosZ);	//再生時間の設定
+											}
+											else if (strcmp(&strLine[0], "ROT") == 0)
+											{
+												sscanf(Read, "%s = %f %f %f", &strLine,
+													&m_apMotion[motionnumber].aModelKey[key].aKey[model].fRotX,
+													&m_apMotion[motionnumber].aModelKey[key].aKey[model].fRotY,
+													&m_apMotion[motionnumber].aModelKey[key].aKey[model].fRotZ);
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+					else if (strcmp(&strLine[0], "#") == 0)
+					{
+						continue;
+					}
+				}
+			}
+			else if (strcmp(&strLine[0], "END_SCRIPT") == 0)
+			{
+				break;
+			}
+		}
+	}
+	fclose(fp);
 }
 
 //===========================
@@ -275,30 +421,30 @@ void CPlayer::MotionPlayer()
 			if (m_nCurrentKey != 0)
 			{
 				fDiffPos = D3DXVECTOR3(
-					g_aKeySet[m_nCurrentKey].aKey[i].fPosX - g_aKeySet[m_nCurrentKey - 1].aKey[i].fPosX,
-					g_aKeySet[m_nCurrentKey].aKey[i].fPosY - g_aKeySet[m_nCurrentKey - 1].aKey[i].fPosY,
-					g_aKeySet[m_nCurrentKey].aKey[i].fPosZ - g_aKeySet[m_nCurrentKey - 1].aKey[i].fPosZ);	//差分の取得
+					m_apMotion[m_MotionCnt].aModelKey[m_nCurrentKey].aKey[i].fPosX - m_apMotion[m_MotionCnt].aModelKey[m_nCurrentKey-1].aKey[i].fPosX,
+					m_apMotion[m_MotionCnt].aModelKey[m_nCurrentKey].aKey[i].fPosY - m_apMotion[m_MotionCnt].aModelKey[m_nCurrentKey-1].aKey[i].fPosY,
+					m_apMotion[m_MotionCnt].aModelKey[m_nCurrentKey].aKey[i].fPosZ - m_apMotion[m_MotionCnt].aModelKey[m_nCurrentKey-1].aKey[i].fPosZ);	//差分の取得
 
 				fDiffRot = D3DXVECTOR3(
-					g_aKeySet[m_nCurrentKey].aKey[i].fRotX - g_aKeySet[m_nCurrentKey - 1].aKey[i].fRotX,
-					g_aKeySet[m_nCurrentKey].aKey[i].fRotY - g_aKeySet[m_nCurrentKey - 1].aKey[i].fRotY,
-					g_aKeySet[m_nCurrentKey].aKey[i].fRotZ - g_aKeySet[m_nCurrentKey - 1].aKey[i].fRotZ);	//差分の取得
+					m_apMotion[m_MotionCnt].aModelKey[m_nCurrentKey].aKey[i].fRotX - m_apMotion[m_MotionCnt].aModelKey[m_nCurrentKey-1].aKey[i].fRotX,
+					m_apMotion[m_MotionCnt].aModelKey[m_nCurrentKey].aKey[i].fRotY - m_apMotion[m_MotionCnt].aModelKey[m_nCurrentKey-1].aKey[i].fRotY,
+					m_apMotion[m_MotionCnt].aModelKey[m_nCurrentKey].aKey[i].fRotZ - m_apMotion[m_MotionCnt].aModelKey[m_nCurrentKey-1].aKey[i].fRotZ);	//差分の取得
 
-				fRela = (float)m_MotionCnt / g_aKeySet[m_nCurrentKey].nFrame;							//相対値
+				fRela = (float)m_MotionCnt / m_apMotion[m_MotionCnt].aModelKey[m_nCurrentKey].nFrame;							//相対値
 			}
 			else
 			{
 				fDiffPos = D3DXVECTOR3(
-					g_aKeySet[0].aKey[i].fPosX - g_aKeySet[m_nNumKey - 1].aKey[i].fPosX,
-					g_aKeySet[0].aKey[i].fPosY - g_aKeySet[m_nNumKey - 1].aKey[i].fPosY,
-					g_aKeySet[0].aKey[i].fPosZ - g_aKeySet[m_nNumKey - 1].aKey[i].fPosZ);	//差分の取得
+					m_apMotion[m_MotionCnt].aModelKey[m_nCurrentKey].aKey[i].fPosX -m_apMotion[m_MotionCnt].aModelKey[m_nCurrentKey-1].aKey[i].fPosX,
+					m_apMotion[m_MotionCnt].aModelKey[m_nCurrentKey].aKey[i].fPosY -m_apMotion[m_MotionCnt].aModelKey[m_nCurrentKey-1].aKey[i].fPosY,
+					m_apMotion[m_MotionCnt].aModelKey[m_nCurrentKey].aKey[i].fPosZ -m_apMotion[m_MotionCnt].aModelKey[m_nCurrentKey-1].aKey[i].fPosZ);	//差分の取得
 
 				fDiffRot = D3DXVECTOR3(
-					g_aKeySet[0].aKey[i].fRotX - g_aKeySet[m_nNumKey - 1].aKey[i].fRotX,
-					g_aKeySet[0].aKey[i].fRotY - g_aKeySet[m_nNumKey - 1].aKey[i].fRotY,
-					g_aKeySet[0].aKey[i].fRotZ - g_aKeySet[m_nNumKey - 1].aKey[i].fRotZ);	//差分の取得
+					m_apMotion[m_MotionCnt].aModelKey[m_nCurrentKey].aKey[i].fRotX -m_apMotion[m_MotionCnt].aModelKey[m_nCurrentKey-1].aKey[i].fRotX,
+					m_apMotion[m_MotionCnt].aModelKey[m_nCurrentKey].aKey[i].fRotY -m_apMotion[m_MotionCnt].aModelKey[m_nCurrentKey-1].aKey[i].fRotY,
+					m_apMotion[m_MotionCnt].aModelKey[m_nCurrentKey].aKey[i].fRotZ -m_apMotion[m_MotionCnt].aModelKey[m_nCurrentKey-1].aKey[i].fRotZ);	//差分の取得
 
-				fRela = (float)m_MotionCnt / g_aKeySet[m_nCurrentKey].nFrame;						//相対値
+				fRela = (float)m_MotionCnt / m_apMotion[m_MotionCnt].aModelKey[m_nCurrentKey].nFrame;						//相対値
 			}
 
 			//キーの設定
@@ -311,7 +457,7 @@ void CPlayer::MotionPlayer()
 		}
 	}
 	//カウンター更新
-	if (m_MotionCnt++ >= g_aKeySet[m_nCurrentKey].nFrame)
+	if (m_MotionCnt++ >= m_apMotion[m_MotionCnt].aModelKey[m_nCurrentKey].nFrame)
 	{//キー番号の更新とカウンターのリセット
 		m_nCurrentKey++;
 		m_MotionCnt = 0;
@@ -321,6 +467,7 @@ void CPlayer::MotionPlayer()
 		}
 	}
 }
+
 
 //===========================
 //回転テスト
@@ -335,6 +482,4 @@ void CPlayer::rolling()
 	//m_fRolling = (m_move.x * m_move.z) * 2 * D3DX_PI / (Radius *D3DX_PI);
 	m_fRolling = D3DXVec3Length(&m_move) * 2 * D3DX_PI / (Radius *D3DX_PI);
 }
-
-
 

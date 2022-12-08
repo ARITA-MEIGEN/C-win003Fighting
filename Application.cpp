@@ -80,8 +80,8 @@ HRESULT CApplication::Init(HWND hWnd, bool bWindow, HINSTANCE hInstance)
 	// モードの設定
 	//----------------------------
 	m_pFade = new CFade;
-	SetMode(MODE_TITLE);
-	m_pFade->Init(MODE_TITLE);
+	SetMode(MODE_GAME);
+	m_pFade->Init(MODE_GAME);
 
 	//----------------------------
 	// デバッグ用文字の生成
@@ -97,7 +97,9 @@ HRESULT CApplication::Init(HWND hWnd, bool bWindow, HINSTANCE hInstance)
 //====================================
 void CApplication::Uninit()
 {
+	//----------------------------
 	//レンダリングクラスの破壊
+	//----------------------------
 	if (m_pRenderer != nullptr)
 	{
 		// 終了処理
@@ -106,12 +108,64 @@ void CApplication::Uninit()
 		m_pRenderer = nullptr;
 	}
 
+	//----------------------------
 	//キーボードの破棄
+	//----------------------------
 	if (m_pInputKeyboard != nullptr)
 	{
 		m_pInputKeyboard->Uninit();
 		delete m_pInputKeyboard;
 		m_pInputKeyboard = nullptr;
+	}
+
+	//----------------------------
+	//ジョイパッドの破棄
+	//----------------------------
+	if (m_pInputJoyPad != nullptr)
+	{
+		m_pInputJoyPad->Uninit();
+		delete m_pInputJoyPad;
+		m_pInputJoyPad = nullptr;
+	}
+	
+	//----------------------------
+	// タイトルの終了
+	//----------------------------
+	if (m_pTitle != nullptr)
+	{
+		m_pTitle->Uninit();
+		delete m_pTitle;
+		m_pTitle = nullptr;
+	}
+
+	//----------------------------
+	// ゲームの終了
+	//----------------------------
+	if (m_pGame != nullptr)
+	{
+		m_pGame->Uninit();
+		delete m_pGame;
+		m_pGame = nullptr;
+	}
+
+	//----------------------------
+	// リザルトの終了
+	//----------------------------
+	if (m_pResult != nullptr)
+	{
+		m_pResult->Uninit();
+		delete m_pResult;
+		m_pResult = nullptr;
+	}
+
+	//----------------------------
+	// フェードの終了
+	//----------------------------
+	if (m_pFade != nullptr)
+	{
+		m_pFade->Uninit();
+		delete m_pFade;
+		m_pFade = nullptr;
 	}
 }
 

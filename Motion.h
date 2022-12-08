@@ -40,7 +40,7 @@ public:
 	HRESULT Init();						//‰Šú‰»
 	void Uninit();						//I—¹
 	void Update();						//XV
-	void Read(char* Filename, D3DXVECTOR3 pos, D3DXVECTOR3 rot));			//“Ç‚İ‚İ
+	void Read(char* Filename, D3DXVECTOR3 pos, D3DXVECTOR3 rot);			//“Ç‚İ‚İ
 	KEY_SET m_MotionKey[MAX_MOTION];	//“o˜^‚µ‚½“®‚«‚Ìî•ñ
 protected:
 private:

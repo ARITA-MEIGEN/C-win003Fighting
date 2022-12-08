@@ -29,10 +29,10 @@ public:
 	void		Uninit(void);
 	void		Update(void);
 	void		Draw(D3DXMATRIX pMtx);
-	static		CModel*Create(D3DXVECTOR3 pos, int Number);
-	void		LoadModel();
+	static		CModel*Create();
 	void		Shadow();
-	void		Siz(int number);
+	void		Siz();
+	void		SetModel(char* Filename);
 	void		SetParent(CModel*pModel) ;
 	CModel*		GetParent();
 	D3DXMATRIX	GetMtx();
@@ -41,22 +41,24 @@ public:
 	void		SetPos(D3DXVECTOR3 pos);
 	D3DXVECTOR3	GetPos();
 	float		GetWidth();
+	void		SetIdx(int Idx) { m_nIdx = Idx; };
+	int			GetIdx() { return m_nIdx; };
 
 private:
-	static LPD3DXBUFFER	m_pPlayerBuffMat[NUM_PLAYERPARTS];	//マテリアル情報へのポインタ
-	static DWORD		m_nPlayerNumMat[NUM_PLAYERPARTS];	//マテリアル情報の数
-	static LPD3DXMESH	m_pPlayerMesh[NUM_PLAYERPARTS];		//メッシュへのポインタ
-	D3DXMATRIX			m_mtxParent;						//親のワールドマトリックス
-	D3DXMATRIX			m_mtxWorld;							//子のワールドマトリックス
-	D3DXMATRIX			m_mtxShadow;						//影用ワールドマトリックス
-	D3DXVECTOR3			m_pos;								//位置
-	D3DXVECTOR3			m_posold;							//前回の位置
-	D3DXVECTOR3			m_rotDest;							//目的の角度の保存
-	D3DXVECTOR3			m_rot;								//向き
-	D3DXVECTOR3			m_vtxMax;							//モデルの最大座標
-	D3DXVECTOR3			m_vtxMin;							//モデルの座標の最小値
-	int					m_nNumber;							//自身の番号
-	CModel*				m_pParent;							//親のモデルへのポインタ
+	LPD3DXBUFFER		m_pBuffMat;		//マテリアル情報へのポインタ
+	DWORD				m_nNumMat;		//マテリアル情報の数
+	LPD3DXMESH			m_pMesh;		//メッシュへのポインタ
+	D3DXMATRIX			m_mtxParent;	//親のワールドマトリックス
+	D3DXMATRIX			m_mtxWorld;		//子のワールドマトリックス
+	D3DXMATRIX			m_mtxShadow;	//影用ワールドマトリックス
+	D3DXVECTOR3			m_pos;			//位置
+	D3DXVECTOR3			m_posold;		//前回の位置
+	D3DXVECTOR3			m_rotDest;		//目的の角度の保存
+	D3DXVECTOR3			m_rot;			//向き
+	D3DXVECTOR3			m_vtxMax;		//モデルの最大座標
+	D3DXVECTOR3			m_vtxMin;		//モデルの座標の最小値
+	int					m_nIdx;			//自身の番号
+	CModel*				m_pParent;		//親のモデルへのポインタ
 };
 
 #endif

@@ -62,7 +62,7 @@ HRESULT CGame::Init()
 
 	//マップデータ読み込み
 	//プレイヤーの生成
-	CPlayer::Create(D3DXVECTOR3(0.0f, 0.0f, 0.0f), 1);
+	CPlayer::Create();
 
 	//背景の生成
 	//メッシュフィールドの設定
