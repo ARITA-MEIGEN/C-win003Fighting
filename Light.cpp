@@ -50,7 +50,7 @@ void CLight::Init(void)
 
 	//ライト3
 	//ライトの方向を設定
-	vecDir = D3DXVECTOR3(-0.4f, -0.8f, 0.2f);
+	//vecDir = D3DXVECTOR3(-0.4f, -0.8f, 0.2f);
 	vecDir = D3DXVECTOR3(0.2f, -0.8f, -0.4f);
 
 

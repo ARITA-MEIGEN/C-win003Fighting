@@ -9,6 +9,7 @@
 #include"xaudio2.h"			//サウンド処理に必要
 #include"Xinput.h"			//ジョイパッド処理に必要
 #include"DebugProc.h"
+#include"Easing.h"
 //#include <nlohmann/json.hpp>
 
 #endif

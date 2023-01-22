@@ -1,0 +1,183 @@
+#==============================================================================
+#
+# 『モーションビューワ』スクリプトファイル [motion.txt]
+# Author : AKIRA TANAKA
+#
+#==============================================================================
+SCRIPT			# この行は絶対消さないこと！
+
+#------------------------------------------------------------------------------
+# モデル数
+#------------------------------------------------------------------------------
+NUM_MODEL = 14
+
+#------------------------------------------------------------------------------
+# モデルファイル名
+#------------------------------------------------------------------------------
+MODEL_FILENAME = data/MODEL/Player000body.x		# [0]体
+MODEL_FILENAME = data/MODEL/Player000head.x		# [1]頭
+MODEL_FILENAME = data/MODEL/Player000Rarm1.x	# [2]右腕
+MODEL_FILENAME = data/MODEL/Player000Rarm2.x	# [3]右腕
+MODEL_FILENAME = data/MODEL/Player000Rhand.x	# [4]右手
+MODEL_FILENAME = data/MODEL/Player000Larm1.x	# [5]左腕
+MODEL_FILENAME = data/MODEL/Player000Larm2.x	# [6]左腕
+MODEL_FILENAME = data/MODEL/Player000Lhand.x	# [7]左手
+MODEL_FILENAME = data/MODEL/Player000Rleg1.x	# [8]右腿
+MODEL_FILENAME = data/MODEL/Player000Rleg2.x	# [9]右腿
+MODEL_FILENAME = data/MODEL/Player000Rfoot.x	# [10]右足
+MODEL_FILENAME = data/MODEL/Player000Lleg1.x	# [11]左腿
+MODEL_FILENAME = data/MODEL/Player000Lleg2.x	# [12]左腿
+MODEL_FILENAME = data/MODEL/Player000Lfoot.x	# [13]左足
+
+#------------------------------------------------------------------------------
+# キャラクター情報
+#------------------------------------------------------------------------------
+CHARACTERSET
+	NUM_PARTS = 14					# パーツ数
+	MOVE = 3.0						# 移動量
+	JUMP = 10.25					# ジャンプ量
+	RADIUS = 20.0					# 半径
+
+	PARTSSET
+		INDEX = 0					# 体
+		PARENT = -1					# (親)NULL
+		POS = 0.0 45.0 0.0
+		ROT = 0.0 0.0 0.0
+	END_PARTSSET
+
+	PARTSSET
+		INDEX = 1					# 頭
+		PARENT = 0					# (親)体
+		POS = 0.0 10.0 0.0
+		ROT = 0.0 0.0 0.0
+	END_PARTSSET
+
+	PARTSSET
+		INDEX = 2					# 二の腕
+		PARENT = 0					# (親)体
+		POS = -8.0 0.0 0.0
+		ROT = 0.0 0.0 0.0
+	END_PARTSSET
+	
+	PARTSSET
+		INDEX = 3					# 右腕
+		PARENT = 2					# (親)体
+		POS = -10.0 0.0 0.0
+		ROT = 0.0 0.0 0.0
+	END_PARTSSET
+
+	PARTSSET
+		INDEX = 4					# 右手
+		PARENT = 3					# (親)右腕
+		POS = -10.0 0.0 0.0
+		ROT = 0.0 0.0 0.0
+	END_PARTSSET
+
+	PARTSSET
+		INDEX = 5					# 二の腕
+		PARENT = 0					# (親)体
+		POS = 8.0 0.0 0.0
+		ROT = 0.0 0.0 0.0
+	END_PARTSSET
+
+	PARTSSET
+		INDEX = 6					# 左腕
+		PARENT = 5					# (親)二の腕
+		POS = 10.0 0.0 0.0
+		ROT = 0.0 0.0 0.0
+	END_PARTSSET
+
+	PARTSSET
+		INDEX = 7					# 左手
+		PARENT = 6					# (親)左腕
+		POS = 10.0 0.0 0.0
+		ROT = 0.0 0.0 0.0
+	END_PARTSSET
+
+	PARTSSET
+		INDEX = 8					# 右太もも
+		PARENT = 0					# (親)体
+		POS = -5.0 -13.0 0.0
+		ROT = 0.0 0.0 0.0
+	END_PARTSSET
+
+	PARTSSET
+		INDEX = 9					# 右腿
+		PARENT = 8					# (親)右太もも
+		POS = 0.0 -10.0 0.0
+		ROT = 0.0 0.0 0.0
+	END_PARTSSET
+
+	PARTSSET
+		INDEX = 10					# 右足
+		PARENT = 9					# (親)右腿
+		POS = 0.0 -10.0 0.0
+		ROT = 0.0 0.0 0.0
+	END_PARTSSET
+	
+	PARTSSET
+		INDEX = 11					# 左太もも
+		PARENT = 0					# (親)体
+		POS = 5.0 -13.0 0.0
+		ROT = 0.0 0.0 0.0
+	END_PARTSSET
+
+	PARTSSET
+		INDEX = 12					# 左腿
+		PARENT = 11					# (親)左太もも
+		POS = 0.0 -10.0 0.0
+		ROT = 0.0 0.0 0.0
+	END_PARTSSET
+
+	PARTSSET
+		INDEX = 13					# 左足
+		PARENT = 12					# (親)左腿
+		POS = 0.0 -10.0 0.0
+		ROT = 0.0 0.0 0.0
+	END_PARTSSET
+END_CHARACTERSET
+
+#------------------------------------------------------------------------------
+# 軸判定の設定
+#------------------------------------------------------------------------------
+AXISSET
+	POS = 0.00 37.00 0.00 
+	SIZ = 28.00 68.00 24.00 
+END_AXIS
+#------------------------------------------------------------------------------
+# モーションテキスト
+#------------------------------------------------------------------------------
+	MOTIONSET
+		#立ち
+		MOTION = data/TXT/Player01/ST_NEUTRAL.txt
+		MOTION = data/TXT/Player01/ST_MOVE.txt
+		MOTION = data/TXT/Player01/ST_DASH.txt
+		MOTION = data/TXT/Player01/ST_BACKSTEP.txt
+		MOTION = data/TXT/Player01/ST_GUARD.txt
+		MOTION = data/TXT/Player01/ST_HIT.txt
+		MOTION = data/TXT/Player01/ST_LATTACK.txt
+		MOTION = data/TXT/Player01/ST_MATTACK.txt
+		MOTION = data/TXT/Player01/ST_HATTACK.txt
+		
+		#空中
+		MOTION = data/TXT/Player01/JP_NEUTRAL.txt
+		MOTION = data/TXT/Player01/JP_MOVELEFT.txt
+		MOTION = data/TXT/Player01/JP_MOVERIGHT.txt
+		MOTION = data/TXT/Player01/JP_DASH.txt
+		MOTION = data/TXT/Player01/JP_GUARD.txt
+		MOTION = data/TXT/Player01/JP_HIT.txt
+		MOTION = data/TXT/Player01/JP_LATTACK.txt
+		MOTION = data/TXT/Player01/JP_MATTACK.txt
+		MOTION = data/TXT/Player01/JP_HATTACK.txt
+		
+		#しゃがみ
+		MOTION = data/TXT/Player01/CR_NEUTRAL.txt
+		MOTION = data/TXT/Player01/CR_MOVE.txt
+		MOTION = data/TXT/Player01/CR_GUARD.txt
+		MOTION = data/TXT/Player01/CR_HIT.txt
+		MOTION = data/TXT/Player01/CR_LATTACK.txt
+		MOTION = data/TXT/Player01/CR_MATTACK.txt
+		MOTION = data/TXT/Player01/CR_HATTACK.txt
+		
+	END_MOTIONSET
+END_SCRIPT		# この行は絶対消さないこと！

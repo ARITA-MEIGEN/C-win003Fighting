@@ -43,6 +43,12 @@ public:
 	float		GetWidth();
 	void		SetIdx(int Idx) { m_nIdx = Idx; };
 	int			GetIdx() { return m_nIdx; };
+	void		SetDPos(D3DXVECTOR3 pos) { m_DefaultPos = pos; };
+	D3DXVECTOR3	GetDPos() { return m_DefaultPos; };
+	void		SetDRot(D3DXVECTOR3 rot) { m_DefaultRot = rot; };
+	D3DXVECTOR3	GetDRot() { return m_DefaultRot; };
+
+
 
 private:
 	LPD3DXBUFFER		m_pBuffMat;		//マテリアル情報へのポインタ
@@ -59,6 +65,8 @@ private:
 	D3DXVECTOR3			m_vtxMin;		//モデルの座標の最小値
 	int					m_nIdx;			//自身の番号
 	CModel*				m_pParent;		//親のモデルへのポインタ
+	D3DXVECTOR3			m_DefaultPos;	//初期位置
+	D3DXVECTOR3			m_DefaultRot;	//初期位置
 };
 
 #endif

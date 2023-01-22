@@ -41,11 +41,14 @@ public:
 	void Uninit()override;
 	void Update()override;
 	void Draw()override;
+	static CObject3D*Create(D3DXVECTOR3 pos, D3DXVECTOR3 siz, int Priority);
+	void BindTexture(LPDIRECT3DTEXTURE9 tex);
+
+	//セッター
 	void SetPos(D3DXVECTOR3 pos);
 	void SetSiz(D3DXVECTOR3 siz);
 	void SetCol(D3DXCOLOR col);
-	static CObject3D*Create(D3DXVECTOR3 pos, D3DXVECTOR3 siz, int Priority);
-	void BindTexture(LPDIRECT3DTEXTURE9 tex);
+	void SetRot(D3DXVECTOR3 rot) { m_Rot = rot; };
 
 private:
 	//メンバ変数

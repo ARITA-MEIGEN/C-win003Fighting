@@ -17,7 +17,7 @@ LPDIRECT3DTEXTURE9 CFloor::m_pTexture;		//ポリゴンのテクスチャ
 //=============================================================================
 CFloor::CFloor(int nPriority) :CObject3D(nPriority)
 {
-	m_pTexture = nullptr;											//ポリゴンのテクスチャ
+
 }
 
 //=============================================================================
@@ -34,6 +34,7 @@ CFloor::~CFloor()
 HRESULT  CFloor::Init()
 {
 	CObject3D::Init();
+	SetRot(D3DXVECTOR3(0.0f,D3DX_PI*0.5f,0.0f));	//90°回転
 	return S_OK;
 }
 
@@ -92,7 +93,7 @@ void CFloor::Load()
 
 	//テクスチャの読み込み処理
 	D3DXCreateTextureFromFile(pDevice,
-		"data\\TEXTURE\\block000.jpg",
+		"data\\TEXTURE\\TestFloor.png",
 		&m_pTexture);
 }
 

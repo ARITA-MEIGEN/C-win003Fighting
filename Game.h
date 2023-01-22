@@ -10,6 +10,7 @@
 //インクルード
 #include"Application.h"
 
+#define MAX_PLAYER (2)
 
 //前方宣言
 class CPlayer;
@@ -54,9 +55,10 @@ public:
 	static CFloor*GetFloor();
 	static CMesh*GetMesh();
 	static CLight*GetLight();
+	static bool GetDebugCamera() { return bDebugCamera; };
 
 private:
-	static CPlayer*m_pPlayer;
+	static CPlayer*m_pPlayer[MAX_PLAYER];
 	static CExplosion*m_pExplosion;
 	static CEnemy*m_pEnemy;
 	static CBg*m_pBg;
@@ -70,6 +72,7 @@ private:
 	static CLight*m_pLight;
 	static CFloor*m_pFloor;
 	static CMesh*m_pMesh;
+	static  bool bDebugCamera;
 };
 
 #endif

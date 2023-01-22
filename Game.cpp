@@ -21,7 +21,7 @@
 
 
 //静的メンバ変数
-CPlayer*CGame::m_pPlayer = nullptr;
+CPlayer*CGame::m_pPlayer[2] = {};
 CExplosion*CGame::m_pExplosion = nullptr;
 CEnemy*CGame::m_pEnemy = nullptr;
 CBg*CGame::m_pBg = nullptr;
@@ -30,7 +30,7 @@ CLife*CGame::m_Life = nullptr;				//体力ゲージ
 CMapdata* CGame::m_pMap = nullptr;
 CSpecial*CGame::m_pSpecial = nullptr;
 CGame::GAME CGame::m_gamestate;
-
+bool CGame::bDebugCamera = nullptr;
 
 CCamera*CGame::m_pCamera = nullptr;
 CLight*CGame::m_pLight = nullptr;
@@ -62,11 +62,15 @@ HRESULT CGame::Init()
 
 	//マップデータ読み込み
 	//プレイヤーの生成
-	CPlayer::Create();
+	m_pPlayer[0] = CPlayer::Create(D3DXVECTOR3(-50.0f, 0.0f, 0.0f), D3DXVECTOR3(0.0f, -D3DX_PI*0.5f, 0.0f));
+	m_pPlayer[1] = CPlayer::Create(D3DXVECTOR3(50.0f, 0.0f, 0.0f), D3DXVECTOR3(0.0f, D3DX_PI*0.5f, 0.0f));
+	m_pPlayer[0]->SetEnemy(m_pPlayer[1]);
+	m_pPlayer[1]->SetEnemy(m_pPlayer[0]);
+
 
 	//背景の生成
 	//メッシュフィールドの設定
-	m_pMesh = CMesh::Create(20, 20);
+	//m_pMesh = CMesh::Create(20, 20);
 
 	//カメラの設定
 	m_pCamera = CCamera::Create();
@@ -75,7 +79,9 @@ HRESULT CGame::Init()
 	m_pLight = new CLight;
 	m_pLight->Init();
 
-	//CFloor::Create(D3DXVECTOR3(0.0f, 0.0f, 0.0f), D3DXVECTOR3(500.0f, 500.0f,500.0f));
+	CFloor::Create(D3DXVECTOR3(0.0f, 0.0f, 0.0f), D3DXVECTOR3(500.0f, 500.0f, 500.0f));
+
+	bDebugCamera = true;
 
 	return S_OK;
 }
@@ -125,9 +131,23 @@ void CGame::Update()
 			CApplication::GetFade()->SetFade(CApplication::MODE_RESULT);
 		}
 	}
+	if (pKeyboard->GetTrigger(DIK_F2))
+	{//カメラのON/OFF
+		bDebugCamera = !bDebugCamera;
+	}
 #endif // !_DEBUG
 
-	m_pCamera->Update();
+	if (bDebugCamera == true)
+	{
+		CDebugProc::Print("F2:カメラモード");
+
+		m_pCamera->Update();
+	}
+	else
+	{
+		CDebugProc::Print("F2:プレイヤーモード");
+	}
+
 	m_pLight->Update();
 }
 
@@ -144,7 +164,7 @@ void CGame::Draw()
 //====================================
 CPlayer * CGame::GetPlayer()
 {
-	return m_pPlayer;
+	return m_pPlayer[0];
 }
 
 //====================================
