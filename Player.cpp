@@ -154,14 +154,7 @@ void CPlayer::Draw(void)
 	//パーツのワールドマトリックスの初期化
 	D3DXMatrixIdentity(&m_mtxWorld);
 
-	//クォータニオンの設定
-	//D3DXQuaternionRotationAxis(&m_quat, &m_vecAxis, m_fRolling);
-
-	//回転用マトリックスの生成
-	//D3DXMatrixRotationQuaternion(&mtxRot, &m_quat);
-
 	//パーツのモデルの向きを反映
-	//D3DXMatrixMultiply(&m_mtxRot, &m_mtxRot, &mtxRot);	//クォータニオンの反映
 	D3DXMatrixRotationYawPitchRoll(&mtxRot, m_rot.y, m_rot.x, m_rot.z);
 	D3DXMatrixMultiply(&m_mtxWorld, &m_mtxWorld, &mtxRot);
 
