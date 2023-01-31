@@ -36,6 +36,7 @@ public:
 	void SetPos(D3DXVECTOR3(pos)) { m_pos = pos; };
 	D3DXVECTOR3 GetPos() { return m_pos; };
 	void SwichUse() { bUse = !bUse; };						//オンオフの切り替え
+	void Damage();											//当たり判定
 
 	//セッター
 	void SetUse(bool use) { bUse = use; };					//オンオフの切り替え

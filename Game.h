@@ -14,14 +14,7 @@
 
 //前方宣言
 class CPlayer;
-class CExplosion;
-class CEnemy;
-class CBg;
-class CScore;
 class CLife;				//体力ゲージ
-class CMapdata;
-class CSpecial;
-class CBoss;
 
 
 class CCamera;
@@ -46,7 +39,6 @@ public:
 	void Uninit();
 	void Update();
 	void Draw();
-	static CPlayer*GetPlayer();
 	static void SetGame(GAME gamestate);
 
 	//ゲッター
@@ -56,16 +48,11 @@ public:
 	static CMesh*GetMesh();
 	static CLight*GetLight();
 	static bool GetDebugCamera() { return bDebugCamera; };
+	static CPlayer*GetPlayer(int number) { return m_pPlayer[number]; };
 
 private:
 	static CPlayer*m_pPlayer[MAX_PLAYER];
-	static CExplosion*m_pExplosion;
-	static CEnemy*m_pEnemy;
-	static CBg*m_pBg;
 	static CLife*m_Life;				//体力ゲージ
-	static CMapdata*m_pMap;
-	static CSpecial*m_pSpecial;			//必殺技ゲージ
-	static CScore*m_pScore;
 	static GAME m_gamestate;			//ゲームの状態
 
 	static CCamera*m_pCamera;
@@ -73,6 +60,7 @@ private:
 	static CFloor*m_pFloor;
 	static CMesh*m_pMesh;
 	static  bool bDebugCamera;
+
 };
 
 #endif

@@ -240,3 +240,11 @@ CCollision* CCollision::Create(D3DXVECTOR3 pos, COLLISION type)
 
 	return pCollision;
 }
+
+void CCollision::Damage()
+{
+	if (m_Colltype == CCollision::COLLI_DAMAGE)
+	{
+
+	}
+}

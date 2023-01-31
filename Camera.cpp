@@ -9,6 +9,8 @@
 #include"Application.h"
 #include"InputKeyBoard.h"
 #include"DebugProc.h"
+#include "Game.h"
+#include"Player.h"
 
 //マクロ定義
 #define	DISTANCE_X	((m_posV.x - m_posR.x)*(m_posV.x - m_posR.x))		//距離の計算用X
@@ -60,10 +62,10 @@ void  CCamera::Uninit(void)
 //===========================
 void  CCamera::Update(void)
 {
-	ControlPos();		//視点操作
-	RadianPosR();		//注視点の旋回
-	RadianPosV();		//視点の旋回
-	//DestPos();		//カメラの追従
+	//ControlPos();		//視点操作
+	//RadianPosR();		//注視点の旋回
+	//RadianPosV();		//視点の旋回
+	DestPos();			//カメラの追従
 	NormalizeRadian();	//角度の正規化
 	CDebugProc::Print("カメラの視点の角度 x:%f y:%f z:%f",m_posV.x,m_posV.y,m_posV.z);
 }
@@ -248,6 +250,30 @@ void CCamera:: ControlPos(void)
 	{//下
 
 	}
+}
+
+//===========================
+//カメラ移動
+//===========================
+void CCamera::DestPos(void)
+{
+	D3DXVECTOR3 Diffpos=CGame::GetPlayer(0)->GetPos()- CGame::GetPlayer(1)->GetPos();
+	
+	m_posR.x = (CGame::GetPlayer(1)->GetPos().x+ CGame::GetPlayer(0)->GetPos().x)/2;
+	m_posV.x =(CGame::GetPlayer(1)->GetPos().x + CGame::GetPlayer(0)->GetPos().x)/2;
+
+	m_posR.y = (CGame::GetPlayer(1)->GetPos().y + CGame::GetPlayer(0)->GetPos().y)/2 + 50.0f;
+	m_posV.y = (CGame::GetPlayer(1)->GetPos().y + CGame::GetPlayer(0)->GetPos().y)/2 + 50.0f;
+
+	//注視点の計算
+	m_posR.z = m_posV.z + sinf(m_rot.x)*cosf(m_rot.y)*m_fDistance;
+	m_posR.x = m_posV.x + sinf(m_rot.x)*sinf(m_rot.y)*m_fDistance;
+	m_posR.y = m_posV.y + cosf(m_rot.x)*m_fDistance;
+
+	//視点の旋回
+	m_posV.z = m_posR.z - sinf(m_rot.x)*cosf(m_rot.y)*m_fDistance;
+	m_posV.x = m_posR.x - sinf(m_rot.x)*sinf(m_rot.y)*m_fDistance;
+	m_posV.y = m_posR.y - cosf(m_rot.x)*m_fDistance;
 }
 
 //===========================

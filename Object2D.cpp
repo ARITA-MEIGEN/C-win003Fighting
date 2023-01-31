@@ -132,7 +132,7 @@ void  CObject2D::Update()
  	m_pVtxBuff->Lock(0, 0, (void**)&pVtx, 0);
 
 	// 頂点情報を設定
-	pVtx[0].pos.x = m_Pos.x + sinf(m_Rot - D3DX_PI + m_fAngle)*m_fLength;
+	pVtx[0].pos.x = m_Pos.x + sinf(m_Rot - D3DX_PI + m_fAngle)*m_fLength-m_nLControl;
 	pVtx[0].pos.y = m_Pos.y + cosf(m_Rot - D3DX_PI + m_fAngle)*m_fLength;
 	pVtx[0].pos.z = 0.0f;
 
@@ -140,7 +140,7 @@ void  CObject2D::Update()
 	pVtx[1].pos.y = m_Pos.y + cosf(m_Rot + D3DX_PI - m_fAngle)*m_fLength;
 	pVtx[1].pos.z = 0.0f;
 
-	pVtx[2].pos.x = m_Pos.x + sinf(m_Rot - m_fAngle)*m_fLength;
+	pVtx[2].pos.x = m_Pos.x + sinf(m_Rot - m_fAngle)*m_fLength - m_nLControl;
 	pVtx[2].pos.y = m_Pos.y + cosf(m_Rot - m_fAngle)*m_fLength;
 	pVtx[2].pos.z = 0.0f;
 
@@ -276,14 +276,6 @@ D3DXVECTOR2 CObject2D::GetUV(int number)
 void CObject2D::SetPos(D3DXVECTOR3 pos)
 {
 	m_Pos = pos;
-}
-
-//=============================================================================
-// 位置の詳細設定
-//=============================================================================
-void CObject2D::SetPosR(float PosR)
-{
-	m_nRControl = PosR;					//座標の右側の制御
 }
 
 //=============================================================================

@@ -51,7 +51,12 @@ public:
 	float GetRot();
 	D3DXVECTOR2 GetUV(int number);
 	void SetPos(D3DXVECTOR3 pos);
-	void SetPosR(float posR);
+	void SetPosR(float posR) { m_nRControl = posR; };
+	float GetPosR() { return m_nRControl; };
+
+	void SetPosL(float posL) { m_nLControl = posL; };
+	float GetPosL() { return m_nLControl; };
+
 	void SetSiz(D3DXVECTOR2 Siz);
 	void SetCol(D3DXCOLOR col);
 	void SetRot(float Rot);
@@ -70,6 +75,8 @@ private:
 	D3DXCOLOR m_Col;					//色
 	D3DXVECTOR2 m_UV[2];				//テクスチャ座標
 	float m_nRControl;					//座標の右側の制御
+	float m_nLControl;					//座標の←側の制御
+
 };
 #endif // !_OBJECT_H_
 

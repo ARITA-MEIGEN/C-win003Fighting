@@ -87,7 +87,9 @@ HRESULT CPlayer::Init()
 			m_apMotion[0].aModelKey[0].aKey[i].fRotZ) + m_apModel[i]->GetDRot());	//差分の取得
 	}
 
-	m_nJump = 50;//デバッグ用設定後でファイル入出力できるようにする
+	//デバッグ用設定後でファイル入出力できるようにする
+	m_nJump = 50;
+	m_nLife = 1000;
 
 	return S_OK;
 }
@@ -119,10 +121,14 @@ void CPlayer::Update(void)
 	}
 
 	DrawCollision();
+	if (m_pos.x - m_pEnemy->GetPos().x > 240.0f || m_pos.x - m_pEnemy->GetPos().x < -240.0f)
+	{
+		m_pos.x = m_posold.x;
+	}
 
 	m_posold = m_pos;		//前回の位置の保存
 	m_pos += m_move;		//位置の更新
-	m_AxisBox->SetPos(m_move + m_AxisBox->GetPos());
+	m_AxisBox->SetPos(m_pos + D3DXVECTOR3(0.0f,m_AxisBox->GetDPos().y,0.0f));
 	m_move = D3DXVECTOR3(0.0f, 0.0f, 0.0f);		//位置の更新
 
 	ControlPlayer();		//操作
@@ -132,9 +138,13 @@ void CPlayer::Update(void)
 	AutoTurn();
 	//m_pos.y = CGame::GetMesh()->Collision(m_pos);
 
-	CDebugProc::Print("現在のプレイヤーの座標:%f %f %f", m_pos.x, m_pos.y, m_pos.z);
-	CDebugProc::Print("現在のモーション:%d ",(int)m_Motion);
 
+	CDebugProc::Print("現在のプレイヤーの座標:%f %f %f", m_pos.x, m_pos.y, m_pos.z);
+	CDebugProc::Print("現在のモーション:%d ", (int)m_Motion);
+	if (m_nLife <= 0)
+	{//体力が亡くなった時
+
+	}
 }
 
 //===========================
@@ -187,76 +197,157 @@ void CPlayer::ControlPlayer(void)
 	CInputKeyboard* pKeyboard = CApplication::GetInputKeyboard();
 
 	//移動
-	if (m_nPlayerNumber == 0 && (m_Motion == PM_ST_NEUTRAL || m_Motion == PM_ST_MOVE) && m_State == PST_GROUND)
+	if (m_nPlayerNumber == 0 && m_bMotion == false)
 	{
-		if (pKeyboard->GetPress(DIK_S))
+		if (pKeyboard->GetPress(DIK_NUMPAD7) )
+		{
+			m_nLife--;
+		}
+		if (pKeyboard->GetPress(DIK_S) && m_State != PST_AIR)
 		{
 			m_Motion = PM_CR_NEUTRAL;
+			m_State = PST_CROUCH;
 		}
-		if (pKeyboard->GetPress(DIK_A))
+		if (pKeyboard->GetRelease(DIK_S) && m_State != PST_AIR)
 		{
-			m_move.x = sinf(D3DX_PI*-0.5f)*PLAYER_SPEED;
-			m_move.z = cosf(D3DX_PI*-0.5f)*PLAYER_SPEED;
-			m_Motion = PM_ST_MOVE;
-			if (m_pEnemy->m_bAttack==true&& m_pos.x <= m_pEnemy->m_pos.x)
+			m_State = PST_GROUND;	//立ち状態に戻す
+		}
+		switch (m_State)
+		{
+		case CPlayer::PST_GROUND:
+			if (pKeyboard->GetPress(DIK_A))
 			{
-				m_Motion = PM_ST_GUARD;
-				m_move = {0.0f,0.0f,0.0f};
+				m_move.x = sinf(D3DX_PI*-0.5f)*PLAYER_SPEED;
+				m_move.z = cosf(D3DX_PI*-0.5f)*PLAYER_SPEED;
+				m_Motion = PM_ST_MOVE;
+				if (m_pEnemy->m_bAttack == true && m_pos.x <= m_pEnemy->m_pos.x)
+				{
+					m_Motion = PM_ST_GUARD;
+					m_move = { 0.0f,0.0f,0.0f };
+				}
 			}
-		}
-		if (pKeyboard->GetPress(DIK_D))
-		{
-			m_move.x = sinf(D3DX_PI*0.5f)*PLAYER_SPEED;
-			m_move.z = cosf(D3DX_PI*0.5f)*PLAYER_SPEED;
-			m_Motion = PM_ST_MOVE;
-			if (m_pEnemy->m_bAttack == true&& m_pos.x >= m_pEnemy->m_pos.x)
-			{
-				m_Motion = PM_ST_GUARD;
-				m_move = {0.0f,0.0f,0.0f};
-			}
-		}
-		if (pKeyboard->GetPress(DIK_U))
-		{
-			m_Motion = PM_ST_LATTACK;
-			m_bAttack = true;
-			m_bMotion = true;
-		}
-		if (pKeyboard->GetPress(DIK_I))
-		{
-			m_Motion = PM_ST_MATTACK;
-			m_bAttack = true;
-			m_bMotion = true;
-		}
-		if (pKeyboard->GetPress(DIK_O))
-		{
-			m_Motion = PM_ST_HATTACK;
-			m_bAttack = true;
-			m_bMotion = true;
-		}
-		if (pKeyboard->GetPress(DIK_W))
-		{
-			m_Motion = PM_JP_NEUTRAL;
-			m_bMotion = true;
-			m_State = PST_AIR;
 			if (pKeyboard->GetPress(DIK_D))
 			{
-				m_Motion = PM_JP_MOVERIGHT;
+				m_move.x = sinf(D3DX_PI*0.5f)*PLAYER_SPEED;
+				m_move.z = cosf(D3DX_PI*0.5f)*PLAYER_SPEED;
+				m_Motion = PM_ST_MOVE;
+				if (m_pEnemy->m_bAttack == true && m_pos.x >= m_pEnemy->m_pos.x)
+				{
+					m_Motion = PM_ST_GUARD;
+					m_move = { 0.0f,0.0f,0.0f };
+				}
 			}
-			else if (pKeyboard->GetPress(DIK_A))
+			if (pKeyboard->GetTrigger(DIK_U))
 			{
-				m_Motion = PM_JP_MOVELEFT;
-
+				m_Motion = PM_ST_LATTACK;
+				m_bAttack = true;
+				m_bMotion = true;
 			}
-		}
+			if (pKeyboard->GetTrigger(DIK_I))
+			{
+				m_Motion = PM_ST_MATTACK;
+				m_bAttack = true;
+				m_bMotion = true;
+			}
+			if (pKeyboard->GetTrigger(DIK_O))
+			{
+				m_Motion = PM_ST_HATTACK;
+				m_bAttack = true;
+				m_bMotion = true;
+			}
+			if (pKeyboard->GetPress(DIK_SPACE))
+			{
+				m_Motion = PM_JP_NEUTRAL;
+				m_State = PST_AIR;
+				if (pKeyboard->GetPress(DIK_D))
+				{
+					m_Motion = PM_JP_MOVERIGHT;
+				}
+				else if (pKeyboard->GetPress(DIK_A))
+				{
+					m_Motion = PM_JP_MOVELEFT;
 
-	}
-#ifdef _DEBUG
-		if (pKeyboard->GetPress(DIK_P)&& m_nPlayerNumber == 1)
-		{
-			m_Motion = PM_ST_LATTACK;
-			m_bAttack = true;
-			m_bMotion = true;
+				}
+			}
+			break;
+
+		case CPlayer::PST_AIR:
+			if (pKeyboard->GetTrigger(DIK_U))
+			{
+				m_Motion = PM_JP_LATTACK;
+				m_bAttack = true;
+				m_bMotion = true;
+			}
+			if (pKeyboard->GetTrigger(DIK_I))
+			{
+				m_Motion = PM_JP_MATTACK;
+				m_bAttack = true;
+				m_bMotion = true;
+			}
+			if (pKeyboard->GetTrigger(DIK_O))
+			{
+				m_Motion = PM_JP_HATTACK;
+				m_bAttack = true;
+				m_bMotion = true;
+			}
+
+			break;
+		case CPlayer::PST_CROUCH:
+			if (pKeyboard->GetTrigger(DIK_U))
+			{
+				m_Motion = PM_CR_LATTACK;
+				m_bAttack = true;
+				m_bMotion = true;
+			}
+			if (pKeyboard->GetTrigger(DIK_I))
+			{
+				m_Motion = PM_CR_MATTACK;
+				m_bAttack = true;
+				m_bMotion = true;
+			}
+			if (pKeyboard->GetTrigger(DIK_O))
+			{
+				m_Motion = PM_CR_HATTACK;
+				m_bAttack = true;
+				m_bMotion = true;
+			}
+			break;
+		case CPlayer::PST_DAMAGE:
+			break;
+		default:
+			break;
 		}
+	}
+
+#ifdef _DEBUG
+	if (pKeyboard->GetPress(DIK_P) && m_nPlayerNumber == 1)
+	{
+		m_Motion = PM_ST_LATTACK;
+		m_bAttack = true;
+		m_bMotion = true;
+	}
+	if (pKeyboard->GetPress(DIK_NUMPAD4) && m_nPlayerNumber == 1)
+	{
+		m_move.x = sinf(D3DX_PI*-0.5f)*PLAYER_SPEED;
+		m_move.z = cosf(D3DX_PI*-0.5f)*PLAYER_SPEED;
+		m_Motion = PM_ST_MOVE;
+		if (m_pEnemy->m_bAttack == true && m_pos.x <= m_pEnemy->m_pos.x)
+		{
+			m_Motion = PM_ST_GUARD;
+			m_move = { 0.0f,0.0f,0.0f };
+		}
+	}
+	if (pKeyboard->GetPress(DIK_NUMPAD6) && m_nPlayerNumber == 1)
+	{
+		m_move.x = sinf(D3DX_PI*0.5f)*PLAYER_SPEED;
+		m_move.z = cosf(D3DX_PI*0.5f)*PLAYER_SPEED;
+		m_Motion = PM_ST_MOVE;
+		if (m_pEnemy->m_bAttack == true && m_pos.x >= m_pEnemy->m_pos.x)
+		{
+			m_Motion = PM_ST_GUARD;
+			m_move = { 0.0f,0.0f,0.0f };
+		}
+	}
 #endif // !_DEBUG
 
 	//角度の正規化
@@ -805,9 +896,18 @@ void CPlayer::DrawCollision()
 					if (m_apMotion[i].aModelKey[k].Collision[j] != nullptr)
 					{
 						m_apMotion[i].aModelKey[k].Collision[j]->SetUse(true);
-						m_apMotion[i].aModelKey[k].Collision[j]->SetPos(m_apMotion[i].aModelKey[k].Collision[j]->GetDPos()+m_pos);
-						m_apMotion[i].aModelKey[k].Collision[j]->SetRot(m_rot);
+						if ( m_pos.x >= m_pEnemy->m_pos.x)
+						{//敵より右側の場合
+							m_apMotion[i].aModelKey[k].Collision[j]->SetPos(m_pos + m_apMotion[i].aModelKey[k].Collision[j]->GetDPos());
 
+						}
+						else
+						{
+							m_apMotion[i].aModelKey[k].Collision[j]->SetPos(D3DXVECTOR3(
+								m_pos.x - m_apMotion[i].aModelKey[k].Collision[j]->GetDPos().x,				//X
+								m_pos.y + m_apMotion[i].aModelKey[k].Collision[j]->GetDPos().y,
+								m_pos.z - m_apMotion[i].aModelKey[k].Collision[j]->GetDPos().z));
+						}
 					}
 				}
 				else
@@ -882,26 +982,30 @@ void CPlayer::Jump(void)
 		if (m_MotionOld == PM_JP_MOVELEFT|| m_Motion == PM_JP_MOVELEFT)
 		{
 			m_Motion = PM_JP_MOVELEFT;
-			m_move.x = sinf(D3DX_PI*-0.5f)*PLAYER_SPEED;
-			m_move.z = cosf(D3DX_PI*-0.5f)*PLAYER_SPEED;
+			m_move.x = sinf(D3DX_PI*-0.5f)*PLAYER_SPEED*JUMP_FACTOR_X;
+			m_move.z = cosf(D3DX_PI*-0.5f)*PLAYER_SPEED*JUMP_FACTOR_X;
 		}
 		else if (m_MotionOld == PM_JP_MOVERIGHT|| m_Motion == PM_JP_MOVERIGHT)
 		{
 			m_Motion = PM_JP_MOVERIGHT;
-			m_move.x = sinf(D3DX_PI*0.5f)*PLAYER_SPEED;
-			m_move.z = cosf(D3DX_PI*0.5f)*PLAYER_SPEED;
+			m_move.x = sinf(D3DX_PI*0.5f)*PLAYER_SPEED*JUMP_FACTOR_X;
+			m_move.z = cosf(D3DX_PI*0.5f)*PLAYER_SPEED*JUMP_FACTOR_X;
 		}
-		if (m_nJumpCount >= m_nJump / 2)
+		else if (m_MotionOld == PM_JP_NEUTRAL || m_Motion == PM_JP_NEUTRAL)
 		{
-			m_move.y = -(JUMP_HEIGHT / (m_nJump / 2));
+			m_Motion = PM_JP_NEUTRAL;
+		}
 			if (m_nJumpCount >= m_nJump - 1)
 			{
 				m_State = PST_GROUND;
 			}
+		if (m_nJumpCount >= m_nJump / 2)
+		{
+			m_move.y = -Easing::OutSine<float>(m_nJumpCount - m_nJump / 2, m_nJump, MAX_SPEED, INITIAL_VELOCITY);
 		}
 		else
 		{
-			m_move.y = (JUMP_HEIGHT / (m_nJump / 2));
+			m_move.y = Easing::OutSine<float>(m_nJumpCount, m_nJump, MAX_SPEED, INITIAL_VELOCITY);
 		}
 		m_nJumpCount++;
 		if (m_nJumpCount >= m_nJump)

@@ -167,6 +167,16 @@ void CApplication::Uninit()
 		delete m_pFade;
 		m_pFade = nullptr;
 	}
+
+	//----------------------------
+	// デバッグ用文字の終了
+	//----------------------------
+	if (m_pDebugProc != nullptr)
+	{
+		m_pDebugProc->Uninit();
+		delete m_pDebugProc;
+		m_pDebugProc = nullptr;
+	}
 }
 
 //====================================
@@ -289,50 +299,6 @@ CFade * CApplication::GetFade()
 {
 	return m_pFade;
 }
-
-
-////======================================================
-////ステータスの表示
-////======================================================
-//void CApplication::DrawStatas(void)
-//{
-//	RECT rect = { 0,0,SCREEN_WIDTH,SCREEN_HEIGHT };
-//	char aStr[512];
-//
-//	//文字列に代入
-//	//wsprintf(&aStr[0], "FPS:%3d\n", g_nCountFPS);
-//
-//	//モデルの操作キー
-//	strcat(aStr, "モデルの操作:↑/↓/←/→\n");
-//
-//	//視点の旋回キー
-//	strcat(aStr, "視点の旋回:Q/E/R/F\n");
-//
-//	//注視点の旋回キー
-//	strcat(aStr, "注視点の旋回:J/L/I/K\n");
-//
-//	//カメラの位置操作キー
-//	strcat(aStr, "カメラの位置操作:W/A/S/D\n");
-//
-//	////視点の座標
-//	//char aStr2[400];
-//	//sprintf(aStr2, "視点の位置:%3f/%3f/%3f\n", m_pCamera->posV.x, m_pCamera->posV.y, m_pCamera->posV.z);
-//	//strcat(aStr, aStr2);
-//
-//	////注視点の座標
-//	//char aStr3[400];
-//	//sprintf(aStr3, "注視点の位置:%3f/%3f/%3f\n", m_pCamera->posR.x, m_pCamera->posR.y, m_pCamera->posR.z);
-//	//strcat(aStr, aStr3);
-//
-//	////ワイヤーフレーム
-//	//strcat(aStr, "ワイヤーフレームON/OFF:1/2\n");
-//
-//	////モデルの操作キー
-//	//strcat(aStr, "発射ァ！:SPACEを押すんだ！\n");
-//
-//	//テキストの描画
-//	m_pFont->DrawText(NULL, &aStr[0], -1, &rect, DT_LEFT, D3DCOLOR_RGBA(255, 255, 255, 255));
-//}
 
 //======================================================
 //モードの設定

@@ -18,17 +18,12 @@
 #include"Light.h"
 #include"Shadow.h"
 #include"Fade.h"
+#include"Life.h"
 
 
 //静的メンバ変数
 CPlayer*CGame::m_pPlayer[2] = {};
-CExplosion*CGame::m_pExplosion = nullptr;
-CEnemy*CGame::m_pEnemy = nullptr;
-CBg*CGame::m_pBg = nullptr;
-CScore*CGame::m_pScore = nullptr;
 CLife*CGame::m_Life = nullptr;				//体力ゲージ
-CMapdata* CGame::m_pMap = nullptr;
-CSpecial*CGame::m_pSpecial = nullptr;
 CGame::GAME CGame::m_gamestate;
 bool CGame::bDebugCamera = nullptr;
 
@@ -59,16 +54,14 @@ HRESULT CGame::Init()
 	//テクスチャの読み込み
 	CShadow::Load();
 	CFloor::Load();
+	CLife::Load();
 
-	//マップデータ読み込み
 	//プレイヤーの生成
 	m_pPlayer[0] = CPlayer::Create(D3DXVECTOR3(-50.0f, 0.0f, 0.0f), D3DXVECTOR3(0.0f, -D3DX_PI*0.5f, 0.0f));
 	m_pPlayer[1] = CPlayer::Create(D3DXVECTOR3(50.0f, 0.0f, 0.0f), D3DXVECTOR3(0.0f, D3DX_PI*0.5f, 0.0f));
 	m_pPlayer[0]->SetEnemy(m_pPlayer[1]);
 	m_pPlayer[1]->SetEnemy(m_pPlayer[0]);
 
-
-	//背景の生成
 	//メッシュフィールドの設定
 	//m_pMesh = CMesh::Create(20, 20);
 
@@ -79,9 +72,14 @@ HRESULT CGame::Init()
 	m_pLight = new CLight;
 	m_pLight->Init();
 
+	//床
 	CFloor::Create(D3DXVECTOR3(0.0f, 0.0f, 0.0f), D3DXVECTOR3(500.0f, 500.0f, 500.0f));
-
+	
+	//デバッグ用カメラ操作モード
 	bDebugCamera = true;
+
+	//体力ゲージ
+	m_Life = CLife::Create();
 
 	return S_OK;
 }
@@ -94,6 +92,7 @@ void CGame::Uninit()
 	//テクスチャの破棄
 	CShadow::Unload();
 	CFloor::Unload();
+	CLife::Unload();
 
 	//カメラの設定
 	if (m_pCamera != nullptr)
@@ -108,6 +107,12 @@ void CGame::Uninit()
 		m_pLight->Uninit();
 		delete m_pLight;
 	}
+
+	if (m_Life != nullptr)
+	{
+		m_Life->Uninit();
+		delete m_Life;
+	}
 }
 
 //====================================
@@ -121,12 +126,7 @@ void CGame::Update()
 	//指定のキーが押されたかどうか
 	if (CApplication::GetFade()->GetFade() == CFade::FADE_NONE)
 	{
-		if (pKeyboard->GetTrigger(DIK_RETURN)
-			|| pJoypad->GetJoypadTrigger(CInputJoyPad::JOYKEY_Y)
-			|| pJoypad->GetJoypadTrigger(CInputJoyPad::JOYKEY_X)
-			|| pJoypad->GetJoypadTrigger(CInputJoyPad::JOYKEY_A)
-			|| pJoypad->GetJoypadTrigger(CInputJoyPad::JOYKEY_B)
-			|| pJoypad->GetJoypadTrigger(CInputJoyPad::JOYKEY_START))
+		if (pKeyboard->GetTrigger(DIK_RETURN))
 		{
 			CApplication::GetFade()->SetFade(CApplication::MODE_RESULT);
 		}
@@ -140,15 +140,15 @@ void CGame::Update()
 	if (bDebugCamera == true)
 	{
 		CDebugProc::Print("F2:カメラモード");
-
-		m_pCamera->Update();
 	}
 	else
 	{
 		CDebugProc::Print("F2:プレイヤーモード");
 	}
 
+	m_pCamera->Update();
 	m_pLight->Update();
+	m_Life->Update();
 }
 
 //====================================
@@ -157,14 +157,6 @@ void CGame::Update()
 void CGame::Draw()
 {
 	m_pCamera->Set();
-}
-
-//====================================
-//プレイヤーの取得
-//====================================
-CPlayer * CGame::GetPlayer()
-{
-	return m_pPlayer[0];
 }
 
 //====================================

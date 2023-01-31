@@ -20,7 +20,7 @@ namespace
 	// ウインドウのクラス名
 	LPCTSTR CLASS_NAME = _T("AppClass");
 	// ウインドウのキャプション名
-	LPCTSTR WINDOW_NAME = _T("kuso");
+	LPCTSTR WINDOW_NAME = _T("1632143+AB");
 }
 
 //*****************************************************************************

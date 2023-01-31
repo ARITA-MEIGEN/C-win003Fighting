@@ -21,13 +21,21 @@ class CCollision;
 
 
 //マクロ定義
-#define MAX_MOTION		(5)		//モーションの数
-#define MAX_KEY			(60)	//キーの総数
-#define MAX_FRAME		(120)	//フレームの最大数
-#define NUM_PARTS		(14)	//パーツの数
-#define MAX_COLLISION	(20)	//1つのパーツにつき設定できる判定の数
-#define JUMP_HEIGHT		(150.0f)	//ジャンプの高さ
-#define PLAYER_SPEED	(2.0f)	//移動速度
+#define MAX_MOTION			(5)		//モーションの数
+#define MAX_KEY				(60)	//キーの総数
+#define MAX_FRAME			(120)	//フレームの最大数
+#define NUM_PARTS			(14)	//パーツの数
+#define MAX_COLLISION		(20)	//1つのパーツにつき設定できる判定の数
+#define JUMP_HEIGHT			(130.0f)	//ジャンプの高さ
+#define PLAYER_SPEED		(2.0f)	//移動速度
+#define FIELD_WIDTH			(240.0f)	//端端の距離
+#define JUMP_FACTOR_X		(1.7f)	//ジャンプの移動の係数
+#define JUMP_FACTOR_Y		(40.0f)	//ジャンプの移動の係数
+#define MAX_SPEED			(10.f)	//ジャンプの最高速度
+#define INITIAL_VELOCITY	(5.0f)	//ジャンプの初速
+
+
+
 
 
 
@@ -52,10 +60,12 @@ public:
 	//キー情報
 	struct KEY_SET 
 	{
-		KEY aKey[NUM_PARTS];		//モデルの数分座標を持つ
-		int nFrame;					//再生時間
+		KEY aKey[NUM_PARTS];					//モデルの数分座標を持つ
+		int nFrame;								//再生時間
 		CCollision* Collision[MAX_COLLISION];	//当たり判定
 		int nNumCollision;						//1つのキーの当たり判定の数
+
+		CCollision* HurtCol[MAX_COLLISION];		//やられ判定
 	};
 
 	struct MOTION_SET
@@ -100,8 +110,9 @@ public:
 
 	enum PLAYER_STATE
 	{
-		PST_GROUND,	//地上
-		PST_AIR,		//空中
+		PST_GROUND,	//立ち
+		PST_CROUCH,	//しゃがみ
+		PST_AIR,	//空中
 		PST_DAMAGE,	//被弾状態
 		PST_MAX
 	};
@@ -128,7 +139,11 @@ public:
 	//セッター
 	void			SetPos(D3DXVECTOR3 pos) { m_pos = pos; };						//位置の設定
 	void			SetRot(D3DXVECTOR3 rot) { m_rot = rot; };						//向きの設定
-	void			SetEnemy(CPlayer* ene) { m_pEnemy = ene; };						//向きの設定
+	void			SetEnemy(CPlayer* ene) { m_pEnemy = ene; };						//敵のポインタ
+
+	//ゲッター
+	D3DXVECTOR3		GetPos() { return m_pos; };
+	int				GetLife() { return m_nLife; };	//体力
 
 private:
 	CModel*			m_apModel[NUM_PLAYERPARTS];		//モデルのインスタンス
@@ -153,14 +168,17 @@ private:
 	D3DXVECTOR3		m_moverot;
 	PLAYER_MOTION	m_Motion;
 	PLAYER_MOTION	m_MotionOld;					//ひとつ前のモーション
-	CCollision* 	m_AxisBox;						//押し出し判定(プレイヤーの軸)
 	bool			m_bMotion;						//モーション再生中かどうか
 	static int		m_nPlayer;						//プレイヤー番号
 	int				m_nPlayerNumber;				//プレイヤー番号
-	int				m_nLife;						//体力
 	CPlayer*		m_pEnemy;						//対戦相手のポインタ
 	PLAYER_STATE	m_State;						//プレイヤーの状態
 	bool			m_bAttack;						//攻撃中かどうか
+	int				m_nLife;						//体力
+
+	//押し出し判定関連
+	CCollision* 	m_AxisBox;						//押し出し判定(プレイヤーの軸)
+	D3DXVECTOR3		m_aAxisSiz[PST_MAX];			//押し出し判定の大きさ
 
 	//ジャンプ関係
 	int				m_nJump;						//ジャンプの全体フレーム

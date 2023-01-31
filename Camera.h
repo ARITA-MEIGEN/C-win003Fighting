@@ -21,7 +21,7 @@ public:
 	void RadianPosV(void);			//視点の旋回
 	void NormalizeRadian(void);		//角度の正規化
 	void ControlPos(void);			//カメラの位置の操作
-	//void DestPos(void);			//カメラの追従処理
+	void DestPos(void);				//カメラの追従処理
 	//void LeavingCamera(void);		//カメラの放置処理
 	D3DXVECTOR3 Getrot(void);		//向き取得
 	static CCamera* Create(void);	//生成
