@@ -120,7 +120,6 @@ void CPlayer::Update(void)
 		m_Motion = PM_ST_NEUTRAL;
 	}
 
-	DrawCollision();
 	if (m_pos.x - m_pEnemy->GetPos().x > 240.0f || m_pos.x - m_pEnemy->GetPos().x < -240.0f)
 	{
 		m_pos.x = m_posold.x;
@@ -137,7 +136,8 @@ void CPlayer::Update(void)
 	MotionManager();
 	AutoTurn();
 	//m_pos.y = CGame::GetMesh()->Collision(m_pos);
-
+	DrawCollision();
+	SetHitBox();
 
 	CDebugProc::Print("現在のプレイヤーの座標:%f %f %f", m_pos.x, m_pos.y, m_pos.z);
 	CDebugProc::Print("現在のモーション:%d ", (int)m_Motion);
@@ -362,7 +362,7 @@ void CPlayer::ControlPlayer(void)
 }
 
 //===========================
-//操作
+//生成
 //===========================
 CPlayer * CPlayer::Create(D3DXVECTOR3 pos, D3DXVECTOR3 rot)
 {
@@ -611,6 +611,51 @@ void CPlayer::ReadMotion()
 																	int select = m_apMotion[motionnumber].aModelKey[key].nNumCollision;	//現在の当たり判定の番号
 																	sscanf(Read, "%s = %f%f%f", &strLine, &dsiz.x, &dsiz.y, &dsiz.z);	//キーの総数
 																	m_apMotion[motionnumber].aModelKey[key].Collision[select]->SetSiz(dsiz);
+																}
+															}
+														}
+														else if (strcmp(&strLine[0], "HURTSET") == 0)
+														{
+															m_apMotion[motionnumber].aModelKey[key].HurtCol[m_apMotion[motionnumber].aModelKey[key].nNumHurtCol]
+																= CCollision::Create(m_pos, CCollision::COLLI_HURT);
+															while (fgets(Read, lenLine, sta) != nullptr)
+															{
+																ZeroMemory(strLine, sizeof(char) * lenLine);	//文字列リセット
+
+																//文字列の分析
+																sscanf(Read, "%s", &strLine);
+
+																//keyはモデルのキーの番号
+																if (strcmp(&strLine[0], "END_HURTSET") == 0)
+																{
+																	m_apMotion[motionnumber].aModelKey[key].nNumHurtCol++;
+																	break;
+																}
+																else if (strcmp(&strLine[0], "STARTFRAME") == 0)
+																{//判定の開始時間
+																	int start;
+																	sscanf(Read, "%s = %d", &strLine, &start);	//ループするかどうか
+																	m_apMotion[motionnumber].aModelKey[key].HurtCol[m_apMotion[motionnumber].aModelKey[key].nNumHurtCol]->SetStartf(start);
+																}
+																else if (strcmp(&strLine[0], "ENDFRAME") == 0)
+																{//判定の開始時間
+																	int end;
+																	sscanf(Read, "%s = %d", &strLine, &end);	//ループするかどうか
+																	m_apMotion[motionnumber].aModelKey[key].HurtCol[m_apMotion[motionnumber].aModelKey[key].nNumHurtCol]->SetEndf(end);
+																}
+																else if ((strcmp(&strLine[0], "POS") == 0))
+																{
+																	D3DXVECTOR3 hpos;
+																	sscanf(Read, "%s = %f%f%f", &strLine, &hpos.x, &hpos.y, &hpos.z);	//キーの総数
+																	m_apMotion[motionnumber].aModelKey[key].HurtCol[m_apMotion[motionnumber].aModelKey[key].nNumHurtCol]->SetDPos(hpos);
+																	m_apMotion[motionnumber].aModelKey[key].HurtCol[m_apMotion[motionnumber].aModelKey[key].nNumHurtCol]->SetPos(hpos);
+																}
+																else if ((strcmp(&strLine[0], "SIZ") == 0))
+																{
+																	D3DXVECTOR3  hsiz;
+																	int select = m_apMotion[motionnumber].aModelKey[key].nNumHurtCol;	//現在の当たり判定の番号
+																	sscanf(Read, "%s = %f%f%f", &strLine, &hsiz.x, &hsiz.y, &hsiz.z);	//キーの総数
+																	m_apMotion[motionnumber].aModelKey[key].HurtCol[select]->SetSiz(hsiz);
 																}
 															}
 														}
@@ -918,6 +963,23 @@ void CPlayer::DrawCollision()
 					}
 				}
 			}
+			for (int j = 0; j < m_apMotion[i].aModelKey[k].nNumHurtCol; j++)
+			{//やられ判定
+				if (m_Motion == i&&m_nCurrentKey == k&&m_apMotion[i].aModelKey[k].HurtCol[j] != nullptr)
+				{
+					m_apMotion[i].aModelKey[k].HurtCol[j]->SetUse(true);
+
+					m_apMotion[i].aModelKey[k].HurtCol[j]->SetPos(m_apMotion[i].aModelKey[k].HurtCol[j]->GetDPos() + m_pos);
+
+				}
+				else
+				{
+					if (m_apMotion[i].aModelKey[k].HurtCol[j] != nullptr)
+					{
+						m_apMotion[i].aModelKey[k].HurtCol[j]->SetUse(false);
+					}
+				}
+			}
 		}
 	}
 }
@@ -1031,6 +1093,31 @@ void CPlayer::AutoTurn(void)
 		else
 		{
 			m_rot.y = -D3DX_PI*0.5f;
+		}
+	}
+}
+
+//===========================
+//やられ判定の設定
+//===========================
+void CPlayer::SetHitBox()
+{
+	for (int i = 0; i < m_apMotion[m_Motion].aModelKey[m_nCurrentKey].nNumHurtCol; i++)
+	{//ダメージ判定が出現するかどうか(1～4フレームまでダメージ判定を出すみたいな)
+		if (m_frame >= m_apMotion[m_Motion].aModelKey[m_nCurrentKey].HurtCol[i]->GetStartf())
+		{//開始フレーム以上かどうか
+			if (m_frame <= m_apMotion[m_Motion].aModelKey[m_nCurrentKey].HurtCol[i]->GetEndf())
+			{//終了フレーム以下かどうか
+				m_apMotion[m_Motion].aModelKey[m_nCurrentKey].HurtCol[i]->SetUse(true);
+			}
+			else
+			{
+				m_apMotion[m_Motion].aModelKey[m_nCurrentKey].HurtCol[i]->SetUse(false);
+			}
+		}
+		else
+		{
+			m_apMotion[m_Motion].aModelKey[m_nCurrentKey].HurtCol[i]->SetUse(false);
 		}
 	}
 }

@@ -9,6 +9,30 @@ STATESET = STAND
 
 		KEYSET			# --- << KEY : 0 / 2 >> ---
 			FRAME = 50
+			
+#1番目の判定
+	HURTSET 
+		STARTFRAME = 0
+		ENDFRAME = 50
+		POS = 0.00 15.70 0.00 
+		SIZ = 29.00 25.00 24.00 
+	END_HURTSET
+#2番目の判定
+	HURTSET
+		STARTFRAME = 0
+		ENDFRAME = 50
+		POS = 0.00 38.70 0.00 
+		SIZ = 29.00 19.00 22.00 
+	END_HURTSET
+#3番目の判定
+	HURTSET
+		STARTFRAME = 0
+		ENDFRAME = 50
+		POS = 0.00 57.70 0.00 
+		SIZ = 26.00 16.00 25.00 
+	END_HURTSET
+			
+			
 			KEY	# ----- [ 0 ] -----
 				POS = 0.00 -3.30 0.00
 				ROT = -0.00 0.60 0.00
@@ -82,6 +106,29 @@ STATESET = STAND
 
 	KEYSET			# --- << KEY : 1 / 2 >> ---
 		FRAME = 50
+		
+		#1番目の判定
+	HURTSET 
+		STARTFRAME = 0
+		ENDFRAME = 50
+		POS = 0.00 15.70 0.00 
+		SIZ = 29.00 25.00 24.00 
+	END_HURTSET
+#2番目の判定
+	HURTSET
+		STARTFRAME = 0
+		ENDFRAME = 50
+		POS = 0.00 38.70 0.00 
+		SIZ = 29.00 19.00 22.00 
+	END_HURTSET
+#3番目の判定
+	HURTSET
+		STARTFRAME = 0
+		ENDFRAME = 50
+		POS = 0.00 57.70 0.00 
+		SIZ = 26.00 16.00 25.00 
+	END_HURTSET
+	
 		KEY	# ----- [ 0 ] -----
 			POS = 0.00 -1.30 0.00
 			ROT = -0.00 0.60 0.00

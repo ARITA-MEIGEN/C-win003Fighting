@@ -64,8 +64,8 @@ public:
 		int nFrame;								//再生時間
 		CCollision* Collision[MAX_COLLISION];	//当たり判定
 		int nNumCollision;						//1つのキーの当たり判定の数
-
 		CCollision* HurtCol[MAX_COLLISION];		//やられ判定
+		int nNumHurtCol;						//1つのキーの当たり判定の数
 	};
 
 	struct MOTION_SET
@@ -135,6 +135,8 @@ public:
 	void			Axis(void);						//軸の押し出し判定
 	void			Jump(void);						//ジャンプ
 	void			AutoTurn(void);					//自動振りむき
+	void			SetHitBox();					//やられ判定の設定
+
 
 	//セッター
 	void			SetPos(D3DXVECTOR3 pos) { m_pos = pos; };						//位置の設定
