@@ -44,12 +44,14 @@
     <ClCompile Include="renderer.cpp" />
     <ClCompile Include="Result.cpp" />
     <ClCompile Include="Shadow.cpp" />
+    <ClCompile Include="sound.cpp" />
     <ClCompile Include="Title.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="Collision.h" />
+    <ClInclude Include="Command.h" />
     <ClInclude Include="DebugProc.h" />
     <ClInclude Include="Easing.h" />
     <ClInclude Include="Fade.h" />
@@ -73,6 +75,7 @@
     <ClInclude Include="renderer.h" />
     <ClInclude Include="Result.h" />
     <ClInclude Include="Shadow.h" />
+    <ClInclude Include="sound.h" />
     <ClInclude Include="Title.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

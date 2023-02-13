@@ -19,6 +19,7 @@
 #define CAMERA_SPEED	(5.0f)		//カメラの移動速度
 #define CAMERA_FACTOR	(0.01f)		//カメラの追従の係数
 #define CAMERA_ROTSPEED	(0.05f)		//カメラの旋回速度
+#define	CAMERA_ZPOS		(-300.0f)	//カメラのZ座標
 
 //===========================
 //コンストラクタ
@@ -40,8 +41,8 @@ CCamera::~CCamera()
 void CCamera::Init(void)
 {
 	//視点・注視点・上方向を設定
-	m_posV = D3DXVECTOR3(0.0f, 50.0f, -200.0f);
-	m_posR = D3DXVECTOR3(0.0f, -50.0f, -200.0f);
+	m_posV = D3DXVECTOR3(0.0f, 50.0f, CAMERA_ZPOS);
+	m_posR = D3DXVECTOR3(0.0f, -50.0f, CAMERA_ZPOS);
 	m_vecU = D3DXVECTOR3(0.0f, 1.0f, 0.0f);
 	m_rot = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
 	m_rot.x = atan2f((m_posV.y - m_posR.y), (m_posV.z - m_posR.z));

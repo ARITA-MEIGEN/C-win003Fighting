@@ -13,7 +13,7 @@
 
 //マクロ定義
 #define NUM_BUFF		(24)		//1つの判定につき必要なバッファの数
-#define NUM_LINE		(16)	//1つのボックスを形成するのに必要な数
+#define NUM_LINE		(16)		//1つのボックスを形成するのに必要な数
 
 
 //===========================
@@ -47,7 +47,7 @@ HRESULT CCollision::Init(void)
 		NULL);
 
 	//情報の初期化
-	bUse = false;
+	m_bUse = false;
 	m_rot = D3DXVECTOR3(0.0f,0.f,0.f);
 	m_width = D3DXVECTOR3(50.0f, 50.f, 50.f);
 
@@ -115,6 +115,10 @@ HRESULT CCollision::Init(void)
 
 	//頂点バッファをアンロック
 	m_pVtxBuff->Unlock();
+
+	m_nDamage = 50;
+
+	m_Property = EDAMAGE_POINT::DP_HIGH;	//基本は上段攻撃
 
 	return S_OK;
 }
@@ -184,7 +188,7 @@ void CCollision::Update(void)
 //==============================
 void CCollision::Draw(void)
 {
-	if (bUse == true)
+	if (m_bUse == true)
 	{
 		LPDIRECT3DDEVICE9 pDevice;	//デバイスへのポインタ
 		pDevice = CApplication::GetRenderer()->GetDevice();
@@ -233,18 +237,9 @@ CCollision* CCollision::Create(D3DXVECTOR3 pos, COLLISION type)
 		pCollision->m_Colltype = type;
 		pCollision->Init();
 		pCollision->m_defaultpos = pos;
-		//pCollision->m_defaultrot = { 0.0f,0.0f,0.0f };
 
-		pCollision->bUse = true;
+		pCollision->m_bUse = true;
 	}
 
 	return pCollision;
-}
-
-void CCollision::Damage()
-{
-	if (m_Colltype == CCollision::COLLI_DAMAGE)
-	{
-
-	}
 }

@@ -14,6 +14,7 @@
 #include"DebugProc.h"
 #include"Object.h"
 #include"Fade.h"
+#include"sound.h"
 
 #include"Title.h"
 #include"Game.h"
@@ -75,6 +76,9 @@ HRESULT CApplication::Init(HWND hWnd, bool bWindow, HINSTANCE hInstance)
 	{
 		return-1;
 	}
+
+	//サウンド初期化
+	InitSound(hWnd);
 
 	//----------------------------
 	// モードの設定
@@ -177,6 +181,8 @@ void CApplication::Uninit()
 		delete m_pDebugProc;
 		m_pDebugProc = nullptr;
 	}
+
+	UninitSound();
 }
 
 //====================================

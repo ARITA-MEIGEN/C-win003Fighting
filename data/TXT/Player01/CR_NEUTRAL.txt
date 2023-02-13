@@ -7,6 +7,27 @@ MOTIONSET
 
 	KEYSET			# --- << KEY : 0 / 1 >> ---
 		FRAME = 1
+		#1番目の判定
+			HURTSET
+				STARTFRAME = 0
+				ENDFRAME = 1
+				POS = 3.00 13.70 0.00 
+				SIZ = 38.00 25.00 24.00 
+			END_HURTSET
+		#2番目の判定
+			HURTSET
+				STARTFRAME = 0
+				ENDFRAME = 1
+				POS = 0.00 32.70 0.00 
+				SIZ = 34.00 15.00 22.00 
+			END_HURTSET
+		#3番目の判定
+			HURTSET
+				STARTFRAME = 0
+				ENDFRAME = 1
+				POS = -4.00 48.70 0.00 
+				SIZ = 26.00 18.00 25.00 
+			END_HURTSET
 		KEY	# ----- [ 0 ] -----
 				POS = 0.00 -10.40 0.00 
 				ROT = -0.56 0.37 0.00 

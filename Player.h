@@ -13,6 +13,7 @@
 #include"Object.h"
 #include"ObjectX.h"
 #include"Model.h"
+#include"Command.h"
 
 //前方宣言
 class CShadow;
@@ -21,25 +22,20 @@ class CCollision;
 
 
 //マクロ定義
-#define MAX_MOTION			(5)		//モーションの数
-#define MAX_KEY				(60)	//キーの総数
-#define MAX_FRAME			(120)	//フレームの最大数
-#define NUM_PARTS			(14)	//パーツの数
-#define MAX_COLLISION		(20)	//1つのパーツにつき設定できる判定の数
-#define JUMP_HEIGHT			(130.0f)	//ジャンプの高さ
-#define PLAYER_SPEED		(2.0f)	//移動速度
-#define FIELD_WIDTH			(240.0f)	//端端の距離
-#define JUMP_FACTOR_X		(1.7f)	//ジャンプの移動の係数
-#define JUMP_FACTOR_Y		(40.0f)	//ジャンプの移動の係数
-#define MAX_SPEED			(10.f)	//ジャンプの最高速度
-#define INITIAL_VELOCITY	(5.0f)	//ジャンプの初速
-
-
-
-
-
-
-
+#define MAX_MOTION			(5)				//モーションの数
+#define MAX_KEY				(60)			//キーの総数
+#define MAX_FRAME			(120)			//フレームの最大数
+#define NUM_PARTS			(14)			//パーツの数
+#define MAX_COLLISION		(20)			//1つのパーツにつき設定できる判定の数
+#define JUMP_HEIGHT			(130.0f)		//ジャンプの高さ
+#define PLAYER_SPEED		(2.0f)			//移動速度
+#define FIELD_WIDTH			(380.0f)		//端端の距離
+#define JUMP_FACTOR_X		(1.7f)			//ジャンプの移動の係数
+#define JUMP_FACTOR_Y		(40.0f)			//ジャンプの移動の係数
+#define MAX_SPEED			(10.f)			//ジャンプの最高速度
+#define INITIAL_VELOCITY	(7.0f)			//ジャンプの初速
+#define MAX_KEYMEMORY		(60)			//記憶するキーの数
+#define	DASH_SPEED			(5.0f)			//ダッシュ速度
 
 
 class CPlayer :public CObject
@@ -48,13 +44,8 @@ public:
 	//キー要素
 	struct KEY
 	{
-		float fPosX;
-		float fPosY;
-		float fPosZ;
-
-		float fRotX;
-		float fRotY;
-		float fRotZ;
+		D3DXVECTOR3 fPos;
+		D3DXVECTOR3 fRot;
 	};
 
 	//キー情報
@@ -70,9 +61,10 @@ public:
 
 	struct MOTION_SET
 	{
-		KEY_SET		aModelKey[NUM_PARTS];		//キーの総数分持つ
+		KEY_SET		aKey[NUM_PARTS];		//キーの総数分持つ
 		int			nNumKey;					//キーの総数(ファイルで読み込む)
 		bool		bLoop;						//ループするかどうか
+		int			nHitStopTimer;				//ヒットストップの時間
 	};
 
 	enum PLAYER_MOTION
@@ -87,16 +79,20 @@ public:
 		PM_ST_LATTACK,		//弱攻撃
 		PM_ST_MATTACK,		//中攻撃
 		PM_ST_HATTACK,		//強攻撃
+		PM_ST_HURT,			//やられモーション
+
 		//空中
 		PM_JP_NEUTRAL,		//垂直ジャンプ
-		PM_JP_MOVELEFT	,	//移動(しゃがみだけ無し)
-		PM_JP_MOVERIGHT,	//移動(しゃがみだけ無し)
+		PM_JP_MOVEFORWARD,	//前ジャンプ
+		PM_JP_MOVEBACK,		//バックジャンプ
 		PM_JP_DASH,			//前ダッシュ
 		PM_JP_GUARD,		//ガード
 		PM_JP_HIT,			//被弾
 		PM_JP_LATTACK,		//弱攻撃
 		PM_JP_MATTACK,		//中攻撃
 		PM_JP_HATTACK,		//強攻撃
+		PM_JP_HURT,			//やられモーション
+
 		//しゃがみ
 		PM_CR_NEUTRAL,		//ニュートラル
 		PM_CR_MOVE,			//移動(しゃがみだけ無し)
@@ -105,15 +101,37 @@ public:
 		PM_CR_LATTACK,		//弱攻撃
 		PM_CR_MATTACK,		//中攻撃
 		PM_CR_HATTACK,		//強攻撃
+		PM_CR_HURT,			//やられモーション
+
+		//必殺技
+		PM_236L,			//弱波動
+		PM_236M,			//中波動
+		PM_236H,			//強波動
+
+		PM_214L,			//弱竜巻
+		PM_214M,			//中竜巻
+		PM_214H,			//強竜巻
+
+		PM_623L,			//弱昇竜
+		PM_623M,			//中昇竜
+		PM_623H,			//強昇竜
+
+		//死亡
+		PM_ST_DIE,			//死
+		PM_CR_DIE,			//死
+		PM_JP_DIE,			//死
+
+		PM_DOWN,			//死亡&ダウン時モーション
+		PM_STANDUP,			//起き上がり
 		PM_MAX
 	};
 
 	enum PLAYER_STATE
 	{
-		PST_GROUND,	//立ち
+		PST_STAND,	//立ち
 		PST_CROUCH,	//しゃがみ
 		PST_AIR,	//空中
-		PST_DAMAGE,	//被弾状態
+		PST_DIE,	//被弾状態
 		PST_MAX
 	};
 
@@ -128,20 +146,27 @@ public:
 	static CPlayer*	Create(D3DXVECTOR3 pos, D3DXVECTOR3 rot);
 	D3DXMATRIX		GetMtx();
 	void			ReadMotion();
-	void			MotionPlayer(int nNumber);		//モーションの再生　引数は再生するモーションの番号
-	void			MotionManager();				//状態に合わせてモーション再生する
-	void			PlayFirstMotion();				//前と状態が違う場合のみ最初のモーションを設定する
-	void			DrawCollision();				//当たり判定の設定
-	void			Axis(void);						//軸の押し出し判定
-	void			Jump(void);						//ジャンプ
-	void			AutoTurn(void);					//自動振りむき
-	void			SetHitBox();					//やられ判定の設定
-
+	void			MotionPlayer(int nNumber);				//モーションの再生　引数は再生するモーションの番号
+	void			MotionManager();						//状態に合わせてモーション再生する
+	void			PlayFirstMotion();						//前と状態が違う場合のみ最初のモーションを設定する
+	void			DrawCollision();						//当たり判定の設定
+	void			Axis(void);								//軸の押し出し判定
+	void			Jump(void);								//ジャンプ
+	void			AutoTurn(void);							//自動振りむき
+	void			Damage();								//ダメージ処理
+	bool			Guard(CCollision* dmg);					//ガード処理
+	void			Command();								//コマンド処理	
+	bool			CheckInput(const int *command);			//コマンドの入力判定
+	void			StateManagement();						//プレイヤーの状態管理
+	void			Input();								//入力処理
+	void			Updatepos();							//座標の更新
+	void			Cancel();								//攻撃キャンセル
+	bool			ColJudge(int hurtnumber,int colnum);	//当たり判定チェック
 
 	//セッター
 	void			SetPos(D3DXVECTOR3 pos) { m_pos = pos; };						//位置の設定
 	void			SetRot(D3DXVECTOR3 rot) { m_rot = rot; };						//向きの設定
-	void			SetEnemy(CPlayer* ene) { m_pEnemy = ene; };						//敵のポインタ
+	void			SetEnemy(CPlayer* ene) { m_pEne = ene; };						//敵のポインタ
 
 	//ゲッター
 	D3DXVECTOR3		GetPos() { return m_pos; };
@@ -159,24 +184,25 @@ private:
 	D3DXVECTOR3		m_rotDest;						//目的の角度の保存
 	int				m_MotionCnt;					//モーションカウンター
 	int				m_nNumKey;						//キーの総数
-	int				m_nCurrentKey;					//現在のキー番号
-	D3DXMATRIX		m_mtxRot;						//回転マトリックス(保存用)
-	D3DXQUATERNION	m_quat;							//クォータニオン
-	D3DXVECTOR3		m_vecAxis;						//回転軸
-	float			m_fRolling;						//回転量　(回転角)
-	int				m_nNumModel;
-	char			m_nModelpass[255];
-	D3DXVECTOR3		m_movepos;
-	D3DXVECTOR3		m_moverot;
-	PLAYER_MOTION	m_Motion;
+	int				m_nCurKey;						//現在のキー番号
+	int				m_nNumModel;					//読み込むモデルの数
+	char			m_nModelpass[255];				//読み込むモデルのパス
+	PLAYER_MOTION	m_Motion;						//現在のモーション
 	PLAYER_MOTION	m_MotionOld;					//ひとつ前のモーション
+	PLAYER_MOTION	m_NextMotion;					//キャンセルで発動する技
+
 	bool			m_bMotion;						//モーション再生中かどうか
-	static int		m_nPlayer;						//プレイヤー番号
-	int				m_nPlayerNumber;				//プレイヤー番号
-	CPlayer*		m_pEnemy;						//対戦相手のポインタ
+	static int		m_nNumPlayer;					//プレイヤーの数
+	int				m_nPlayerNumber;				//自分のプレイヤー番号
+	CPlayer*		m_pEne;						//対戦相手のポインタ
 	PLAYER_STATE	m_State;						//プレイヤーの状態
 	bool			m_bAttack;						//攻撃中かどうか
 	int				m_nLife;						//体力
+	bool			m_bSide;						//どっちを向いてるか(trueなら←)
+	int				m_anInput[MAX_KEYMEMORY];		//コマンド認識用
+	int				m_nNowKey;						//キー保存用
+	int				m_nHitStop;						//ヒットストップの時間
+
 
 	//押し出し判定関連
 	CCollision* 	m_AxisBox;						//押し出し判定(プレイヤーの軸)
@@ -186,6 +212,10 @@ private:
 	int				m_nJump;						//ジャンプの全体フレーム
 	int				m_nJumpCount;					//ジャンプカウンター
 	int				m_nJumpRigor;					//ジャンプの着地硬直
+	bool			m_bJump;						//ジャンプ中かどうか
+
+	//ガード関係
+	int				m_nGuardRig;					//ガード硬直
 
 
 };

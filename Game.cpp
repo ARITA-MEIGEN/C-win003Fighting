@@ -19,7 +19,7 @@
 #include"Shadow.h"
 #include"Fade.h"
 #include"Life.h"
-
+#include"sound.h"
 
 //静的メンバ変数
 CPlayer*CGame::m_pPlayer[2] = {};
@@ -76,10 +76,12 @@ HRESULT CGame::Init()
 	CFloor::Create(D3DXVECTOR3(0.0f, 0.0f, 0.0f), D3DXVECTOR3(500.0f, 500.0f, 500.0f));
 	
 	//デバッグ用カメラ操作モード
-	bDebugCamera = true;
+	bDebugCamera = false;
 
 	//体力ゲージ
 	m_Life = CLife::Create();
+
+	PlaySound(SOUND_LABEL_BGM_BATTLE001);
 
 	return S_OK;
 }
@@ -113,6 +115,8 @@ void CGame::Uninit()
 		m_Life->Uninit();
 		delete m_Life;
 	}
+
+	StopSound();
 }
 
 //====================================

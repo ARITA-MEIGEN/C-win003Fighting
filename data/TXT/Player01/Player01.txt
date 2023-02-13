@@ -158,35 +158,59 @@ END_AXIS
 #------------------------------------------------------------------------------
 	MOTIONSET
 		#立ち
-		MOTION = data/TXT/Player01/ST_NEUTRAL.txt	#[0]
-		MOTION = data/TXT/Player01/ST_MOVE.txt		#[1]
-		MOTION = data/TXT/Player01/ST_DASH.txt		#[2]
-		MOTION = data/TXT/Player01/ST_BACKSTEP.txt	#[3]
-		MOTION = data/TXT/Player01/ST_GUARD.txt		#[4]
-		MOTION = data/TXT/Player01/ST_HIT.txt		#[5]
-		MOTION = data/TXT/Player01/ST_LATTACK.txt	#[6]
-		MOTION = data/TXT/Player01/ST_MATTACK.txt	#[7]
-		MOTION = data/TXT/Player01/ST_HATTACK.txt	#[8]
-		
+		MOTION = data/TXT/Player01/ST_NEUTRAL.txt	
+		MOTION = data/TXT/Player01/ST_MOVE.txt		
+		MOTION = data/TXT/Player01/ST_DASH.txt		
+		MOTION = data/TXT/Player01/ST_BACKSTEP.txt	
+		MOTION = data/TXT/Player01/ST_GUARD.txt		
+		MOTION = data/TXT/Player01/ST_HIT.txt		
+		MOTION = data/TXT/Player01/ST_LATTACK.txt	
+		MOTION = data/TXT/Player01/ST_MATTACK.txt	
+		MOTION = data/TXT/Player01/ST_HATTACK.txt	
+		MOTION = data/TXT/Player01/ST_HURT.txt		
+				
 		#空中
-		MOTION = data/TXT/Player01/JP_NEUTRAL.txt	#[9]
-		MOTION = data/TXT/Player01/JP_MOVELEFT.txt	#[10]
-		MOTION = data/TXT/Player01/JP_MOVERIGHT.txt	#[11]
-		MOTION = data/TXT/Player01/JP_DASH.txt		#[12]
-		MOTION = data/TXT/Player01/JP_GUARD.txt		#[13]
-		MOTION = data/TXT/Player01/JP_HIT.txt		#[14]
-		MOTION = data/TXT/Player01/JP_LATTACK.txt	#[15]
-		MOTION = data/TXT/Player01/JP_MATTACK.txt	#[16]
-		MOTION = data/TXT/Player01/JP_HATTACK.txt	#[17]
+		MOTION = data/TXT/Player01/JP_NEUTRAL.txt	
+		MOTION = data/TXT/Player01/JP_MOVELEFT.txt	
+		MOTION = data/TXT/Player01/JP_MOVERIGHT.txt	
+		MOTION = data/TXT/Player01/JP_DASH.txt		
+		MOTION = data/TXT/Player01/JP_GUARD.txt		
+		MOTION = data/TXT/Player01/JP_HIT.txt		
+		MOTION = data/TXT/Player01/JP_LATTACK.txt	
+		MOTION = data/TXT/Player01/JP_MATTACK.txt	
+		MOTION = data/TXT/Player01/JP_HATTACK.txt	
+		MOTION = data/TXT/Player01/JP_HURT.txt		
 		
 		#しゃがみ
-		MOTION = data/TXT/Player01/CR_NEUTRAL.txt	#[18]
-		MOTION = data/TXT/Player01/CR_MOVE.txt		#[19]
-		MOTION = data/TXT/Player01/CR_GUARD.txt		#[20]
-		MOTION = data/TXT/Player01/CR_HIT.txt		#[21]
-		MOTION = data/TXT/Player01/CR_LATTACK.txt	#[22]
-		MOTION = data/TXT/Player01/CR_MATTACK.txt	#[23]
-		MOTION = data/TXT/Player01/CR_HATTACK.txt	#[24]
+		MOTION = data/TXT/Player01/CR_NEUTRAL.txt	
+		MOTION = data/TXT/Player01/CR_MOVE.txt		
+		MOTION = data/TXT/Player01/CR_GUARD.txt		
+		MOTION = data/TXT/Player01/CR_HIT.txt		
+		MOTION = data/TXT/Player01/CR_LATTACK.txt	
+		MOTION = data/TXT/Player01/CR_MATTACK.txt	
+		MOTION = data/TXT/Player01/CR_HATTACK.txt	
+		MOTION = data/TXT/Player01/CR_HURT.txt	
+		
+		#必殺技
+		MOTION = data/TXT/Player01/L236.txt	
+		MOTION = data/TXT/Player01/M236.txt	
+		MOTION = data/TXT/Player01/H236.txt	
+		
+		MOTION = data/TXT/Player01/L214.txt	
+		MOTION = data/TXT/Player01/M214.txt	
+		MOTION = data/TXT/Player01/H214.txt	
+		
+		MOTION = data/TXT/Player01/L623.txt	
+		MOTION = data/TXT/Player01/M623.txt	
+		MOTION = data/TXT/Player01/H623.txt	
+		
+		//死
+		MOTION = data/TXT/Player01/ST_DIE.txt		
+		MOTION = data/TXT/Player01/JP_DIE.txt		
+		MOTION = data/TXT/Player01/CR_DIE.txt		
+		
+		MOTION = data/TXT/Player01/DOWN.txt	
+		MOTION = data/TXT/Player01/STANDUP.txt		#[41]
 		
 	END_MOTIONSET
 END_SCRIPT		# この行は絶対消さないこと！
