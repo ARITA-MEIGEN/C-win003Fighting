@@ -162,6 +162,7 @@ public:
 	void			Updatepos();							//座標の更新
 	void			Cancel();								//攻撃キャンセル
 	bool			ColJudge(int hurtnumber,int colnum);	//当たり判定チェック
+	void			HitColSet();							//攻撃判定再設定
 
 	//セッター
 	void			SetPos(D3DXVECTOR3 pos) { m_pos = pos; };						//位置の設定

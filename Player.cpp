@@ -108,7 +108,7 @@ void CPlayer::Update(void)
 {
 	Input();
 	if (m_nHitStop <= 0 && m_pEne->m_nHitStop <= 0)
-	{
+	{//ヒットストップがない場合
 		if (m_nLife > 0)
 		{
 			if (m_bMotion == false && m_bJump == false)
@@ -125,9 +125,8 @@ void CPlayer::Update(void)
 			Jump();					//ジャンプ
 			Axis();					//軸の押し出し判定
 			AutoTurn();				//自動振り向き
-			DrawCollision();		//当たり判定表示
 			Damage();				//ダメージ処理
-
+			DrawCollision();		//当たり判定表示
 
 			if (m_nLife <= 0)
 			{//体力が亡くなった時
@@ -141,7 +140,6 @@ void CPlayer::Update(void)
 			m_Motion = m_NextMotion;
 			m_NextMotion = PM_ST_NEUTRAL;	//PM_ST_NEUTRALは使っていない状態
 		}
-		Cancel();
 		MotionManager();		//モーション再生
 
 		//角度の正規化
@@ -155,8 +153,9 @@ void CPlayer::Update(void)
 		}
 	}
 	else
-	{
+	{//ヒットストップがかかっている場合
 		m_nHitStop--;
+		Cancel();				//攻撃キャンセル
 	}
 
 #ifdef _DEBUG
@@ -654,7 +653,7 @@ void CPlayer::MotionPlayer(int nNumber)
 	//カウンター更新
 	if (m_nCurKey == m_apMotion[m_Motion].nNumKey&& m_apMotion[m_Motion].bLoop == false)
 	{
-		//エディットじゃないときループモーションが終わったらニュートラルにする
+		//ループモーションが終わったらニュートラルにする
 		m_bMotion = false;
 		m_bAttack = false;
 		PlayFirstMotion();
@@ -746,6 +745,7 @@ void CPlayer::MotionPlayer(int nNumber)
 			m_apModel[i]->SetRot(rot);
 		}
 	}
+
 	//再生モードの場合
 	 //カウンター更新
 	if (m_frame >= m_apMotion[m_Motion].aKey[m_nCurKey].nFrame)
@@ -811,24 +811,26 @@ void CPlayer::DrawCollision()
 			//ダメージ判定
 			for (int j = 0; j < m_apMotion[i].aKey[k].nNumCollision; j++)
 			{//違うモーションの当たり判定をオフにする
-				if (m_Motion == i&&m_nCurKey == k&&m_frame >= m_apMotion[i].aKey[k].Collision[j]->GetStartf()&&
-					m_frame <= m_apMotion[i].aKey[k].Collision[j]->GetEndf())
+
+				 //攻撃判定再設定
+				if (m_bSide == false)
+				{//敵より右側の場合
+					m_apMotion[i].aKey[k].Collision[j]->SetPos(m_pos + m_apMotion[i].aKey[k].Collision[j]->GetDPos());
+				}
+				else
+				{//1P側
+					m_apMotion[i].aKey[k].Collision[j]->SetPos(D3DXVECTOR3(
+						m_pos.x - m_apMotion[i].aKey[k].Collision[j]->GetDPos().x,				//X
+						m_pos.y + m_apMotion[i].aKey[k].Collision[j]->GetDPos().y,
+						m_pos.z - m_apMotion[i].aKey[k].Collision[j]->GetDPos().z));
+				}
+
+
+				if (m_Motion == i&&m_nCurKey == k&&m_frame >= m_apMotion[i].aKey[k].Collision[j]->GetStartf()&&m_frame <= m_apMotion[i].aKey[k].Collision[j]->GetEndf())
 				{//キーとモーションが一致している場合のみ表示
 					if (m_apMotion[i].aKey[k].Collision[j] != nullptr)
 					{
 						m_apMotion[i].aKey[k].Collision[j]->SetUse(true);
-
-						if (m_bSide == false)
-						{//敵より右側の場合
-							m_apMotion[i].aKey[k].Collision[j]->SetPos(m_pos + m_apMotion[i].aKey[k].Collision[j]->GetDPos());
-						}
-						else
-						{
-							m_apMotion[i].aKey[k].Collision[j]->SetPos(D3DXVECTOR3(
-								m_pos.x - m_apMotion[i].aKey[k].Collision[j]->GetDPos().x,				//X
-								m_pos.y + m_apMotion[i].aKey[k].Collision[j]->GetDPos().y,
-								m_pos.z - m_apMotion[i].aKey[k].Collision[j]->GetDPos().z));
-						}
 					}
 				}
 				else
@@ -1629,17 +1631,13 @@ void CPlayer::Cancel()
 //==============================================
 bool CPlayer::ColJudge(int hurtnumber, int colnum)
 {
-	if (m_apMotion[m_Motion].aKey[m_nCurKey].HurtCol[hurtnumber]->GetPos().x + m_apMotion[m_Motion].aKey[m_nCurKey].HurtCol[hurtnumber]->GetWidth().x / 2 >=
-		m_pEne->m_apMotion[m_pEne->m_Motion].aKey[m_pEne->m_nCurKey].Collision[colnum]->GetPos().x - m_pEne->m_apMotion[m_pEne->m_Motion].aKey[m_pEne->m_nCurKey].Collision[colnum]->GetWidth().x / 2 &&
+	D3DXVECTOR3 Hurt, col, HurtWidth, colWidth;
+	Hurt = m_apMotion[m_Motion].aKey[m_nCurKey].HurtCol[hurtnumber]->GetPos();
+	col = m_pEne->m_apMotion[m_pEne->m_Motion].aKey[m_pEne->m_nCurKey].Collision[colnum]->GetPos();
+	HurtWidth = m_apMotion[m_Motion].aKey[m_nCurKey].HurtCol[hurtnumber]->GetWidth();
+	colWidth = m_pEne->m_apMotion[m_pEne->m_Motion].aKey[m_pEne->m_nCurKey].Collision[colnum]->GetWidth();
 
-		m_apMotion[m_Motion].aKey[m_nCurKey].HurtCol[hurtnumber]->GetPos().x - m_apMotion[m_Motion].aKey[m_nCurKey].HurtCol[hurtnumber]->GetWidth().x / 2 <=
-		m_pEne->m_apMotion[m_pEne->m_Motion].aKey[m_pEne->m_nCurKey].Collision[colnum]->GetPos().x + m_pEne->m_apMotion[m_pEne->m_Motion].aKey[m_pEne->m_nCurKey].Collision[colnum]->GetWidth().x / 2 &&
-
-		m_apMotion[m_Motion].aKey[m_nCurKey].HurtCol[hurtnumber]->GetPos().y + m_apMotion[m_Motion].aKey[m_nCurKey].HurtCol[hurtnumber]->GetWidth().y / 2 >=
-		m_pEne->m_apMotion[m_pEne->m_Motion].aKey[m_pEne->m_nCurKey].Collision[colnum]->GetPos().y - m_pEne->m_apMotion[m_pEne->m_Motion].aKey[m_pEne->m_nCurKey].Collision[colnum]->GetWidth().y / 2 &&
-
-		m_apMotion[m_Motion].aKey[m_nCurKey].HurtCol[hurtnumber]->GetPos().y - m_apMotion[m_Motion].aKey[m_nCurKey].HurtCol[hurtnumber]->GetWidth().y / 2 <=
-		m_pEne->m_apMotion[m_pEne->m_Motion].aKey[m_pEne->m_nCurKey].Collision[colnum]->GetPos().y + m_pEne->m_apMotion[m_pEne->m_Motion].aKey[m_pEne->m_nCurKey].Collision[colnum]->GetWidth().y / 2)
+	if (Hurt.x + HurtWidth.x / 2 >=col.x - colWidth.x / 2 &&Hurt.x - HurtWidth.x / 2 <=col.x + colWidth.x / 2 &&Hurt.y + HurtWidth.y / 2 >=	col.y - colWidth.y / 2 &&Hurt.y - HurtWidth.y / 2 <=col.y + colWidth.y / 2)
 	{
 		return true;
 	}
@@ -1648,3 +1646,4 @@ bool CPlayer::ColJudge(int hurtnumber, int colnum)
 		return false;
 	}
 }
+
