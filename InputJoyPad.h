@@ -1,60 +1,87 @@
-#ifndef _INPUTJOYPAD_H_
-#define _INPUTJOYPAD_H_	//二重インクルード防止用
+//=============================================================================
+//
+// 入力処理 [directjoypad.h]
+// Author1 : KOZUNA HIROHITO
+//
+//=============================================================================
 
-#include "main.h"
+#ifndef _INPUTJOYPAD_H_		//このマクロ定義がされなかったら
+#define _INPUTJOYPAD_H_		//2重インクルード防止のマクロ定義
 
-//マクロ定義
-#define NUM_KEY_MAX		(256)					//キーの最大数
-#define DEADZONE		(20000.0f)				//スティックの認識する量
+//----------------------------------------------------------------------------
+//インクルードファイル
+//----------------------------------------------------------------------------
+#include "DirectInput.h"
+#include "inputkeydata.h"
 
-
-class CInputJoyPad
+//----------------------------------------------------------------------------
+//クラス定義
+//----------------------------------------------------------------------------
+class CInputJoyPad : public CDirectInput
 {
-public:
-	//キーの種類
-	typedef enum
-	{
-		JOYKEY_UP = 0,	//十字キー(上)
-		JOYKEY_DOWN,	//十字キー(下)
-		JOYKEY_LEFT,	//十字キー(左)
-		JOYKEY_RIGHT,	//十字キー(右)
-		JOYKEY_START,	//スタートボタン
-		JOYKEY_BACK,	//バックボタン
-		JOYKEY_LPUSH,	//Lスティック押し込み
-		JOYKEY_RPUSH,	//Rスティック押し込み
-		JOYKEY_LB,		//Lボタン
-		JOYKEY_RB,		//Rボタン
-		JOYKEY_NONE1,	//反応なし
-		JOYKEY_NONE2,	//反応なし
-		JOYKEY_A,		//Aボタン
-		JOYKEY_B,		//Bボタン
-		JOYKEY_X,		//Xボタン
-		JOYKEY_Y,		//Yボタン
-		JOYKEY_LSTICK,	//左スティック
-		JOYKEY_RSTICK,	//右スティック
-	}JOYKEY;
-
-	CInputJoyPad();
-	~CInputJoyPad();
-	HRESULT Init();	//初期化
-	void Uninit();									//終了
-	void Update();									//更新
-
-	bool GetJoypadPress(JOYKEY key);						//キーボードプレス情報を取得
-	bool GetJoypadTrigger(JOYKEY key);						//キーボードトリガー情報を取得
-	bool GetJoypadRelease(JOYKEY key);						//キーボードリリース情報を取得
-	D3DXVECTOR3 GetJoypadStick(JOYKEY key);					//ジョイパッドのスティック情報
-	void Joypadvibration(int nTime, int nStrength);			//ジョイパッドの振動設定
 
 private:
-	//メンバ変数
-	XINPUT_STATE m_joyKeyState;						//ジョイパッドのプレス情報
-	XINPUT_STATE m_joyKeyStateTrigger;				//ジョイパッドのトリガー情報
-	XINPUT_STATE m_joyKeyStateRelease;				//ジョイパッドのリリース情報
-	D3DXVECTOR3 m_JoyStickPos;						//ジョイスティック
-	XINPUT_VIBRATION m_joyMoter;					//振動の設定
-	int m_nTime;									//振動の時間
-	int m_nStrength;								//振動の強さ
-};
+	static const int MAX_JOY_KEY = 32;		//ジョイパッドの使ってないキーを含めた最大数
+	static const int JOYPAD_DATA_MAX = 4;	//同時接続可能最大数
 
+											//ジョイパッドのひとつに必要な情報の構造体
+	struct SJoyPad
+	{
+		LPDIRECTINPUTDEVICE8 pInputDevice;				//入力デバイスへのポインタ
+		DIJOYSTATE aKeyState;							//ジョイパッドのプレス情報
+		DIJOYSTATE aKeyStateTrigger;					//ジョイパッドのトリガー情報
+		DIJOYSTATE aKeyStateRelease;					//ジョイパッドのリリース情報
+		DirectJoypad aOldKeyTrigger;					//前回押されたトリガーキーの種類
+		DirectJoypad aOldKeyRelease;					//前回押されたリリースキーの種類
+		int nCrossPressRot;								//ジョイパッドの十字キーの押されている方向
+	};
+
+public:
+	CInputJoyPad();
+	~CInputJoyPad()override;
+	HRESULT Init(HINSTANCE hInstance, HWND hWnd)override;		//ジョイパッドの初期化
+	void Uninit(void)override;									//ジョイパッドの終了処理
+	void Update(void)override;									//ジョイパッドの更新処理
+
+																//入力デバイスへのポインタの取得
+	LPDIRECTINPUTDEVICE8 GetInputDevice() { return m_JoyPadData[m_nJoyNumCnt].pInputDevice; }
+	LPDIRECTINPUTDEVICE8 GetInputDevice(int nNum) { return m_JoyPadData[nNum].pInputDevice; }
+
+	//入力デバイスへのポインタの設定
+	void SetInputDevice(LPDIRECTINPUTDEVICE8 pInputDeviceint) { m_JoyPadData[m_nJoyNumCnt].pInputDevice = pInputDeviceint; m_nJoyNumCnt++; }
+
+	//現在接続されているジョイパッドの数の取得
+	int GetJoyPadNumMax() { return m_nJoyNumCnt; }
+
+	//*接続が確認時に行うコールバック関数
+	//デバイスが確認できたら情報を生成するコールバック関数
+	static BOOL CALLBACK EnumJoysticksCallback(const DIDEVICEINSTANCE *pdidInstance, VOID *pContext);
+	//確認が出来たジョイパッドのスティックの傾きの値の幅設定
+	static BOOL CALLBACK EnumAxesCallback(const DIDEVICEOBJECTINSTANCE *pdidoi, VOID *pContext);
+	//*
+
+	bool GetPress(DirectJoypad eKey, int nNum);				//プレス処理
+	bool GetTrigger(DirectJoypad eKey, int nNum);			//トリガー処理
+	bool GetRelease(DirectJoypad eKey, int nNum);			//リリース処理
+	bool GetCrossPress(DirectJoypad eKey, int nNum);		//十字キープレス処理
+	bool GetCrossTrigger(DirectJoypad eKey, int nNum);	    //十字キートリガー処理
+	bool GetCrossRelease(DirectJoypad eKey, int nNum);	    //十字キーリリース処理
+	bool GetPressAll(DirectJoypad eKey);			//オールプレス処理	（キー指定あり、プレイヤー指定なし）
+	bool GetTriggerAll(DirectJoypad eKey);			//オールトリガー処理（キー指定あり、プレイヤー指定なし）
+	bool GetReleaseAll(DirectJoypad eKey);			//オールリリース処理（キー指定あり、プレイヤー指定なし）
+	bool GetPressAll(int nNum);						//オールプレス処理	（キー指定なし、プレイヤー指定あり）
+	bool GetTriggerAll(int nNum);					//オールトリガー処理（キー指定なし、プレイヤー指定あり）
+	bool GetReleaseAll(int nNum);					//オールリリース処理（キー指定なし、プレイヤー指定あり）
+	bool GetPressAll();								//オールプレス処理	（キー指定なし、プレイヤー指定なし）
+	bool GetTriggerAll();							//オールトリガー処理（キー指定なし、プレイヤー指定なし）
+	bool GetReleaseAll();							//オールリリース処理（キー指定なし、プレイヤー指定なし）
+	D3DXVECTOR3 GetJoyStickData(int nNum, bool bleftandright = false);			//ジョイスティックの傾き値を返す(true  = 右、false = 左)
+	int GetCross(int nNum = 0) { return m_JoyPadData[nNum].nCrossPressRot; }	//ジョイパッドの十字キーの押されている方向(例　45°など)
+
+private:
+	SJoyPad m_JoyPadData[JOYPAD_DATA_MAX];		//ジョイパッドのひとつに必要な情報の構造体
+	DirectJoypad m_AllOldKeyTrigger;			//全ジョイパッド共通の前回されたトリガーキー
+	DirectJoypad m_AllOldKeyRelease;			//全ジョイパッド共通の前回されたリリースキー
+	int m_nJoyNumCnt;							//現在接続の接続数
+};
 #endif

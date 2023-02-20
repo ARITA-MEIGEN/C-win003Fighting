@@ -4,16 +4,41 @@
 MOTIONSET
 	LOOP = 1		# ループするかどうか[0:ループしない / 1:ループする]
 	NUM_KEY = 4		# キー数
+	HITSTOP = 0		# ヒットストップの時間
 
-	KEYSET			# --- << KEY : 0 / 2 >> ---
+	KEYSET			# --- << KEY : 0 / 4 >> ---
 		FRAME = 10
+		#1番目のやられ判定
+			HURTSET
+				STARTFRAME = 0
+				ENDFRAME = 8
+				POS = 0.00 15.70 0.00 
+				SIZ = 29.00 25.00 24.00 
+			END_HURTSET
+
+		#2番目のやられ判定
+			HURTSET
+				STARTFRAME = 0
+				ENDFRAME = 8
+				POS = 0.00 38.70 0.00 
+				SIZ = 29.00 19.00 22.00 
+			END_HURTSET
+
+		#3番目のやられ判定
+			HURTSET
+				STARTFRAME = 0
+				ENDFRAME = 8
+				POS = 0.00 57.70 0.00 
+				SIZ = 26.00 16.00 25.00 
+			END_HURTSET
+
 		KEY	# ----- [ 0 ] -----
 				POS = 0.00 0.00 0.00 
 				ROT = -0.55 0.00 0.00 
 		END_KEY
 		KEY	# ----- [ 1 ] -----
 				POS = 0.00 0.00 0.00 
-				ROT = 0.00 0.00 0.00 
+				ROT = 0.51 0.00 0.00 
 		END_KEY
 		KEY	# ----- [ 2 ] -----
 				POS = 0.00 0.00 0.00 
@@ -64,15 +89,39 @@ MOTIONSET
 				ROT = 0.00 0.00 0.00 
 		END_KEY
 		END_KEYSET
-	KEYSET			# --- << KEY : 1 / 2 >> ---
+	KEYSET			# --- << KEY : 1 / 4 >> ---
 		FRAME = 10
+		#1番目のやられ判定
+			HURTSET
+				STARTFRAME = 0
+				ENDFRAME = 8
+				POS = 0.00 15.70 0.00 
+				SIZ = 29.00 25.00 24.00 
+			END_HURTSET
+
+		#2番目のやられ判定
+			HURTSET
+				STARTFRAME = 0
+				ENDFRAME = 8
+				POS = 0.00 38.70 0.00 
+				SIZ = 29.00 19.00 22.00 
+			END_HURTSET
+
+		#3番目のやられ判定
+			HURTSET
+				STARTFRAME = 0
+				ENDFRAME = 8
+				POS = 0.00 57.70 0.00 
+				SIZ = 26.00 16.00 25.00 
+			END_HURTSET
+
 		KEY	# ----- [ 0 ] -----
 				POS = 0.00 0.00 0.00 
 				ROT = -0.55 0.00 0.00 
 		END_KEY
 		KEY	# ----- [ 1 ] -----
 				POS = 0.00 0.00 0.00 
-				ROT = 0.00 0.00 0.00 
+				ROT = 0.51 0.00 0.00 
 		END_KEY
 		KEY	# ----- [ 2 ] -----
 				POS = 0.00 0.00 0.00 
@@ -123,15 +172,39 @@ MOTIONSET
 				ROT = -0.47 0.00 0.00 
 		END_KEY
 		END_KEYSET
-	KEYSET			# --- << KEY : 2 / 2 >> ---
+	KEYSET			# --- << KEY : 2 / 4 >> ---
 		FRAME = 10
+		#1番目のやられ判定
+			HURTSET
+				STARTFRAME = 0
+				ENDFRAME = 8
+				POS = 0.00 15.70 0.00 
+				SIZ = 29.00 25.00 24.00 
+			END_HURTSET
+
+		#2番目のやられ判定
+			HURTSET
+				STARTFRAME = 0
+				ENDFRAME = 8
+				POS = 0.00 38.70 0.00 
+				SIZ = 29.00 19.00 22.00 
+			END_HURTSET
+
+		#3番目のやられ判定
+			HURTSET
+				STARTFRAME = 0
+				ENDFRAME = 8
+				POS = 0.00 57.70 0.00 
+				SIZ = 26.00 16.00 25.00 
+			END_HURTSET
+
 		KEY	# ----- [ 0 ] -----
 				POS = 0.00 0.00 0.00 
 				ROT = -0.55 0.00 0.00 
 		END_KEY
 		KEY	# ----- [ 1 ] -----
 				POS = 0.00 0.00 0.00 
-				ROT = 0.00 0.00 0.00 
+				ROT = 0.50 0.00 0.00 
 		END_KEY
 		KEY	# ----- [ 2 ] -----
 				POS = 0.00 0.00 0.00 
@@ -182,15 +255,39 @@ MOTIONSET
 				ROT = 0.00 0.00 0.00 
 		END_KEY
 		END_KEYSET
-	KEYSET			# --- << KEY : 3 / 2 >> ---
+	KEYSET			# --- << KEY : 3 / 4 >> ---
 		FRAME = 10
+		#1番目のやられ判定
+			HURTSET
+				STARTFRAME = 0
+				ENDFRAME = 8
+				POS = 0.00 15.70 0.00 
+				SIZ = 29.00 25.00 24.00 
+			END_HURTSET
+
+		#2番目のやられ判定
+			HURTSET
+				STARTFRAME = 0
+				ENDFRAME = 8
+				POS = 0.00 38.70 0.00 
+				SIZ = 29.00 19.00 22.00 
+			END_HURTSET
+
+		#3番目のやられ判定
+			HURTSET
+				STARTFRAME = 0
+				ENDFRAME = 8
+				POS = 0.00 57.70 0.00 
+				SIZ = 26.00 16.00 25.00 
+			END_HURTSET
+
 		KEY	# ----- [ 0 ] -----
 				POS = 0.00 0.00 0.00 
 				ROT = -0.55 0.00 0.00 
 		END_KEY
 		KEY	# ----- [ 1 ] -----
 				POS = 0.00 0.00 0.00 
-				ROT = 0.00 0.00 0.00 
+				ROT = 0.51 0.00 0.00 
 		END_KEY
 		KEY	# ----- [ 2 ] -----
 				POS = 0.00 0.00 0.00 

@@ -9,8 +9,6 @@
 #include"Application.h"
 #include"Game.h"
 #include"Player.h"
-#include"InputKeyBoard.h"
-#include"InputJoyPad.h"
 #include"Floor.h"
 #include"Player.h"
 #include"Mesh.h"
@@ -20,6 +18,8 @@
 #include"Fade.h"
 #include"Life.h"
 #include"sound.h"
+#include"input.h"
+#include"effect.h"
 
 //静的メンバ変数
 CPlayer*CGame::m_pPlayer[2] = {};
@@ -55,6 +55,7 @@ HRESULT CGame::Init()
 	CShadow::Load();
 	CFloor::Load();
 	CLife::Load();
+	CEffect::Load();
 
 	//プレイヤーの生成
 	m_pPlayer[0] = CPlayer::Create(D3DXVECTOR3(-50.0f, 0.0f, 0.0f), D3DXVECTOR3(0.0f, -D3DX_PI*0.5f, 0.0f));
@@ -62,8 +63,8 @@ HRESULT CGame::Init()
 	m_pPlayer[0]->SetEnemy(m_pPlayer[1]);
 	m_pPlayer[1]->SetEnemy(m_pPlayer[0]);
 
-	//メッシュフィールドの設定
-	//m_pMesh = CMesh::Create(20, 20);
+	//体力ゲージ
+	m_Life = CLife::Create();
 
 	//カメラの設定
 	m_pCamera = CCamera::Create();
@@ -73,13 +74,21 @@ HRESULT CGame::Init()
 	m_pLight->Init();
 
 	//床
-	CFloor::Create(D3DXVECTOR3(0.0f, 0.0f, 0.0f), D3DXVECTOR3(500.0f, 500.0f, 500.0f));
-	
+	CFloor::Create(D3DXVECTOR3(0.0f, 0.0f, 0.0f), D3DXVECTOR3(500.0f, 500.0f, 500.0f),D3DXVECTOR3(0.0f, D3DX_PI*0.5f, 0.0f));
+	CFloor::Create(D3DXVECTOR3(200.0f, 0.0f, 0.0f), D3DXVECTOR3(500.0f, 500.0f, 500.0f), D3DXVECTOR3(0.0f, D3DX_PI*0.5f, 0.0f));
+	CFloor::Create(D3DXVECTOR3(-200.0f, 0.0f, 0.0f), D3DXVECTOR3(500.0f, 500.0f, 500.0f), D3DXVECTOR3(0.0f, D3DX_PI*0.5f, 0.0f));
+
+	//奥の壁
+	CFloor::Create(D3DXVECTOR3(0.0f, 100.0f, 300.0f), D3DXVECTOR3(500.0f, 500.0f, 500.0f), D3DXVECTOR3(D3DX_PI*-0.5f,0.0f , 0.0f));	
+	CFloor::Create(D3DXVECTOR3(200.0f, 100.0f, 300.0f), D3DXVECTOR3(500.0f, 500.0f, 500.0f), D3DXVECTOR3(D3DX_PI*-0.5f, 0.0f, 0.0f));
+	CFloor::Create(D3DXVECTOR3(-200.0f, 100.0f, 300.0f), D3DXVECTOR3(500.0f, 500.0f, 500.0f), D3DXVECTOR3(D3DX_PI*-0.5f, 0.0f, 0.0f));
+
+	//横の壁
+	CFloor::Create(D3DXVECTOR3(STAGE_WIDTH, 100.0f, 0.0f), D3DXVECTOR3(500.0f, 500.0f, 500.0f), D3DXVECTOR3(D3DX_PI*-0.5f, D3DX_PI*0.5f, 0.0f));
+	CFloor::Create(D3DXVECTOR3(-STAGE_WIDTH, 100.0f, 0.0f), D3DXVECTOR3(500.0f, 500.0f, 500.0f), D3DXVECTOR3(D3DX_PI*-0.5f, D3DX_PI*-0.5f, 0.0f));
+
 	//デバッグ用カメラ操作モード
 	bDebugCamera = false;
-
-	//体力ゲージ
-	m_Life = CLife::Create();
 
 	PlaySound(SOUND_LABEL_BGM_BATTLE001);
 
@@ -95,6 +104,7 @@ void CGame::Uninit()
 	CShadow::Unload();
 	CFloor::Unload();
 	CLife::Unload();
+	CEffect::Unload();
 
 	//カメラの設定
 	if (m_pCamera != nullptr)
@@ -124,23 +134,20 @@ void CGame::Uninit()
 //====================================
 void CGame::Update()
 {
-	CInputKeyboard* pKeyboard = CApplication::GetInputKeyboard();
-	CInputJoyPad*pJoypad = CApplication::GetInputJoypad();
+	CInput* pInput = CApplication::GetInput();
 #ifdef _DEBUG
 	//指定のキーが押されたかどうか
 	if (CApplication::GetFade()->GetFade() == CFade::FADE_NONE)
 	{
-		if (pKeyboard->GetTrigger(DIK_RETURN))
+		if (pInput->Trigger(DIK_RETURN))
 		{
 			CApplication::GetFade()->SetFade(CApplication::MODE_RESULT);
 		}
 	}
-	if (pKeyboard->GetTrigger(DIK_F2))
+	if (pInput->Trigger(DIK_F2))
 	{//カメラのON/OFF
 		bDebugCamera = !bDebugCamera;
 	}
-#endif // !_DEBUG
-
 	if (bDebugCamera == true)
 	{
 		CDebugProc::Print("F2:カメラモード");
@@ -149,6 +156,7 @@ void CGame::Update()
 	{
 		CDebugProc::Print("F2:プレイヤーモード");
 	}
+#endif // !_DEBUG
 
 	m_pCamera->Update();
 	m_pLight->Update();

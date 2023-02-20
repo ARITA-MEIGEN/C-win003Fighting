@@ -14,12 +14,11 @@
 #include"ObjectX.h"
 #include"Model.h"
 #include"Command.h"
+#include"Collision.h"
 
 //前方宣言
 class CShadow;
 class CModel;
-class CCollision;
-
 
 //マクロ定義
 #define MAX_MOTION			(5)				//モーションの数
@@ -36,6 +35,7 @@ class CCollision;
 #define INITIAL_VELOCITY	(7.0f)			//ジャンプの初速
 #define MAX_KEYMEMORY		(60)			//記憶するキーの数
 #define	DASH_SPEED			(5.0f)			//ダッシュ速度
+#define BULLET_ANGLE		(1.0f)			//弾の角度
 
 
 class CPlayer :public CObject
@@ -143,8 +143,8 @@ public:
 	void			Update(void)override;
 	void			Draw(void)override;
 	void			ControlPlayer(void);			//プレイヤーの操作
-	static CPlayer*	Create(D3DXVECTOR3 pos, D3DXVECTOR3 rot);
-	D3DXMATRIX		GetMtx();
+	static CPlayer*	Create(D3DXVECTOR3 pos, D3DXVECTOR3 rot);	
+	D3DXMATRIX		GetMtx() { return m_mtxWorld; };		//マトリックスの取得
 	void			ReadMotion();
 	void			MotionPlayer(int nNumber);				//モーションの再生　引数は再生するモーションの番号
 	void			MotionManager();						//状態に合わせてモーション再生する
@@ -154,7 +154,7 @@ public:
 	void			Jump(void);								//ジャンプ
 	void			AutoTurn(void);							//自動振りむき
 	void			Damage();								//ダメージ処理
-	bool			Guard(CCollision* dmg);					//ガード処理
+	bool			Guard(CCollision::EDAMAGE_POINT dp);	//ガード処理
 	void			Command();								//コマンド処理	
 	bool			CheckInput(const int *command);			//コマンドの入力判定
 	void			StateManagement();						//プレイヤーの状態管理
@@ -162,16 +162,26 @@ public:
 	void			Updatepos();							//座標の更新
 	void			Cancel();								//攻撃キャンセル
 	bool			ColJudge(int hurtnumber,int colnum);	//当たり判定チェック
-	void			HitColSet();							//攻撃判定再設定
+	void			Down();									//着地設定
+	void			Damage_Cal(int Damage, CCollision::EDAMAGE_POINT pro, int HitRig, int GuardRig);							//ダメージ設定
+	void			Die();
+	void			FireBall();								//遠距離技
 
 	//セッター
 	void			SetPos(D3DXVECTOR3 pos) { m_pos = pos; };						//位置の設定
 	void			SetRot(D3DXVECTOR3 rot) { m_rot = rot; };						//向きの設定
 	void			SetEnemy(CPlayer* ene) { m_pEne = ene; };						//敵のポインタ
+	void			SetBullet(bool bullet) { m_bBullet = bullet; };						//敵のポインタ
 
 	//ゲッター
 	D3DXVECTOR3		GetPos() { return m_pos; };
 	int				GetLife() { return m_nLife; };	//体力
+	//当たり判定の取得
+	CCollision*		GetCollision(int number) { return m_apMotion[m_Motion].aKey[m_nCurKey].Collision[number]; };
+
+	//やられ判定の取得
+	CCollision*		GetHurt(int number) { return m_apMotion[m_Motion].aKey[m_nCurKey].HurtCol[number]; };
+
 
 private:
 	CModel*			m_apModel[NUM_PLAYERPARTS];		//モデルのインスタンス
@@ -203,7 +213,7 @@ private:
 	int				m_anInput[MAX_KEYMEMORY];		//コマンド認識用
 	int				m_nNowKey;						//キー保存用
 	int				m_nHitStop;						//ヒットストップの時間
-
+	bool			m_bBullet;						//飛び道具を使用しているか？
 
 	//押し出し判定関連
 	CCollision* 	m_AxisBox;						//押し出し判定(プレイヤーの軸)
@@ -216,7 +226,7 @@ private:
 	bool			m_bJump;						//ジャンプ中かどうか
 
 	//ガード関係
-	int				m_nGuardRig;					//ガード硬直
+	int				m_nRig;							//硬直時間
 
 
 };

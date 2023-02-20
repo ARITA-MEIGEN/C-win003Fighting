@@ -6,9 +6,6 @@
 #include"Application.h"
 #include"renderer.h"
 
-
-
-//グローバル変数
 //===========================
 //ライトの初期化処理
 //===========================
@@ -19,7 +16,8 @@ void CLight::Init(void)
 	pDevice = CApplication::GetRenderer()->GetDevice();
 
 	D3DXVECTOR3 vecDir;	//ライトの方向ベクトル
-						//ライトをクリアする
+
+	//ライトをクリアする
 	ZeroMemory(&m_alight[0], sizeof(D3DLIGHT9));
 
 	//ライトの種類を設定
@@ -50,9 +48,7 @@ void CLight::Init(void)
 
 	//ライト3
 	//ライトの方向を設定
-	//vecDir = D3DXVECTOR3(-0.4f, -0.8f, 0.2f);
-	vecDir = D3DXVECTOR3(0.2f, -0.8f, -0.4f);
-
+	vecDir = D3DXVECTOR3(-0.4f, -0.8f, 0.2f);
 
 	//正規化する
 	D3DXVec3Normalize(&vecDir, &vecDir);
@@ -70,6 +66,7 @@ void CLight::Init(void)
 	//ライトを有効にする
 	pDevice->LightEnable(2, TRUE);
 }
+
 //===========================
 //ライトの終了処理
 //===========================
@@ -77,6 +74,7 @@ void  CLight::Uninit(void)
 {
 
 }
+
 //===========================
 //ライトの更新処理
 //===========================

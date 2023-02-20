@@ -189,11 +189,13 @@ void  CObject2D::Draw()
 	//テクスチャの設定
 	pDevice->SetTexture(0, m_pTexture);
 
-	
 	//ポリゴンの描画       
 	pDevice->DrawPrimitive(D3DPT_TRIANGLESTRIP,	//ポリゴンの形
 		0,										//頂点の開始場所
 		2);										//プリミティブの数
+
+												//テクスチャの解除
+	pDevice->SetTexture(0, NULL);
 }
 //=============================================================================
 // 位置の設定

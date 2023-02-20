@@ -9,8 +9,7 @@
 #include "Application.h"
 #include"renderer.h"
 #include"main.h"
-#include"InputKeyBoard.h"
-#include"InputJoyPad.h"
+#include"input.h"
 #include"DebugProc.h"
 #include"Object.h"
 #include"Fade.h"
@@ -24,11 +23,11 @@
 //静的メンバ変数
 //====================================
 CRenderer*CApplication::m_pRenderer = nullptr;
-CInputKeyboard*CApplication::m_pInputKeyboard = nullptr;
-CInputJoyPad*CApplication::m_pInputJoyPad = nullptr;
 CDebugProc*CApplication::m_pDebugProc = nullptr;
 CFade* CApplication::m_pFade = nullptr;
 
+//コントローラー周り
+CInput*CApplication::m_pInput = nullptr;
 //画面遷移周り
 CApplication::MODE CApplication::m_mode;
 CTitle*CApplication::m_pTitle = nullptr;
@@ -56,8 +55,6 @@ CApplication::~CApplication()
 HRESULT CApplication::Init(HWND hWnd, bool bWindow, HINSTANCE hInstance)
 {
 	m_pRenderer = new CRenderer;
-	m_pInputKeyboard = new CInputKeyboard;
-	m_pInputJoyPad = new CInputJoyPad;
 
 	//初期化処理
 	if (FAILED(m_pRenderer->Init(hWnd, bWindow)))
@@ -65,27 +62,29 @@ HRESULT CApplication::Init(HWND hWnd, bool bWindow, HINSTANCE hInstance)
 		return-1;
 	}
 
-	//キーボードの生成
-	if (FAILED(m_pInputKeyboard->Init(hInstance, hWnd)))
+	//-------------------------------
+	//キーボードとジョイパッドの生成
+	//-------------------------------
+	m_pInput = CInput::Create();
+
+	//入力処理の初期化
+	if (FAILED(m_pInput->Init(hInstance, hWnd)))
 	{
 		return-1;
 	}
 
-	//ジョイパッドの生成(XInput)
-	if (FAILED(m_pInputJoyPad->Init()))
-	{
-		return-1;
-	}
-
+	//----------------------------
 	//サウンド初期化
+	//----------------------------
+
 	InitSound(hWnd);
 
 	//----------------------------
 	// モードの設定
 	//----------------------------
 	m_pFade = new CFade;
-	SetMode(MODE_GAME);
-	m_pFade->Init(MODE_GAME);
+	SetMode(MODE_TITLE);
+	m_pFade->Init(MODE_TITLE);
 
 	//----------------------------
 	// デバッグ用文字の生成
@@ -112,26 +111,6 @@ void CApplication::Uninit()
 		m_pRenderer = nullptr;
 	}
 
-	//----------------------------
-	//キーボードの破棄
-	//----------------------------
-	if (m_pInputKeyboard != nullptr)
-	{
-		m_pInputKeyboard->Uninit();
-		delete m_pInputKeyboard;
-		m_pInputKeyboard = nullptr;
-	}
-
-	//----------------------------
-	//ジョイパッドの破棄
-	//----------------------------
-	if (m_pInputJoyPad != nullptr)
-	{
-		m_pInputJoyPad->Uninit();
-		delete m_pInputJoyPad;
-		m_pInputJoyPad = nullptr;
-	}
-	
 	//----------------------------
 	// タイトルの終了
 	//----------------------------
@@ -182,6 +161,15 @@ void CApplication::Uninit()
 		m_pDebugProc = nullptr;
 	}
 
+	//----------------------------
+	// 入力処理の終了
+	//----------------------------
+	if (m_pInput != nullptr)
+	{
+		m_pInput->Uninit();
+	}
+
+	//サウンド処理の終了
 	UninitSound();
 }
 
@@ -192,11 +180,11 @@ void CApplication::Update()
 {
 	LPDIRECT3DDEVICE9 pDevice = CApplication::GetRenderer()->GetDevice();	//デバイスへのポインタ
 	//ワイヤーフレーム
-	if (m_pInputKeyboard->GetTrigger(DIK_1))
+	if (m_pInput->Trigger(DIK_1))
 	{
 		pDevice->SetRenderState(D3DRS_FILLMODE, D3DFILL_WIREFRAME);
 	}
-	if (m_pInputKeyboard->GetTrigger(DIK_2))
+	if (m_pInput->Trigger(DIK_2))
 	{
 		pDevice->SetRenderState(D3DRS_FILLMODE, D3DFILL_SOLID);
 	}
@@ -204,16 +192,10 @@ void CApplication::Update()
 	//レンダラー更新
 	m_pRenderer->Update();
 	
-	//キーボードの更新
-	if (m_pInputKeyboard != nullptr)
+	//キーボードとジョイパッドの更新
+	if (m_pInput != nullptr)
 	{
-		m_pInputKeyboard->Update();
-	}
-
-	//ジョイパッドの更新
-	if (m_pInputJoyPad!=nullptr)
-	{
-		m_pInputJoyPad->Update();
+		m_pInput->Update();
 	}
 
 	//モードごとの更新
@@ -275,22 +257,6 @@ CRenderer * CApplication::GetRenderer()
 }
 
 //====================================
-//キーボードの取得
-//====================================
-CInputKeyboard * CApplication::GetInputKeyboard()
-{
-	return m_pInputKeyboard;
-}
-
-//====================================
-//ジョイパッドの取得
-//====================================
-CInputJoyPad * CApplication::GetInputJoypad()
-{
-	return m_pInputJoyPad;
-}
-
-//====================================
 //デバッグ情報の取得
 //====================================
 CDebugProc * CApplication::GetDebugProc()
@@ -316,14 +282,20 @@ void CApplication::SetMode(MODE mode)
 	{
 	case MODE_TITLE:	//タイトル画面
 		m_pTitle->Uninit();
+		delete m_pTitle;
+		m_pTitle=nullptr;
 		break;
 
 	case MODE_GAME:		//ゲーム画面
 		m_pGame->Uninit();
+		delete m_pGame;
+		m_pGame = nullptr;
 		break;
 
 	case MODE_RESULT:	//リザルト画面
 		m_pResult->Uninit();
+		delete m_pResult;
+		m_pResult = nullptr;
 		break;
 	}
 	m_mode = mode;	//現在の画面(モード)を切り替える

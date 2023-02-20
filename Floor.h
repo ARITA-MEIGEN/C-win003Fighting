@@ -31,7 +31,7 @@ public:
 	void Uninit()override;
 	void Update()override;
 	void Draw()override;
-	static CFloor*Create(D3DXVECTOR3 pos, D3DXVECTOR3 siz);
+	static CFloor*Create(D3DXVECTOR3 pos, D3DXVECTOR3 siz, D3DXVECTOR3 rot);
 	static void Load();
 	static void Unload();
 

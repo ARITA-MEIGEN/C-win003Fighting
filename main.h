@@ -24,12 +24,6 @@
 #pragma comment(lib,"dInput8.lib")		//入力処理に必要
 #pragma comment (lib, "xinput.lib")		//Xinput処理に必要
 
-
-//マクロ定義
-#define MAX_POLYGON		(1920)			//ポリゴンの最大数
-#define SCREEN_WIDTH	(1280)			// スクリーンの幅
-#define SCREEN_HEIGHT	(720)			// スクリーンの高さ
-
 //前方宣言
 class CApplication;
 

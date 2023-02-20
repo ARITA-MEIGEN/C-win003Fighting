@@ -7,10 +7,10 @@
 #include"camera.h"
 #include "renderer.h"
 #include"Application.h"
-#include"InputKeyBoard.h"
 #include"DebugProc.h"
 #include "Game.h"
 #include"Player.h"
+#include"input.h"
 
 //マクロ定義
 #define	DISTANCE_X	((m_posV.x - m_posR.x)*(m_posV.x - m_posR.x))		//距離の計算用X
@@ -68,7 +68,11 @@ void  CCamera::Update(void)
 	//RadianPosV();		//視点の旋回
 	DestPos();			//カメラの追従
 	NormalizeRadian();	//角度の正規化
+#ifdef _DEBUG
+
 	CDebugProc::Print("カメラの視点の角度 x:%f y:%f z:%f",m_posV.x,m_posV.y,m_posV.z);
+#endif // _DEBUG
+
 }
 
 //===========================
@@ -112,23 +116,23 @@ void  CCamera::Set(void)
 //===========================
 void CCamera::RadianPosR(void)
 {
-	CInputKeyboard* pKeyboard = CApplication::GetInputKeyboard();
+	CInput* pKeyboard = CApplication::GetInput();
 
 	//注視点の旋回
-	if (pKeyboard->GetPress(DIK_J) == true)
+	if (pKeyboard->Press(DIK_J) == true)
 	{
 		m_rot.y -= CAMERA_ROTSPEED;
 	}
-	else if (pKeyboard->GetPress(DIK_L) == true)
+	else if (pKeyboard->Press(DIK_L) == true)
 	{
 		m_rot.y += CAMERA_ROTSPEED;
 	}
 	//縦
-	if (pKeyboard->GetPress(DIK_I) == true)
+	if (pKeyboard->Press(DIK_I) == true)
 	{//うえ 
 		m_rot.x -= CAMERA_ROTSPEED;
 	}
-	else if (pKeyboard->GetPress(DIK_K) == true)
+	else if (pKeyboard->Press(DIK_K) == true)
 	{
 		m_rot.x += CAMERA_ROTSPEED;
 	}
@@ -143,25 +147,25 @@ void CCamera::RadianPosR(void)
 //===========================
 void CCamera::RadianPosV(void)
 {
-	CInputKeyboard* pKeyboard = CApplication::GetInputKeyboard();
+	CInput* pKeyboard = CApplication::GetInput();
 
 	//視点の旋回
-	if (pKeyboard->GetPress(DIK_Q) == true)
+	if (pKeyboard->Press(DIK_Q) == true)
 	{
 		m_rot.y -= CAMERA_ROTSPEED;
 
 	}
-	else if (pKeyboard->GetPress(DIK_E) == true)
+	else if (pKeyboard->Press(DIK_E) == true)
 	{
 		m_rot.y += CAMERA_ROTSPEED;
 
 	}
-	if (pKeyboard->GetPress(DIK_R) == true)
+	if (pKeyboard->Press(DIK_R) == true)
 	{
 		m_rot.x += CAMERA_ROTSPEED;
 
 	}
-	else if (pKeyboard->GetPress(DIK_F) == true)
+	else if (pKeyboard->Press(DIK_F) == true)
 	{
 		m_rot.x -= CAMERA_ROTSPEED;
 
@@ -211,10 +215,10 @@ void CCamera::NormalizeRadian(void)
 //===========================
 void CCamera:: ControlPos(void)
 {
-	CInputKeyboard* pKeyboard = CApplication::GetInputKeyboard();
+	CInput* pKeyboard = CApplication::GetInput();
 
 	//カメラの位置の操作
-	if (pKeyboard->GetPress(DIK_W) == true)
+	if (pKeyboard->Press(DIK_W) == true)
 	{//前
 	 //先にsinf/cosfで角度を求めてから速度をかける
 		m_posV.x += sinf(D3DX_PI*0.0f + m_rot.y) *CAMERA_SPEED;
@@ -222,32 +226,32 @@ void CCamera:: ControlPos(void)
 		m_posR.x = m_posV.x + sinf(m_rot.y) *m_fDistance;
 		m_posR.z = m_posV.z + cosf(m_rot.y) *m_fDistance;
 	}
-	else if (pKeyboard->GetPress(DIK_S) == true)
+	else if (pKeyboard->Press(DIK_S) == true)
 	{//後ろ
 		m_posV.x += sinf(D3DX_PI*1.0f + m_rot.y)*CAMERA_SPEED;
 		m_posV.z += cosf(D3DX_PI*1.0f + m_rot.y)*CAMERA_SPEED;
 		m_posR.x = m_posV.x + sinf(m_rot.y)*m_fDistance;
 		m_posR.z = m_posV.z + cosf(m_rot.y)*m_fDistance;
 	}
-	if (pKeyboard->GetPress(DIK_D) == true)
+	if (pKeyboard->Press(DIK_D) == true)
 	{//右
 		m_posV.x += sinf(D3DX_PI*0.5f + m_rot.y)*CAMERA_SPEED;
 		m_posV.z += cosf(D3DX_PI*0.5f + m_rot.y)*CAMERA_SPEED;
 		m_posR.x = m_posV.x + sinf(m_rot.y)*m_fDistance;
 		m_posR.z = m_posV.z + cosf(m_rot.y)*m_fDistance;
 	}
-	else if (pKeyboard->GetPress(DIK_A) == true)
+	else if (pKeyboard->Press(DIK_A) == true)
 	{//左
 		m_posV.x += sinf(D3DX_PI*-0.5f + m_rot.y)*CAMERA_SPEED;
 		m_posV.z += cosf(D3DX_PI*-0.5f + m_rot.y)*CAMERA_SPEED;
 		m_posR.x = m_posV.x + sinf(m_rot.y)*m_fDistance;
 		m_posR.z = m_posV.z + cosf(m_rot.y)*m_fDistance;
 	}
-	else if (pKeyboard->GetPress(DIK_Z) == true)
+	else if (pKeyboard->Press(DIK_Z) == true)
 	{//上
 
 	}
-	else if (pKeyboard->GetPress(DIK_X) == true)
+	else if (pKeyboard->Press(DIK_X) == true)
 	{//下
 
 	}

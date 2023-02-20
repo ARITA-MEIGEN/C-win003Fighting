@@ -37,7 +37,10 @@ SOUNDPARAM g_aParam[SOUND_LABEL_MAX] =
 	{ "data/SOUND/SE/LATK.wav.", 0 },		// 弱
 	{ "data/SOUND/SE/MATK.wav.", 0 },		// 中
 	{ "data/SOUND/SE/HATK.wav.", 0 },		// 強
-
+	{ "data/SOUND/SE/GUARD.wav.", 0 },		// 強
+	{ "data/SOUND/SE/Fire.wav.", 0 },		// 炎
+	{ "data/SOUND/SE/SPECIAL.wav.", 0 },	// 必殺技ヒット
+	{ "data/SOUND/SE/START.wav.", 0 },		// スタート
 };
 //=============================================================================
 // 初期化処理

@@ -11,6 +11,7 @@
 #include"Application.h"
 
 #define MAX_PLAYER (2)
+#define STAGE_WIDTH	(350)	//’†‰›‚©‚ç’[‚Ü‚Å‚Ì’·‚³
 
 //‘O•ûéŒ¾
 class CPlayer;

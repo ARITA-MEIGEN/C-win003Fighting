@@ -18,15 +18,16 @@
 class CRenderer;
 class CInputKeyboard;
 class CInputJoyPad;
+class CInput;
 class CDebugProc;
 class CTitle;
 class CGame;
 class CResult;
 class CFade;
 
-//マクロ定義
-#define SCREEN_WIDTH	(1280)		// スクリーンの幅
-#define SCREEN_HEIGHT	(720)		// スクリーンの高さ
+static const int  MAX_POLYGON = 1920;			//ポリゴンの最大数
+static const int  SCREEN_WIDTH = 1280;			// スクリーンの幅
+static const int  SCREEN_HEIGHT = 720;		// スクリーンの高さ
 
 // プロトタイプ宣言
 class CApplication
@@ -43,14 +44,13 @@ public:
 	//メンバ関数
 	CApplication();
 	~CApplication();
-	HRESULT Init(HWND hWnd, bool bWindow,HINSTANCE hInstance);
+	HRESULT Init(HWND hWnd, bool bWindow, HINSTANCE hInstance);
 	void Uninit();
 	void Update();
 	void Draw();
 	//ゲッター
 	static CRenderer*GetRenderer();
-	static CInputKeyboard*GetInputKeyboard();
-	static CInputJoyPad*GetInputJoypad();
+	static CInput * GetInput() { return m_pInput; };
 	static CDebugProc * GetDebugProc();
 	static CFade*GetFade();
 	//void DrawStatas();
@@ -60,13 +60,11 @@ public:
 private:
 	//メンバ変数
 	static CRenderer*m_pRenderer;
-	static CInputKeyboard*m_pInputKeyboard;
-	static CInputJoyPad*m_pInputJoyPad;
+	static CInput*m_pInput;
 	static CDebugProc*m_pDebugProc;
 	LPD3DXFONT m_pFont;						//フォントへのポイント
 	static MODE m_mode;
 	static CFade* m_pFade;
-
 	//画面
 	static CTitle*m_pTitle;
 	static CGame*m_pGame;

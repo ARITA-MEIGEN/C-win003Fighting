@@ -38,7 +38,6 @@ public:
 	void Update(void)override;
 	void Draw(void)override;
 	static CCollision* Create(D3DXVECTOR3 pos, COLLISION type);
-	void SetHitBox();	//当たり判定の表示時間設定
 	//ゲッターとセッター
 
 	//セッター
@@ -66,7 +65,7 @@ public:
 	int				GetDamage() { return m_nDamage; };			//ダメージ量の取得
 	EDAMAGE_POINT	GetProperty() { return m_Property; };		//属性の取得
 	bool			GetUse() { return m_bUse; };				//オンオフの切り替え
-	bool			GetDmg() { return m_bDmg; };				//ダメージ処理を無効にするかどうか
+	bool			GetUseDmg() { return m_bDmg; };				//ダメージ処理を無効にするかどうか
 	D3DXVECTOR3		GetWidth() { return m_width; };
 	D3DXVECTOR3		GetPos() { return m_pos; };
 	int				GetHitRig() { return m_nHitRig; };			//ダメージ硬直の取得

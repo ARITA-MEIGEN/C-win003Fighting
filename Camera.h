@@ -24,6 +24,7 @@ public:
 	void DestPos(void);				//ƒJƒƒ‰‚Ì’Ç]ˆ—
 	//void LeavingCamera(void);		//ƒJƒƒ‰‚Ì•ú’uˆ—
 	D3DXVECTOR3 Getrot(void);		//Œü‚«æ“¾
+
 	static CCamera* Create(void);	//¶¬
 
 private:

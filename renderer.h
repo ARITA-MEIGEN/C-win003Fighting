@@ -19,6 +19,9 @@ class CPlayer;
 class CRenderer
 {
 public:
+
+
+
 	//ƒƒ“ƒoŠÖ”
 	CRenderer();
 	~CRenderer();

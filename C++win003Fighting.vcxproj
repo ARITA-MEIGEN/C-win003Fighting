@@ -20,13 +20,16 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Application.cpp" />
+    <ClCompile Include="Bullet.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="Collision.cpp" />
     <ClCompile Include="DebugProc.cpp" />
+    <ClCompile Include="DirectInput.cpp" />
+    <ClCompile Include="effect.cpp" />
     <ClCompile Include="Fade.cpp" />
-    <ClCompile Include="fbxmodel.cpp" />
     <ClCompile Include="Floor.cpp" />
     <ClCompile Include="Game.cpp" />
+    <ClCompile Include="input.cpp" />
     <ClCompile Include="InputJoypad.cpp" />
     <ClCompile Include="InputKeyBoard.cpp" />
     <ClCompile Include="Life.cpp" />
@@ -49,17 +52,21 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application.h" />
+    <ClInclude Include="Bullet.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="Collision.h" />
     <ClInclude Include="Command.h" />
     <ClInclude Include="DebugProc.h" />
+    <ClInclude Include="DirectInput.h" />
     <ClInclude Include="Easing.h" />
+    <ClInclude Include="effect.h" />
     <ClInclude Include="Fade.h" />
-    <ClInclude Include="fbxmodel.h" />
     <ClInclude Include="Floor.h" />
     <ClInclude Include="Game.h" />
+    <ClInclude Include="input.h" />
     <ClInclude Include="InputJoyPad.h" />
     <ClInclude Include="InputKeyBoard.h" />
+    <ClInclude Include="inputkeydata.h" />
     <ClInclude Include="Life.h" />
     <ClInclude Include="Light.h" />
     <ClInclude Include="main.h" />

@@ -7,8 +7,7 @@
 //インクルード
 #include"main.h"
 #include"Result.h"
-#include"InputJoyPad.h"
-#include"InputKeyBoard.h"
+#include"input.h"
 #include"Fade.h"
 #include"Application.h"
 
@@ -57,20 +56,11 @@ void CResult::Uninit()
 //====================================
 void CResult::Update()
 {
-	CInputKeyboard* pKeyboard = CApplication::GetInputKeyboard();
-	CInputJoyPad*pJoypad = CApplication::GetInputJoypad();
-
-	////文字のサイズが想定よりデカくなるバグに対しての応急処置
-	//m_pScore->SetPos(D3DXVECTOR3(SCREEN_WIDTH / 2 - 70.0f, SCREEN_HEIGHT / 2 + 30.5f, 0.0f), D3DXVECTOR2(RESULT_SCORE_WIDTH, RESULT_SCORE_HEIGHT));
+	CInput* pInput = CApplication::GetInput();
 
 	if (CApplication::GetFade()->GetFade() == CFade::FADE_NONE)
 	{
-		if ((pKeyboard->GetTrigger(DIK_RETURN) == true ||
-			pJoypad->GetJoypadTrigger(CInputJoyPad::JOYKEY_START) == true)
-			|| pJoypad->GetJoypadTrigger(CInputJoyPad::JOYKEY_Y) == true
-			|| pJoypad->GetJoypadTrigger(CInputJoyPad::JOYKEY_X) == true
-			|| pJoypad->GetJoypadTrigger(CInputJoyPad::JOYKEY_A) == true
-			|| pJoypad->GetJoypadTrigger(CInputJoyPad::JOYKEY_B) == true)		//ENTERキー
+		if (pInput->Trigger(DIK_RETURN) == true)		//ENTERキー
 		{//エンターでランキングに
 		 //モード設定
 			//PlaySound(SOUND_LABEL_SE_GAMESTART);

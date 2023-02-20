@@ -102,6 +102,9 @@ void CDebugProc::Print(const char * pFormat, ...)
 //=============================================================================
 void CDebugProc::Draw()
 {
+#ifdef _DEBUG
+
+
 	RECT rect = { 0,0,SCREEN_WIDTH,SCREEN_HEIGHT };
 	D3DXCOLOR col = {1.0f,0.0f,0.0f,1.0f};
 
@@ -110,4 +113,6 @@ void CDebugProc::Draw()
 
 	//テキストリセット
 	m_aStr[0] = {};
+#endif // _DEBUG
+
 }

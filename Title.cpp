@@ -8,10 +8,11 @@
 #include"main.h"
 #include"Title.h"
 #include"Application.h"
-#include"InputJoyPad.h"
-#include"InputKeyBoard.h"
+#include"input.h"
 #include"Fade.h"
 #include"Object2D.h"
+#include"renderer.h"
+#include"sound.h"
 
 //静的メンバ変数
 CObject2D*CTitle::m_pBg = nullptr;
@@ -35,13 +36,26 @@ CTitle::~CTitle()
 //====================================
 HRESULT CTitle::Init()
 {
+	LPDIRECT3DDEVICE9 pDevice;
+	pDevice = CApplication::GetRenderer()->GetDevice();
+
 	//テクスチャの読み込み
+	LPDIRECT3DTEXTURE9 tex;
+
 	//背景の生成
 	m_pBg = new CObject2D(CObject::OBJTYPE_UI);
 	m_pBg->Init();
 	m_pBg->SetPos(D3DXVECTOR3(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2,0.0f));
 	m_pBg->SetSiz(D3DXVECTOR2(SCREEN_WIDTH, SCREEN_HEIGHT));
-	m_pBg->SetCol(D3DXCOLOR(1.0f, 0.0f, 0.0f, 1.0f));
+	m_pBg->SetCol(D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f));
+
+	//テクスチャの読み込み
+	D3DXCreateTextureFromFile(pDevice,
+		"data\\TEXTURE\\Title000.png",
+		&tex);
+
+	m_pBg->BindTexture(tex);
+
 
 	return S_OK;
 }
@@ -51,11 +65,6 @@ HRESULT CTitle::Init()
 //====================================
 void CTitle::Uninit()
 {
-	if (m_pBg != nullptr)
-	{
-		m_pBg->Uninit();
-		m_pBg = nullptr;
-	}
 	//テクスチャの破棄
 }
 
@@ -64,20 +73,15 @@ void CTitle::Uninit()
 //====================================
 void CTitle::Update()
 {
-	CInputKeyboard* pKeyboard = CApplication::GetInputKeyboard();
-	CInputJoyPad*pJoypad = CApplication::GetInputJoypad();
+	CInput* pInput = CApplication::GetInput();
 
 		//指定のキーが押されたかどうか
 	if (CApplication::GetFade()->GetFade() == CFade::FADE_NONE)
 	{
-		if (pKeyboard->GetTrigger(DIK_RETURN)
-			|| pJoypad->GetJoypadTrigger(CInputJoyPad::JOYKEY_Y)
-			|| pJoypad->GetJoypadTrigger(CInputJoyPad::JOYKEY_X)
-			|| pJoypad->GetJoypadTrigger(CInputJoyPad::JOYKEY_A)
-			|| pJoypad->GetJoypadTrigger(CInputJoyPad::JOYKEY_B)
-			|| pJoypad->GetJoypadTrigger(CInputJoyPad::JOYKEY_START))
+		if (pInput->Trigger(DIK_RETURN))
 		{
 			CApplication::GetFade()->SetFade(CApplication::MODE_GAME);
+			PlaySound(SOUND_LABEL_SE_START);
 		}
 	}
 }

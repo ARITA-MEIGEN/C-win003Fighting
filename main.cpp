@@ -20,7 +20,7 @@ namespace
 	// ウインドウのクラス名
 	LPCTSTR CLASS_NAME = _T("AppClass");
 	// ウインドウのキャプション名
-	LPCTSTR WINDOW_NAME = _T("1632143+AB");
+	LPCTSTR WINDOW_NAME = _T("FIGHTING SPRITS");
 }
 
 //*****************************************************************************
@@ -29,7 +29,6 @@ namespace
 
 #ifdef _DEBUG
 // FPSカウンタ
-int g_nCountFPS;
 
 
 #endif // _DEBUGgf
@@ -83,7 +82,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/, LPSTR /*lpC
 		NULL);
 
 	//初期化処理
-	if (FAILED(pApplication->Init(hWnd,TRUE, hInstance)))
+	if (FAILED(pApplication->Init(hWnd, TRUE, hInstance)))
 	{
 		return-1;
 	}
@@ -128,7 +127,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/, LPSTR /*lpC
 			if ((dwCurrentTime - dwFPSLastTime) >= 500)
 			{// 0.5秒ごとに実行
 				// FPSを算出
-				g_nCountFPS = dwFrameCount * 1000 / (dwCurrentTime - dwFPSLastTime);
+				//g_nCountFPS = dwFrameCount * 1000 / (dwCurrentTime - dwFPSLastTime);
 				dwFPSLastTime = dwCurrentTime;	// 現在の時間を保存
 				dwFrameCount = 0;
 			}
@@ -156,6 +155,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/, LPSTR /*lpC
 
 	// 終了処理
 	pApplication->Uninit();
+	delete pApplication;
+	pApplication = nullptr;
+
 
 	// ウィンドウクラスの登録を解除
 	UnregisterClass(CLASS_NAME, wcex.hInstance);
@@ -205,6 +207,6 @@ int GetFPS(void)
 {
 #ifdef _DEBUG
 
-	return g_nCountFPS;
+	return 0;
 #endif
 }

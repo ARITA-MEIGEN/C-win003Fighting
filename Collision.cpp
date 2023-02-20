@@ -35,6 +35,8 @@ CCollision::~CCollision()
 //===========================
 HRESULT CCollision::Init(void)
 {
+
+#ifdef _DEBUG
 	LPDIRECT3DDEVICE9 pDevice;	//デバイスへのポインタ
 	pDevice = CApplication::GetRenderer()->GetDevice();
 
@@ -45,11 +47,33 @@ HRESULT CCollision::Init(void)
 		D3DPOOL_MANAGED,
 		&m_pVtxBuff,
 		NULL);
+	//頂点座標へのポインタ
+	VERTEX_3D*pVtx = NULL;
 
-	//情報の初期化
-	m_bUse = false;
-	m_rot = D3DXVECTOR3(0.0f,0.f,0.f);
-	m_width = D3DXVECTOR3(50.0f, 50.f, 50.f);
+	//頂点バッファをロックし、頂点情報へのポインタを取得
+	m_pVtxBuff->Lock(0, 0, (void**)&pVtx, 0);
+
+	//頂点座標の設定
+	pVtx[0].pos = D3DXVECTOR3(m_width.x / 2, m_width.y / 2, m_width.z / 2);
+	pVtx[1].pos = D3DXVECTOR3(-m_width.x / 2, m_width.y / 2, m_width.z / 2);
+	pVtx[2].pos = D3DXVECTOR3(-m_width.x / 2, m_width.y / 2, m_width.z / 2);
+	pVtx[3].pos = D3DXVECTOR3(m_width.x / 2, m_width.y / 2, -m_width.z / 2);
+	pVtx[4].pos = D3DXVECTOR3(m_width.x / 2, m_width.y / 2, -m_width.z / 2);
+	pVtx[5].pos = D3DXVECTOR3(-m_width.x / 2, m_width.y / 2, -m_width.z / 2);
+	pVtx[6].pos = D3DXVECTOR3(-m_width.x / 2, m_width.y / 2, -m_width.z / 2);
+	pVtx[7].pos = D3DXVECTOR3(m_width.x / 2, m_width.y / 2, m_width.z / 2);
+
+	pVtx[8].pos = D3DXVECTOR3(m_width.x / 2, -m_width.y / 2, m_width.z / 2);
+	pVtx[9].pos = D3DXVECTOR3(-m_width.x / 2, -m_width.y / 2, m_width.z / 2);
+	pVtx[10].pos = D3DXVECTOR3(-m_width.x / 2, -m_width.y / 2, m_width.z / 2);
+	pVtx[11].pos = D3DXVECTOR3(m_width.x / 2, -m_width.y / 2, -m_width.z / 2);
+	pVtx[12].pos = D3DXVECTOR3(m_width.x / 2, -m_width.y / 2, -m_width.z / 2);
+	pVtx[13].pos = D3DXVECTOR3(-m_width.x / 2, -m_width.y / 2, -m_width.z / 2);
+	pVtx[14].pos = D3DXVECTOR3(-m_width.x / 2, -m_width.y / 2, -m_width.z / 2);
+	pVtx[15].pos = D3DXVECTOR3(m_width.x / 2, -m_width.y / 2, m_width.z / 2);
+
+	//頂点バッファをアンロック
+	m_pVtxBuff->Unlock();
 
 	switch (m_Colltype)
 	{//種類に応じて色の設定
@@ -78,12 +102,6 @@ HRESULT CCollision::Init(void)
 		break;
 	}
 
-	//頂点座標へのポインタ
-	VERTEX_3D*pVtx = NULL;
-
-	//頂点バッファをロックし、頂点情報へのポインタを取得
-	m_pVtxBuff->Lock(0, 0, (void**)&pVtx, 0);
-
 	for (int i = 0; i < NUM_BUFF; i++)	//上段
 	{
 		//頂点座標の設定
@@ -94,27 +112,12 @@ HRESULT CCollision::Init(void)
 		pVtx[i].col = m_col;
 	}
 
-	//頂点座標の設定
-	pVtx[0].pos = D3DXVECTOR3(m_width.x / 2, m_width.y / 2, m_width.z / 2);
-	pVtx[1].pos = D3DXVECTOR3(-m_width.x / 2, m_width.y / 2, m_width.z / 2);
-	pVtx[2].pos = D3DXVECTOR3(-m_width.x / 2, m_width.y / 2, m_width.z / 2);
-	pVtx[3].pos = D3DXVECTOR3(m_width.x / 2, m_width.y / 2, -m_width.z / 2);
-	pVtx[4].pos = D3DXVECTOR3(m_width.x / 2, m_width.y / 2, -m_width.z / 2);
-	pVtx[5].pos = D3DXVECTOR3(-m_width.x / 2, m_width.y / 2, -m_width.z / 2);
-	pVtx[6].pos = D3DXVECTOR3(-m_width.x / 2, m_width.y / 2, -m_width.z / 2);
-	pVtx[7].pos = D3DXVECTOR3(m_width.x / 2, m_width.y / 2, m_width.z / 2);
+#endif // !_DEBUG
 
-	pVtx[8].pos = D3DXVECTOR3(m_width.x / 2, -m_width.y / 2, m_width.z / 2);
-	pVtx[9].pos = D3DXVECTOR3(-m_width.x / 2, -m_width.y / 2, m_width.z / 2);
-	pVtx[10].pos = D3DXVECTOR3(-m_width.x / 2, -m_width.y / 2, m_width.z / 2);
-	pVtx[11].pos = D3DXVECTOR3(m_width.x / 2, -m_width.y / 2, -m_width.z / 2);
-	pVtx[12].pos = D3DXVECTOR3(m_width.x / 2, -m_width.y / 2, -m_width.z / 2);
-	pVtx[13].pos = D3DXVECTOR3(-m_width.x / 2,- m_width.y / 2, -m_width.z / 2);
-	pVtx[14].pos = D3DXVECTOR3(-m_width.x / 2, -m_width.y / 2, -m_width.z / 2);
-	pVtx[15].pos = D3DXVECTOR3(m_width.x / 2,- m_width.y / 2, m_width.z / 2);
-
-	//頂点バッファをアンロック
-	m_pVtxBuff->Unlock();
+	//情報の初期化
+	m_bUse = false;
+	m_rot = D3DXVECTOR3(0.0f,0.f,0.f);
+	m_width = D3DXVECTOR3(50.0f, 50.f, 50.f);
 
 	m_nDamage = 50;
 
@@ -142,6 +145,7 @@ void CCollision::Uninit(void)
 //==============================
 void CCollision::Update(void)
 {
+#ifdef _DEBUG
 	if (m_pVtxBuff != NULL)
 	{
 		//頂点座標へのポインタ
@@ -180,6 +184,7 @@ void CCollision::Update(void)
 		//頂点バッファをアンロック
 		m_pVtxBuff->Unlock();
 	}
+#endif // _DEBUG
 	m_posold = m_pos;
 }
 
@@ -209,6 +214,7 @@ void CCollision::Draw(void)
 		//ワールドマトリックスの設定
 		pDevice->SetTransform(D3DTS_WORLD, &m_mtxWorld);
 
+#ifdef _DEBUG
 		//頂点バッファをデータストリームに設定
 		pDevice->SetStreamSource(0, m_pVtxBuff, 0, sizeof(VERTEX_3D));
 
@@ -222,6 +228,7 @@ void CCollision::Draw(void)
 		pDevice->DrawPrimitive(D3DPT_LINELIST,	//ポリゴンの形(線)
 			0,									//頂点の開始場所
 			NUM_LINE);							//プリミティブの数
+#endif // !_DEBUG
 	}
 }
 

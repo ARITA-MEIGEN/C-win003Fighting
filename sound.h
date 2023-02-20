@@ -18,6 +18,13 @@ typedef enum
 	SOUND_LABEL_SE_LATK_HIT,				// Žã
 	SOUND_LABEL_SE_MATK_HIT,				// ’†
 	SOUND_LABEL_SE_HATK_HIT,				// ‹­
+	SOUND_LABEL_SE_GUARD,				// ‹­
+	SOUND_LABEL_SE_FIRE,				// ‰ŠSE
+	SOUND_LABEL_SE_SPECIAL,				// •KŽE‹Z
+	SOUND_LABEL_SE_START,				// ŠJŽn
+
+
+
 	SOUND_LABEL_MAX,
 } SOUND_LABEL;
 

@@ -168,6 +168,11 @@ void  CRenderer::Draw()
 	// Direct3Dによる描画の開始
 	if (SUCCEEDED(g_pD3DDevice->BeginScene()))
 	{
+		//// 平行投影行列の作成
+		//D3DXMATRIX matProjection;
+		//D3DXMatrixOrthoLH(&matProjection, SCREEN_WIDTH, SCREEN_HEIGHT, 0.0f, 1.0f);
+		//g_pD3DDevice->SetTransform(D3DTS_PROJECTION, &matProjection);
+
 		// ポリゴンの描画処理
 		CObject::DrawAll();
 

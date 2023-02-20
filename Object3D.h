@@ -50,6 +50,12 @@ public:
 	void SetCol(D3DXCOLOR col);
 	void SetRot(D3DXVECTOR3 rot) { m_Rot = rot; };
 
+	//ゲッター
+	D3DXVECTOR3 GetPos() { return m_Pos; };
+	D3DXVECTOR3 GetSiz() { return m_Siz; };
+	D3DXCOLOR GetCol() { return m_Col; };
+	D3DXVECTOR3 GetRot() { return m_Rot; };
+
 private:
 	//メンバ変数
 	LPDIRECT3DTEXTURE9 m_pTexture;		//ポリゴンのテクスチャ

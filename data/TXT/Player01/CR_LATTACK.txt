@@ -8,7 +8,7 @@
 MOTIONSET
 	LOOP = 0		# ループするかどうか[0:ループしない / 1:ループする]
 	NUM_KEY = 3		# キー数
-	HITSTOP = 3		# ヒットストップ
+	HITSTOP = 5		# ヒットストップ
 	
 	KEYSET			# --- << KEY : 0 / 3 >> ---
 		FRAME = 4
