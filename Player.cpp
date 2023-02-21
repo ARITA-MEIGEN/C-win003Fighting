@@ -132,8 +132,6 @@ void CPlayer::Update(void)
 			Axis();					//軸の押し出し判定
 			Jump();					//ジャンプ
 			AutoTurn();				//自動振り向き
-			DrawCollision();		//当たり判定表示
-			Damage();				//ダメージ処理
 
 			if (m_NextMotion != PM_ST_NEUTRAL)
 			{
@@ -142,7 +140,6 @@ void CPlayer::Update(void)
 				FireBall();
 			}
 		}
-		Die();
 		if (m_State == PST_AIR)
 		{
 			m_move.y -= 0.25f;				//少しずつ減速
@@ -172,6 +169,9 @@ void CPlayer::Update(void)
 		Cancel();				//攻撃キャンセル
 		m_nRig--;
 	}
+	DrawCollision();		//当たり判定表示
+	Damage();				//ダメージ処理
+	Die();
 	MotionManager();		//モーション再生
 
 
@@ -483,6 +483,20 @@ void CPlayer::ReadMotion()
 																	int select = m_apMotion[motionnumber].aKey[key].nNumCollision;	//現在の当たり判定の番号
 																	sscanf(Read, "%s = %d", &strLine, &dp);	//キーの総数
 																	m_apMotion[motionnumber].aKey[key].Collision[select]->SetDP((CCollision::EDAMAGE_POINT)dp);
+																}
+																else if ((strcmp(&strLine[0], "HIT") == 0))
+																{//ヒット硬直の設定
+																	int hit;
+																	int select = m_apMotion[motionnumber].aKey[key].nNumCollision;	//現在の当たり判定の番号
+																	sscanf(Read, "%s = %d", &strLine, &hit);	//キーの総数
+																	m_apMotion[motionnumber].aKey[key].Collision[select]->SetHitRig(hit);
+																}
+																else if ((strcmp(&strLine[0], "GUARD") == 0))
+																{//ガード硬直の設定
+																	int Guard;
+																	int select = m_apMotion[motionnumber].aKey[key].nNumCollision;	//現在の当たり判定の番号
+																	sscanf(Read, "%s = %d", &strLine, &Guard);	//キーの総数
+																	m_apMotion[motionnumber].aKey[key].Collision[select]->SetGuardRig(Guard);
 																}
 															}
 														}
@@ -1769,8 +1783,6 @@ void CPlayer::Damage_Cal(int Damage, CCollision::EDAMAGE_POINT pro,int HitRig,in
 			break;
 		}
 
-	//	m_move.x = 0.0f;
-
 		//ヒット硬直の値を代入
 		m_nRig = HitRig;
 		
@@ -1817,11 +1829,28 @@ void CPlayer::Damage_Cal(int Damage, CCollision::EDAMAGE_POINT pro,int HitRig,in
 				break;
 			}
 		}
+		if (m_pos.x < m_pEne->m_pos.x)
+		{
+			m_pos.x -= 10.0f;	//ヒットバックのつもり
+		}
+		else
+		{
+			m_pos.x += 10.0f;	//ヒットバックのつもり
+		}
 	}
 	else
 	{//ガード成功
 	 //ガードの音
 		PlaySound(SOUND_LABEL_SE_GUARD);
+
+		if (m_pos.x < m_pEne->m_pos.x)
+		{
+			m_pEne->m_pos.x += 10.0f;	//ヒットバックのつもり
+		}
+		else
+		{
+			m_pEne->m_pos.x -= 10.0f;	//ヒットバックのつもり
+		}
 
 		//ガード硬直の値を代入
 		m_nRig = GuardRig;
@@ -1853,6 +1882,8 @@ void CPlayer::Die()
 		{//空中で死んだときの処理
 			m_pos.y = 0.0f;
 			m_move.y = 0.0f;
+			m_move.x = 0.0f;
+
 			m_Motion = PM_DOWN;
 			m_State = PST_DIE;
 		}

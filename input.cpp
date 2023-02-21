@@ -234,6 +234,10 @@ bool CInput::KeyChackAll(STAN_DART_INPUT_KEY key, int type)
 	case KEY_PAUSE:
 		return Keyboard(DIK_P) || Joypad(JOYPAD_START);
 		break;
+	case KEY_ALL:
+		return m_pKeyboard->GetAllPress() || m_pJoyPad->GetPressAll();
+		break;
+
 	default:
 		break;
 	}

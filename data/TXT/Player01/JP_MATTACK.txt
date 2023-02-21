@@ -7,6 +7,30 @@ MOTIONSET
 
 	KEYSET			# --- << KEY : 0 / 2 >> ---
 		FRAME = 5
+		
+			#1番目の判定
+			HURTSET
+				STARTFRAME = 0
+				ENDFRAME = 60
+				POS = 12.00 13.70 0.00 
+				SIZ = 33.00 25.00 24.00 
+			END_HURTSET
+		#2番目の判定
+			HURTSET
+				STARTFRAME = 0
+				ENDFRAME = 60
+				POS = 3.00 33.70 0.00 
+				SIZ = 22.00 16.00 22.00 
+			END_HURTSET
+			
+			#3番目の判定
+			HURTSET
+				STARTFRAME = 0
+				ENDFRAME = 60
+				POS = -9.00 44.00 0.00 
+				SIZ = 26.00 22.00 49.00 
+			END_HURTSET
+		
 		KEY	# ----- [ 0 ] -----
 				POS = 0.00 -12.00 0.00 
 				ROT = -0.36 0.64 0.00 
@@ -73,13 +97,30 @@ MOTIONSET
 				POS = -15.00 59.00 0.00 
 				SIZ = 30.00 13.00 50.00 
 				DAMAGE_POINT = 1
+				HIT = 15
+				GUARD = 10
 			END_COLLISIONSET
-		#1番目の判定
+			#1番目の判定
 			HURTSET
 				STARTFRAME = 0
-				ENDFRAME = 5
-				POS = -16.00 53.00 -9.00 
-				SIZ = 31.00 23.00 27.00 
+				ENDFRAME = 60
+				POS = 12.00 13.70 0.00 
+				SIZ = 33.00 25.00 24.00 
+			END_HURTSET
+		#2番目の判定
+			HURTSET
+				STARTFRAME = 0
+				ENDFRAME = 60
+				POS = 3.00 33.70 0.00 
+				SIZ = 22.00 16.00 22.00 
+			END_HURTSET
+			
+			#3番目の判定
+			HURTSET
+				STARTFRAME = 0
+				ENDFRAME = 60
+				POS = -9.00 44.00 0.00 
+				SIZ = 26.00 22.00 49.00 
 			END_HURTSET
 		KEY	# ----- [ 0 ] -----
 				POS = 0.00 -12.00 0.00 

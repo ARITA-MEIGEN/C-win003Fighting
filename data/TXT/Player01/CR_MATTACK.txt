@@ -98,6 +98,8 @@ MOTIONSET
 				POS = -26.00 10.00 0.00 
 				SIZ = 28.00 14.00 50.00 
 				DAMAGE_POINT = 2
+				HIT = 20
+				GUARD = 10
 			END_COLLISIONSET
 		#1番目の判定
 			HURTSET

@@ -78,7 +78,7 @@ void CTitle::Update()
 		//Žw’è‚ÌƒL[‚ª‰Ÿ‚³‚ê‚½‚©‚Ç‚¤‚©
 	if (CApplication::GetFade()->GetFade() == CFade::FADE_NONE)
 	{
-		if (pInput->Trigger(DIK_RETURN))
+		if (pInput->Trigger(KEY_ALL))
 		{
 			CApplication::GetFade()->SetFade(CApplication::MODE_GAME);
 			PlaySound(SOUND_LABEL_SE_START);

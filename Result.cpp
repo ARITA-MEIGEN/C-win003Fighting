@@ -81,7 +81,7 @@ void CResult::Update()
 
 	if (CApplication::GetFade()->GetFade() == CFade::FADE_NONE)
 	{
-		if (pInput->Trigger(DIK_RETURN) == true)		//ENTERキー
+		if ((pInput->Trigger(KEY_ALL)) == true)		//ENTERキー
 		{//エンターでランキングに
 		 //モード設定
 			PlaySound(SOUND_LABEL_SE_START);

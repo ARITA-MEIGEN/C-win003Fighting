@@ -94,6 +94,8 @@ MOTIONSET
 				ENDFRAME = 4
 				POS = -22.00 58.40 0.00 
 				SIZ = 25.00 46.00 31.00 
+				HIT = 20
+				GUARD = 10
 			END_COLLISIONSET
 		#1番目の判定
 			HURTSET
