@@ -972,6 +972,7 @@ void CPlayer::Jump(void)
 			m_State = PST_STAND;			//立ち状態に変更
 			m_pos.y = 0.0f;					//位置設定
 			m_move.y = 0.0f;				//移動量を0に戻す
+			m_move.x = 0.0f;				//移動量を0に戻す
 			m_bJump = false;				//ジャンプ状態解除
 			m_bAttack = false;				//攻撃状態を解除
 			m_bMotion = false;
@@ -1020,9 +1021,6 @@ void CPlayer::Damage()
 			{
 				if (ColJudge(i, j)==true)	//矩形の判定
 				{
-					m_nRig = m_pEne->m_apMotion[m_pEne->m_Motion].aKey[m_pEne->m_nCurKey].Collision[j]->GetHitRig();
-					m_nRig = m_pEne->m_apMotion[m_pEne->m_Motion].aKey[m_pEne->m_nCurKey].Collision[j]->GetProperty();
-
 					//ダメージ処理
 					Damage_Cal(m_pEne->m_apMotion[m_pEne->m_Motion].aKey[m_pEne->m_nCurKey].Collision[j]->GetDamage(),
 						m_pEne->m_apMotion[m_pEne->m_Motion].aKey[m_pEne->m_nCurKey].Collision[j]->GetProperty(),
@@ -1771,7 +1769,7 @@ void CPlayer::Damage_Cal(int Damage, CCollision::EDAMAGE_POINT pro,int HitRig,in
 			break;
 		}
 
-		m_move.x = 0.0f;
+	//	m_move.x = 0.0f;
 
 		//ヒット硬直の値を代入
 		m_nRig = HitRig;
@@ -1801,19 +1799,21 @@ void CPlayer::Damage_Cal(int Damage, CCollision::EDAMAGE_POINT pro,int HitRig,in
 				m_move.y = 5.0f;
 				if (m_pos.x < m_pEne->m_pos.x)
 				{
-					m_move.x = -10.0f;
+					m_move.x = -2.0f;
 				}
 				else
 				{
-					m_move.x = 10.0f;
+					m_move.x = 2.0f;
 				}
-				
+				m_bJump = true;
 				break;
 
 			case PM_CR_HATTACK:
 				m_Motion = PM_JP_HURT;
 				m_State = PST_AIR;
 				m_move.y = 1.0f;
+				m_bJump = true;
+
 				break;
 			}
 		}
