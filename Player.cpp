@@ -1812,13 +1812,15 @@ void CPlayer::Damage_Cal(int Damage, CCollision::EDAMAGE_POINT pro,int HitRig,in
 				break;
 			}
 		}
+
+		//なんちゃってヒットバック
 		if (m_pos.x < m_pEne->m_pos.x)
 		{
-			m_pos.x -= 10.0f;	//ヒットバックのつもり
+			m_pos.x -= 8.0f;	//ヒットバックのつもり
 		}
 		else
 		{
-			m_pos.x += 10.0f;	//ヒットバックのつもり
+			m_pos.x += 8.0f;	//ヒットバックのつもり
 		}
 	}
 	else
