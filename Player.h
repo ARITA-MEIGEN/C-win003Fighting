@@ -171,6 +171,8 @@ public:
 	void			Die();
 	void			FireBall();								//遠距離技
 	void			Slow();									//投げ
+	void			Normalization();						//正規化
+	void			StageEdge();							//ステージの端の処理
 
 	//セッター
 	void			SetPos(D3DXVECTOR3 pos) { m_pos = pos; };						//位置の設定
@@ -236,8 +238,6 @@ private:
 
 	//ガード関係
 	int				m_nRig;							//硬直時間
-
-
 };
 
 #endif

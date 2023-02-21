@@ -16,11 +16,10 @@
 //前方宣言
 class Player;
 
-
 //マクロ定義
 #define NUM_TEXLIFE		(3)
 #define LIFEBAR_WIDTH	(450.0f)
-#define LIFE_POS		(100.0f)	//体力バーの位置
+#define LIFE_POS_P1		(600.0f)	//体力バーの位置
 #define LIFE_POS_Y		(60.0f)	//体力バーの位置
 
 

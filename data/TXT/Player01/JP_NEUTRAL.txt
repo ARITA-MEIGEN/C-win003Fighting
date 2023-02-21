@@ -12,15 +12,22 @@ MOTIONSET
 		#1番目の判定
 			HURTSET
 				STARTFRAME = 0
-				ENDFRAME = 4
-				POS = 3.00 31.00 0.00 
-				SIZ = 22.00 20.00 22.00 
+				ENDFRAME = 600
+				POS = 12.00 13.70 0.00 
+				SIZ = 33.00 25.00 24.00 
 			END_HURTSET
 		#2番目の判定
-
 			HURTSET
 				STARTFRAME = 0
-				ENDFRAME = 8
+				ENDFRAME = 600
+				POS = 3.00 33.70 0.00 
+				SIZ = 22.00 16.00 22.00 
+			END_HURTSET
+			
+			#3番目の判定
+			HURTSET
+				STARTFRAME = 0
+				ENDFRAME = 600
 				POS = -9.00 44.00 0.00 
 				SIZ = 26.00 22.00 49.00 
 			END_HURTSET
@@ -86,15 +93,22 @@ MOTIONSET
 		#1番目の判定
 			HURTSET
 				STARTFRAME = 0
-				ENDFRAME = 8
-				POS = 3.00 31.00 0.00 
-				SIZ = 22.00 20.00 22.00 
+				ENDFRAME = 600
+				POS = 12.00 13.70 0.00 
+				SIZ = 33.00 25.00 24.00 
 			END_HURTSET
 		#2番目の判定
-
 			HURTSET
 				STARTFRAME = 0
-				ENDFRAME = 8
+				ENDFRAME = 600
+				POS = 3.00 33.70 0.00 
+				SIZ = 22.00 16.00 22.00 
+			END_HURTSET
+			
+			#3番目の判定
+			HURTSET
+				STARTFRAME = 0
+				ENDFRAME = 600
 				POS = -9.00 44.00 0.00 
 				SIZ = 26.00 22.00 49.00 
 			END_HURTSET
@@ -161,15 +175,22 @@ MOTIONSET
 		#1番目の判定
 			HURTSET
 				STARTFRAME = 0
-				ENDFRAME = 120
-				POS = 3.00 31.00 0.00 
-				SIZ = 22.00 20.00 22.00 
+				ENDFRAME = 600
+				POS = 12.00 13.70 0.00 
+				SIZ = 33.00 25.00 24.00 
 			END_HURTSET
 		#2番目の判定
-
 			HURTSET
 				STARTFRAME = 0
-				ENDFRAME = 120
+				ENDFRAME = 600
+				POS = 3.00 33.70 0.00 
+				SIZ = 22.00 16.00 22.00 
+			END_HURTSET
+			
+			#3番目の判定
+			HURTSET
+				STARTFRAME = 0
+				ENDFRAME = 600
 				POS = -9.00 44.00 0.00 
 				SIZ = 26.00 22.00 49.00 
 			END_HURTSET

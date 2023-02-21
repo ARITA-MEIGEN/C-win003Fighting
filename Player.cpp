@@ -110,10 +110,10 @@ void CPlayer::Uninit(void)
 //===========================
 void CPlayer::Update(void)
 {
-	Input();
+	Input();					//入力処理
 	if ((m_nHitStop <= 0 && m_pEne->m_nHitStop <= 0)&&m_nRig<=0)
 	{//ヒットストップがない場合
-		Down();
+		Down();					//ダウン＆起き上がり
 		Updatepos();			//座標更新
 
 		if (m_nLife > 0 && m_Motion != PM_DOWN&&m_Motion != PM_STANDUP)
@@ -121,11 +121,6 @@ void CPlayer::Update(void)
 			if (m_bMotion == false && m_bJump == false)
 			{
 				m_Motion = PM_ST_NEUTRAL;
-			}
-
-			if (m_pos.x - m_pEne->GetPos().x > FIELD_WIDTH || m_pos.x - m_pEne->GetPos().x < -FIELD_WIDTH)
-			{//一定以上離れると1フレーム前の位置に移動
-				m_pos.x = m_posold.x;
 			}
 
 			ControlPlayer();		//操作
@@ -141,27 +136,10 @@ void CPlayer::Update(void)
 			}
 		}
 		if (m_State == PST_AIR)
-		{
+		{//重力
 			m_move.y -= 0.25f;				//少しずつ減速
 		}
-		if (m_pos.x - m_AxisBox->GetWidth().x * 2 <= -FIELD_WIDTH)
-		{
-			m_pos.x = -FIELD_WIDTH + m_AxisBox->GetWidth().x * 2;
-		}
-		else if (m_pos.x + m_AxisBox->GetWidth().x * 2 >= FIELD_WIDTH)
-		{
-			m_pos.x = FIELD_WIDTH - m_AxisBox->GetWidth().x * 2;
-		}
-
-		//角度の正規化
-		if (m_rot.y >= D3DX_PI)
-		{
-			m_rot.y -= D3DX_PI * 2;
-		}
-		else if (m_rot.y <= -D3DX_PI)
-		{
-			m_rot.y += D3DX_PI * 2;
-		}
+		StageEdge();		//ステージの端の処理
 	}
 	else
 	{//ヒットストップもしくは硬直中の場合
@@ -169,11 +147,12 @@ void CPlayer::Update(void)
 		Cancel();				//攻撃キャンセル
 		m_nRig--;
 	}
+
 	DrawCollision();		//当たり判定表示
 	Damage();				//ダメージ処理
-	Die();
+	Die();					//死亡処理
 	MotionManager();		//モーション再生
-
+	Normalization();		//角度の正規化
 
 #ifdef _DEBUG
 	CDebugProc::Print("現在のプレイヤーの座標:%f %f %f", m_pos.x, m_pos.y, m_pos.z);
@@ -1165,7 +1144,7 @@ void CPlayer::Command()
 			else
 			{//左向き(2P側)の場合
 				//バックステップ
-				m_Motion = PM_JP_NEUTRAL;
+				m_Motion = PM_ST_BACKSTEP;
 				m_State = PST_AIR;
 				m_move = { BACKSTEP_MOVE_X,BACKSTEP_MOVE_Y,0.0f };
 				m_bJump = true;
@@ -1184,7 +1163,7 @@ void CPlayer::Command()
 			else
 			{//右向きの場合
 			 //バックステップ
-				m_Motion = PM_JP_NEUTRAL;
+				m_Motion = PM_ST_BACKSTEP;
 				m_move = { -BACKSTEP_MOVE_X,BACKSTEP_MOVE_Y,0.0f };
 				m_State = PST_AIR;
 				m_nJumpCount = 1;
@@ -1267,6 +1246,7 @@ void CPlayer::Command()
 	}
 
 	//攻撃
+	if (m_Motion != PM_ST_BACKSTEP)
 	{
 		//弱攻撃
 		if ((m_anInput[0] & INPUT_LATK) == INPUT_LATK && (m_anInput[1] & INPUT_NOT_LATK) == INPUT_NOT_LATK)
@@ -1801,14 +1781,17 @@ void CPlayer::Damage_Cal(int Damage, CCollision::EDAMAGE_POINT pro,int HitRig,in
 		{
 			PlaySound(SOUND_LABEL_SE_HATK_HIT);
 			switch (m_pEne->m_Motion)
-			{
+			{//技に応じて吹き飛ばし量を変える
 			case PM_JP_HATTACK:
 				break;
 
 			case PM_ST_HATTACK:
 				m_Motion = PM_JP_HURT;
 				m_State = PST_AIR;
-				m_move.y = 5.0f;
+				if (m_move.y <= 3.0f)
+				{
+					m_move.y += 3.0f;
+				}
 				if (m_pos.x < m_pEne->m_pos.x)
 				{
 					m_move.x = -2.0f;
@@ -1943,4 +1926,42 @@ void CPlayer::FireBall()
 //==============================================
 void CPlayer::Slow()
 {
+}
+
+//==============================================
+//角度の正規化
+//==============================================
+void CPlayer::Normalization()
+{
+	//角度の正規化
+	if (m_rot.y >= D3DX_PI)
+	{
+		m_rot.y -= D3DX_PI * 2;
+	}
+	else if (m_rot.y <= -D3DX_PI)
+	{
+		m_rot.y += D3DX_PI * 2;
+	}
+}
+
+//==============================================
+//端の処理
+//==============================================
+void CPlayer::StageEdge()
+{
+	//カメラ端
+	if (m_pos.x - m_pEne->GetPos().x > FIELD_WIDTH || m_pos.x - m_pEne->GetPos().x < -FIELD_WIDTH)
+	{//一定以上離れると1フレーム前の位置に移動
+		m_pos.x = m_posold.x;
+	}
+
+	//ステージの端
+	if (m_pos.x - m_AxisBox->GetWidth().x * 2 <= -FIELD_WIDTH)
+	{
+		m_pos.x = -FIELD_WIDTH + m_AxisBox->GetWidth().x * 2;
+	}
+	else if (m_pos.x + m_AxisBox->GetWidth().x * 2 >= FIELD_WIDTH)
+	{
+		m_pos.x = FIELD_WIDTH - m_AxisBox->GetWidth().x * 2;
+	}
 }
