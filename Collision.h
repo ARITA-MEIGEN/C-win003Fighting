@@ -66,8 +66,8 @@ public:
 	EDAMAGE_POINT	GetProperty() { return m_Property; };		//属性の取得
 	bool			GetUse() { return m_bUse; };				//オンオフの切り替え
 	bool			GetUseDmg() { return m_bDmg; };				//ダメージ処理を無効にするかどうか
-	D3DXVECTOR3		GetWidth() { return m_width; };
-	D3DXVECTOR3		GetPos() { return m_pos; };
+	D3DXVECTOR3		GetWidth() { return m_width; };				//当たり判定の大きさ
+	D3DXVECTOR3		GetPos() { return m_pos; };					//当たり判定の位置
 	int				GetHitRig() { return m_nHitRig; };			//ダメージ硬直の取得
 	int				GetGuardRig() { return m_nGuardRig; };		//ガード硬直の取得
 

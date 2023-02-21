@@ -48,14 +48,17 @@ public:
 	void Uninit();
 	void Update();
 	void Draw();
+
+	//セッター
+	static void SetWinner(int win) { m_nWinner = win; };	//勝ったプレイヤーの番号
+	static void SetMode(MODE mode);
+
 	//ゲッター
 	static CRenderer*GetRenderer();
 	static CInput * GetInput() { return m_pInput; };
 	static CDebugProc * GetDebugProc();
 	static CFade*GetFade();
-	//void DrawStatas();
-	static void SetMode(MODE mode);
-
+	static int GetWinner() { return m_nWinner; };
 
 private:
 	//メンバ変数
@@ -65,6 +68,7 @@ private:
 	LPD3DXFONT m_pFont;						//フォントへのポイント
 	static MODE m_mode;
 	static CFade* m_pFade;
+	static int m_nWinner;
 	//画面
 	static CTitle*m_pTitle;
 	static CGame*m_pGame;

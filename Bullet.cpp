@@ -28,11 +28,11 @@ HRESULT CBullet::Init()
 	m_nNumber = 2;															//一度に放出するパーティクルの数
 	m_nSpeed = 2;															//パーティクルの最大速度
 	m_nTimer = 0;															//パーティクルの発射感覚
-	m_moverot = 1;															//各酸度	大きければ大きいほど狭くなる
+	m_moverot = 1;															//拡散	大きければ大きいほど狭くなる
 	m_Collision = CCollision::Create(m_pos, CCollision::COLLI_DAMAGE);
 	m_Collision->SetSiz(D3DXVECTOR3(50.0f,50.0f,10.0f));
 	PlaySound(SOUND_LABEL_SE_FIRE);
-
+	
 	return S_OK;
 }
 
@@ -50,7 +50,7 @@ void CBullet::Uninit(void)
 void CBullet::Update(void)
 {
 	m_nTimer++;
-
+	
 	//移動量の設定
 		for (int nCnt = 0; nCnt < m_nNumber; nCnt++)
 		{
@@ -58,7 +58,12 @@ void CBullet::Update(void)
 			float fSpeed = ((float)(rand() % m_nSpeed)) + 2.0f;
 			D3DXVECTOR3 randpos = D3DXVECTOR3((float)(rand() % 20 - 10), (float)(rand() % 20 - 10), 0.0f);
 			D3DXVECTOR3 randmove = D3DXVECTOR3(sinf(fAngle)*fSpeed +0.0f, cosf(fAngle)*fSpeed +0.0f, 0.0f);
-			float randrot = (float)(rand() % KAKUSANDO) / KAKUSANDOB +0.0f;	//各酸度
+			 float randrot = (float)(rand() % KAKUSANDO) / KAKUSANDOB +0.0f;	//各酸度
+
+			if (m_pos.x >= CGame::GetPlayer(1 ^ m_PlayerNumber)->GetPos().x)
+			{//2P側で向き逆転
+				randrot *= -1;
+			}
 
 			CEffect::Create(m_pos,							//位置の設定
 				m_siz ,										//半径の大きさの設定
@@ -73,14 +78,13 @@ void CBullet::Update(void)
 	//位置更新
 	m_pos += m_move;
 	m_Collision->SetPos(m_pos);
-
 	Hit();
 	
-	float Centerpos = CGame::GetPlayer(0)->GetPos().x - CGame::GetPlayer(1)->GetPos().x;
+	float Centerpos = (CGame::GetPlayer(1)->GetPos().x - CGame::GetPlayer(0)->GetPos().x)/2 + CGame::GetPlayer(0)->GetPos().x;
 
-	if (Centerpos - m_pos.x > FIELD_WIDTH || Centerpos - m_pos.x < -FIELD_WIDTH)
-	{
-		m_Collision->SetUse(false);
+	if (Centerpos + FIELD_WIDTH< m_pos.x || Centerpos - FIELD_WIDTH  > m_pos.x)
+	{//画面外に出たときの処理
+    		m_Collision->SetUse(false);
 		m_Collision->Uninit();
 		CGame::GetPlayer(m_PlayerNumber)->SetBullet(false);
 		Uninit();
@@ -123,16 +127,17 @@ bool CBullet::Hit()
 	while (pPlayer->GetHurt(i) != nullptr)
 	{
 		CCollision*pCollision = pPlayer->GetHurt(i);
-
 		Hurt = pCollision->GetPos();
-		col = m_Collision->GetPos();
 		HurtWidth = pCollision->GetWidth();
+		col = m_Collision->GetPos();
 		colWidth = m_Collision->GetWidth();
-		pCollision = pPlayer->GetHurt(i);
 
-		if (Hurt.x + HurtWidth.x / 2 >= col.x - colWidth.x / 2 && Hurt.x - HurtWidth.x / 2 <= col.x + colWidth.x / 2 && Hurt.y + HurtWidth.y / 2 >= col.y - colWidth.y / 2 && Hurt.y - HurtWidth.y / 2 <= col.y + colWidth.y / 2)
+		if (Hurt.x + HurtWidth.x / 2 >= col.x - colWidth.x / 2 && 
+			Hurt.x - HurtWidth.x / 2 <= col.x + colWidth.x / 2 &&
+			Hurt.y + HurtWidth.y / 2 >= col.y - colWidth.y / 2 &&
+			Hurt.y - HurtWidth.y / 2 <= col.y + colWidth.y / 2)
 		{
-			pPlayer->Damage_Cal(DAMAGE, (CCollision::EDAMAGE_POINT)0, 10, 10);
+			pPlayer->Damage_Cal(DAMAGE, CCollision::EDAMAGE_POINT::DP_HIGH, 10, 10);
 			Uninit();
 			m_Collision->SetUse(false);
 			m_Collision->Uninit();

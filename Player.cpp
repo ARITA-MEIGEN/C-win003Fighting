@@ -24,7 +24,7 @@ int CPlayer::m_nNumPlayer = 0;	//プレイヤーの数
 //===========================
 CPlayer::CPlayer(int nPriority) :CObject(nPriority)
 {
-	m_nPlayerNumber = m_nNumPlayer;
+	m_nPlaNum = m_nNumPlayer;
 	m_nNumPlayer++;
 }
 
@@ -96,6 +96,11 @@ void CPlayer::Uninit(void)
 		delete m_apModel[i];
 		m_apModel[i] = nullptr;
 	}
+	if (m_pBullet!=nullptr)
+	{
+		m_pBullet = nullptr;
+	}
+	
 
 	CObject::Release();
 }
@@ -106,10 +111,9 @@ void CPlayer::Uninit(void)
 void CPlayer::Update(void)
 {
 	Input();
-	if (m_nHitStop <= 0 && m_pEne->m_nHitStop <= 0)
+	if ((m_nHitStop <= 0 && m_pEne->m_nHitStop <= 0)&&m_nRig<=0)
 	{//ヒットストップがない場合
 		Down();
-
 		Updatepos();			//座標更新
 
 		if (m_nLife > 0 && m_Motion != PM_DOWN&&m_Motion != PM_STANDUP)
@@ -126,9 +130,9 @@ void CPlayer::Update(void)
 
 			ControlPlayer();		//操作
 			Axis();					//軸の押し出し判定
-			DrawCollision();		//当たり判定表示
 			Jump();					//ジャンプ
 			AutoTurn();				//自動振り向き
+			DrawCollision();		//当たり判定表示
 			Damage();				//ダメージ処理
 
 			if (m_NextMotion != PM_ST_NEUTRAL)
@@ -138,14 +142,19 @@ void CPlayer::Update(void)
 				FireBall();
 			}
 		}
-
 		Die();
 		if (m_State == PST_AIR)
 		{
 			m_move.y -= 0.25f;				//少しずつ減速
 		}
-	
-		MotionManager();		//モーション再生
+		if (m_pos.x - m_AxisBox->GetWidth().x * 2 <= -FIELD_WIDTH)
+		{
+			m_pos.x = -FIELD_WIDTH + m_AxisBox->GetWidth().x * 2;
+		}
+		else if (m_pos.x + m_AxisBox->GetWidth().x * 2 >= FIELD_WIDTH)
+		{
+			m_pos.x = FIELD_WIDTH - m_AxisBox->GetWidth().x * 2;
+		}
 
 		//角度の正規化
 		if (m_rot.y >= D3DX_PI)
@@ -158,10 +167,13 @@ void CPlayer::Update(void)
 		}
 	}
 	else
-	{//ヒットストップがかかっている場合
+	{//ヒットストップもしくは硬直中の場合
 		m_nHitStop--;
 		Cancel();				//攻撃キャンセル
+		m_nRig--;
 	}
+	MotionManager();		//モーション再生
+
 
 #ifdef _DEBUG
 	CDebugProc::Print("現在のプレイヤーの座標:%f %f %f", m_pos.x, m_pos.y, m_pos.z);
@@ -213,54 +225,11 @@ void CPlayer::ControlPlayer(void)
 {
 	if (m_Motion != PM_CR_HURT && m_Motion != PM_ST_HURT && m_Motion != PM_JP_HURT && m_Motion != PM_DOWN && m_Motion != PM_STANDUP)
 	{//被弾状態じゃない場合
-		CInput* pInput = CApplication::GetInput();
-
 		//移動
-		if (m_nPlayerNumber == 0 && m_bAttack == false)
+		if (m_bAttack == false&&m_bMotion==false)
 		{
 			Command();
 		}
-
-		//デバッグ用2Pの操作
-#ifdef _DEBUG
-		if (m_nPlayerNumber == 1)
-		{
-			
-			 if (pInput->Press(DIK_NUMPAD4))
-			{
-				m_move.x = sinf(D3DX_PI*-0.5f)*PLAYER_SPEED;
-				m_move.z = cosf(D3DX_PI*-0.5f)*PLAYER_SPEED;
-				m_Motion = PM_ST_MOVE;
-				if (m_pEne->m_bAttack == true && m_pos.x <= m_pEne->m_pos.x)
-				{
-					m_Motion = PM_ST_GUARD;
-					m_move = { 0.0f,0.0f,0.0f };
-				}
-			}
-			else if (pInput->Press(DIK_NUMPAD6))
-			{
-				m_move.x = sinf(D3DX_PI*0.5f)*PLAYER_SPEED;
-				m_move.z = cosf(D3DX_PI*0.5f)*PLAYER_SPEED;
-				m_Motion = PM_ST_MOVE;
-				if (m_pEne->m_bAttack == true && m_pos.x >= m_pEne->m_pos.x)
-				{
-					m_Motion = PM_ST_GUARD;
-					m_move = { 0.0f,0.0f,0.0f };
-				}
-			}
-			else  if (pInput->Press(DIK_P))
-			 {
-				 m_Motion = PM_ST_LATTACK;
-				 m_bAttack = true;
-				 m_bMotion = true;
-			 }
-			else
-			{
-				m_move.x = 0.0f;
-				m_Motion = PM_ST_NEUTRAL;
-			}
-		}
-#endif // !_DEBUG
 	}
 }
 
@@ -286,12 +255,11 @@ void CPlayer::ReadMotion()
 	const int lenLine = 2048;	//1単語の最大数
 	char strLine[lenLine];		//読み込み用の文字列
 	char Read[lenLine];			//読み取る用
-	int	m_pEnenumber = 0;		//モデルの番号
+	int	modelnumber = 0;		//モデルの番号
 	int motionnumber = 0;		//モーションの番号
 	int key = 0;
-	int m_pEne = 0;
+	int partsmotion = 0;
 	int Idx = 0;
-
 
 	//ファイル読み込み
 	FILE*fp = fopen("data/TXT/Player01/Player01.txt", "r");		//ファイル読み込み
@@ -326,8 +294,8 @@ void CPlayer::ReadMotion()
 					{
 						sscanf(Read, "%s = %s", &strLine, &m_nModelpass[0]);	//モデルのパスの設定
 
-						m_apModel[m_pEnenumber]->SetModel(&m_nModelpass[0]);
-						m_pEnenumber++;
+						m_apModel[modelnumber]->SetModel(&m_nModelpass[0]);
+						modelnumber++;
 					}
 					else if (strcmp(&strLine[0], "CHARACTERSET") == 0)
 					{//初期位置の設定
@@ -459,7 +427,7 @@ void CPlayer::ReadMotion()
 														if (strcmp(&strLine[0], "END_KEYSET") == 0)
 														{
 															key++;
-															m_pEne = 0;	//番号リセット
+															partsmotion = 0;	//番号リセット
 															break;
 														}
 														else if (strcmp(&strLine[0], "FRAME") == 0)
@@ -574,22 +542,22 @@ void CPlayer::ReadMotion()
 
 																if (strcmp(&strLine[0], "END_KEY") == 0)
 																{
-																	m_pEne++;
+																	partsmotion++;
 																	break;
 																}
 																else if (strcmp(&strLine[0], "POS") == 0)
 																{
 																	sscanf(Read, "%s = %f%f%f", &strLine,
-																		&m_apMotion[motionnumber].aKey[key].aKey[m_pEne].fPos.x,
-																		&m_apMotion[motionnumber].aKey[key].aKey[m_pEne].fPos.y,
-																		&m_apMotion[motionnumber].aKey[key].aKey[m_pEne].fPos.z);	//再生時間の設定
+																		&m_apMotion[motionnumber].aKey[key].aKey[partsmotion].fPos.x,
+																		&m_apMotion[motionnumber].aKey[key].aKey[partsmotion].fPos.y,
+																		&m_apMotion[motionnumber].aKey[key].aKey[partsmotion].fPos.z);	//再生時間の設定
 																}
 																else if (strcmp(&strLine[0], "ROT") == 0)
 																{
 																	sscanf(Read, "%s = %f%f%f", &strLine,
-																		&m_apMotion[motionnumber].aKey[key].aKey[m_pEne].fRot.x,
-																		&m_apMotion[motionnumber].aKey[key].aKey[m_pEne].fRot.y,
-																		&m_apMotion[motionnumber].aKey[key].aKey[m_pEne].fRot.z);
+																		&m_apMotion[motionnumber].aKey[key].aKey[partsmotion].fRot.x,
+																		&m_apMotion[motionnumber].aKey[key].aKey[partsmotion].fRot.y,
+																		&m_apMotion[motionnumber].aKey[key].aKey[partsmotion].fRot.z);
 																}
 															}
 														}
@@ -651,7 +619,7 @@ void CPlayer::ReadMotion()
 //===========================
 //パーツのモーション
 //===========================
-void CPlayer::MotionPlayer(int nNumber)
+void CPlayer::MotionPlayer()
 {
 	D3DXVECTOR3 RelaPos, RelaRot;		//1フレームごとの移動量
 	D3DXVECTOR3 pos, rot, DiffPos, DiffRot;
@@ -762,8 +730,8 @@ void CPlayer::MotionPlayer(int nNumber)
 			}
 
 			//位置
-			RelaPos = DiffPos / m_apMotion[m_Motion].aKey[m_nCurKey].nFrame;		//相対値
-			RelaRot = DiffRot / m_apMotion[m_Motion].aKey[m_nCurKey].nFrame;
+			RelaPos = (DiffPos / (float)m_apMotion[m_Motion].aKey[m_nCurKey].nFrame);		//相対値
+			RelaRot = (DiffRot / (float)m_apMotion[m_Motion].aKey[m_nCurKey].nFrame);
 
 			//キーの設定
 			//再生モードの場合
@@ -806,7 +774,7 @@ void CPlayer::MotionManager()
 	{//状態が違う場合
 		PlayFirstMotion();
 	}
-		MotionPlayer(m_Motion);		//プレイヤーのモーション
+		MotionPlayer();		//プレイヤーのモーション
 	m_MotionOld = m_Motion;
 }
 
@@ -875,22 +843,22 @@ void CPlayer::DrawCollision()
 			//やられ判定
 			for (int j = 0; j < m_apMotion[i].aKey[k].nNumHurtCol; j++)
 			{
+				if (m_bSide == true)
+				{//右向き(1P)
+					m_apMotion[i].aKey[k].HurtCol[j]->SetPos(D3DXVECTOR3(
+						m_pos.x - m_apMotion[i].aKey[k].HurtCol[j]->GetDPos().x,
+						m_pos.y + m_apMotion[i].aKey[k].HurtCol[j]->GetDPos().y,
+						m_pos.z + m_apMotion[i].aKey[k].HurtCol[j]->GetDPos().z));
+				}
+				else
+				{//左向き(2P)
+					m_apMotion[i].aKey[k].HurtCol[j]->SetPos(m_apMotion[i].aKey[k].HurtCol[j]->GetDPos() + m_pos);
+				}
+
 				if (m_Motion == i&&m_nCurKey == k&&m_apMotion[i].aKey[k].HurtCol[j] != nullptr&&
 					m_frame >= m_apMotion[i].aKey[k].HurtCol[j]->GetStartf()&& m_frame <= m_apMotion[i].aKey[k].HurtCol[j]->GetEndf())
 				{
 					m_apMotion[i].aKey[k].HurtCol[j]->SetUse(true);
-
-					if (m_bSide == true)
-					{//右向き(1P)
-						m_apMotion[i].aKey[k].HurtCol[j]->SetPos(D3DXVECTOR3(
-							m_pos.x - m_apMotion[i].aKey[k].HurtCol[j]->GetDPos().x,
-							m_pos.y + m_apMotion[i].aKey[k].HurtCol[j]->GetDPos().y,
-							m_pos.z + m_apMotion[i].aKey[k].HurtCol[j]->GetDPos().z));
-					}
-					else
-					{//左向き(2P)
-						m_apMotion[i].aKey[k].HurtCol[j]->SetPos(m_apMotion[i].aKey[k].HurtCol[j]->GetDPos() + m_pos);
-					}
 				}
 				else
 				{
@@ -991,11 +959,6 @@ void CPlayer::Jump(void)
 					m_move.z = cosf(D3DX_PI*0.5f)*PLAYER_SPEED*JUMP_FACTOR_X;
 				}
 			}
-			else if (m_Motion == PM_JP_NEUTRAL&& m_nJumpCount == 0)
-			{//垂直ジャンプ
-				m_move.x = 0.0f;
-			}
-
 			if (m_nJumpCount == 0)
 			{
 				m_move.y = INITIAL_VELOCITY;	//初速を設定
@@ -1011,7 +974,7 @@ void CPlayer::Jump(void)
 			m_move.y = 0.0f;				//移動量を0に戻す
 			m_bJump = false;				//ジャンプ状態解除
 			m_bAttack = false;				//攻撃状態を解除
-
+			m_bMotion = false;
 			if (m_Motion == PM_JP_HURT)
 			{
 				m_Motion = PM_DOWN;
@@ -1068,6 +1031,8 @@ void CPlayer::Damage()
 
 					m_pEne->m_apMotion[m_pEne->m_Motion].aKey[m_pEne->m_nCurKey].Collision[j]->SetDmg(false);
 					m_nHitStop = m_pEne->m_apMotion[m_pEne->m_Motion].nHitStopTimer;
+					m_bAttack = false;
+					m_bMotion = false;
 				}
 			}
 		}
@@ -1120,6 +1085,7 @@ void CPlayer::Command()
 		//ニュートラル
 		if ((m_anInput[0] & INPUT5) == INPUT5)
 		{
+			m_Motion = PM_ST_NEUTRAL;
 			m_move.x = 0.0f;
 		}
 
@@ -1132,20 +1098,21 @@ void CPlayer::Command()
 				m_move.x = sinf(D3DX_PI*-0.5f)*PLAYER_SPEED;
 				m_move.z = cosf(D3DX_PI*-0.5f)*PLAYER_SPEED;
 				m_Motion = PM_ST_MOVE;
-				m_bAttack == false;
 
 				if (m_pEne->m_bAttack == true && m_pos.x <= m_pEne->m_pos.x)
 				{
 					m_Motion = PM_ST_GUARD;
 					m_move = { 0.0f,0.0f,0.0f };
 				}
-				break;
-			case PST_CROUCH:
-				if (m_pEne->m_bAttack == true && m_pos.x <= m_pEne->m_pos.x)
-				{
-					m_Motion = PM_CR_GUARD;
-					m_move = { 0.0f,0.0f,0.0f };
+				else if (m_pEne->m_pBullet != nullptr)
+				{//弾の防御処理
+					if (m_pEne->m_pBullet->GetPos().x - m_pos.x <= 100.0f&&m_pEne->m_pBullet->GetPos().x - m_pos.x >= -100.0f)
+					{
+						m_Motion = PM_ST_GUARD;
+						m_move = { 0.0f,0.0f,0.0f };
+					}
 				}
+				break;
 			}
 		}
 
@@ -1158,11 +1125,18 @@ void CPlayer::Command()
 				m_move.x = sinf(D3DX_PI*0.5f)*PLAYER_SPEED;
 				m_move.z = cosf(D3DX_PI*0.5f)*PLAYER_SPEED;
 				m_Motion = PM_ST_MOVE;
-				m_bAttack == false;
 				if (m_pEne->m_bAttack == true && m_pos.x >= m_pEne->m_pos.x)
 				{
 					m_Motion = PM_ST_GUARD;
 					m_move = { 0.0f,0.0f,0.0f };
+				}
+				else if (m_pEne->m_pBullet != nullptr)
+				{//弾の防御処理
+					if (m_pEne->m_pBullet->GetPos().x - m_pos.x <= 100.0f&&m_pEne->m_pBullet->GetPos().x - m_pos.x >= -100.0f)
+					{
+						m_Motion = PM_ST_GUARD;
+						m_move = { 0.0f,0.0f,0.0f };
+					}
 				}
 				break;
 			}
@@ -1179,7 +1153,12 @@ void CPlayer::Command()
 			else
 			{//左向き(2P側)の場合
 				//バックステップ
-				//m_Motion = PM_ST_DASH;
+				m_Motion = PM_JP_NEUTRAL;
+				m_State = PST_AIR;
+				m_move = { BACKSTEP_MOVE_X,BACKSTEP_MOVE_Y,0.0f };
+				m_bJump = true;
+				m_nJumpCount = 1;
+				PlaySound(SOUND_LABEL_SE_BACKSTEP);
 			}
 		}
 
@@ -1191,9 +1170,14 @@ void CPlayer::Command()
 				m_Motion = PM_ST_DASH;
 			}
 			else
-			{//左右向きの場合
+			{//右向きの場合
 			 //バックステップ
-			 //m_Motion = PM_ST_DASH;
+				m_Motion = PM_JP_NEUTRAL;
+				m_move = { -BACKSTEP_MOVE_X,BACKSTEP_MOVE_Y,0.0f };
+				m_State = PST_AIR;
+				m_nJumpCount = 1;
+				m_bJump = true;
+				PlaySound(SOUND_LABEL_SE_BACKSTEP);
 			}
 		}
 
@@ -1204,7 +1188,6 @@ void CPlayer::Command()
 
 			m_move.x = 0.0f;
 			m_move.z = 0.0f;
-			m_bAttack == false;
 		}
 
 		//下(しゃがみ)
@@ -1215,17 +1198,24 @@ void CPlayer::Command()
 				m_Motion = PM_CR_NEUTRAL;
 				m_State = PST_CROUCH;
 				m_move = { 0.0f,0.0f,0.0f };
-				m_bAttack == false;
-				if (m_pEne->m_bAttack == true)
+
+				if ((m_pos.x >= m_pEne->m_pos.x && (m_anInput[0] & INPUT6) == INPUT6) || (m_pos.x < m_pEne->m_pos.x && (m_anInput[0] & INPUT4) == INPUT4))
 				{
-					if ((m_pos.x >= m_pEne->m_pos.x && (m_anInput[0] & INPUT6) == INPUT6)||(m_pos.x < m_pEne->m_pos.x && (m_anInput[0] & INPUT4) == INPUT4))
+					if (m_pEne->m_bAttack == true)
 					{
 						m_Motion = PM_CR_GUARD;
 						m_move = { 0.0f,0.0f,0.0f };
 					}
+					else if (m_pEne->m_pBullet != nullptr)
+					{//弾の防御処理
+						if (m_pEne->m_pBullet->GetPos().x - m_pos.x <= 100.0f&&m_pEne->m_pBullet->GetPos().x - m_pos.x >= -100.0f)
+						{
+							m_Motion = PM_CR_GUARD;
+							m_move = { 0.0f,0.0f,0.0f };
+						}
+					}
 				}
 			}
-		
 		}
 
 		//上(ジャンプ)
@@ -1344,7 +1334,7 @@ void CPlayer::Command()
 			}
 			else if (m_pos.x > m_pEne->m_pos.x)
 			{
-				m_Motion = PM_214H;
+			//	m_Motion = PM_214H;
 			}
 		}
 
@@ -1358,7 +1348,7 @@ void CPlayer::Command()
 			}
 			else if (m_pos.x > m_pEne->m_pos.x)
 			{
-				m_Motion = PM_214M;
+			//	m_Motion = PM_214M;
 			}
 		}
 
@@ -1372,34 +1362,34 @@ void CPlayer::Command()
 			}
 			else if (m_pos.x > m_pEne->m_pos.x)
 			{
-				m_Motion = PM_214L;
+			//	m_Motion = PM_214L;
 			}
 		}
 
 		//2P側
 		//強
 		if (CheckInput(CMD214H) == true && m_State != PST_AIR)
+		{
+			if (m_pos.x <= m_pEne->m_pos.x)
 			{
-				if (m_pos.x <= m_pEne->m_pos.x)
-				{
-					m_Motion = PM_214H;
-				}
-				else if(m_bBullet == false)
-				{
-					m_Motion = PM_236H;
-					FireBall();
-				}
+		//		m_Motion = PM_214H;
 			}
+			else if (m_pos.x > m_pEne->m_pos.x&&m_bBullet == false)
+			{
+				m_Motion = PM_236H;
+				FireBall();
+			}
+		}
 
 		//中
 		if (CheckInput(CMD214M) == true && m_State != PST_AIR)
 		{
 			if (m_pos.x <= m_pEne->m_pos.x)
 			{
-				m_Motion = PM_214M;
+			//	m_Motion = PM_214M;
 
 			}
-			else if(m_bBullet == false)
+			else if (m_pos.x > m_pEne->m_pos.x&&m_bBullet == false)
 			{
 				m_Motion = PM_236M;
 				FireBall();
@@ -1411,9 +1401,9 @@ void CPlayer::Command()
 		{
 			if (m_pos.x <= m_pEne->m_pos.x)
 			{
-				m_Motion = PM_214L;
+			//	m_Motion = PM_214L;
 			}
-			else if(m_bBullet == false)
+			else if (m_pos.x > m_pEne->m_pos.x&&m_bBullet == false)
 			{
 				m_Motion = PM_236L;
 				FireBall();
@@ -1497,36 +1487,36 @@ void CPlayer::Input()
 {
 	CInput* pInput = CApplication::GetInput();
 	int Key = 0;
-
+	pInput->PressDevice(KEY_DOWN_RIGHT);
 	//レバー
 	{
 		//左下
-		Key |= (pInput->Press(DIK_A) && pInput->Press(DIK_S)) || pInput->Press(KEY_DOWN_LEFT) ? INPUT1 : INPUT_NOT1;
+		Key |= (pInput->Press(DIK_A) && pInput->Press(DIK_S)) || pInput->Press(JOYPAD_DOWN_LEFT, m_nPlaNum) ? INPUT1 : INPUT_NOT1;
 		//下
-		Key |= pInput->Press(DIK_S) || pInput->Press(KEY_DOWN) || pInput->Press(KEY_DOWN_LEFT) || pInput->Press(KEY_DOWN_RIGHT) ? INPUT2 : INPUT_NOT2;
+		Key |= pInput->Press(DIK_S) || pInput->Press(JOYPAD_DOWN, m_nPlaNum)|| pInput->Press(JOYPAD_DOWN_LEFT, m_nPlaNum) || pInput->Press(JOYPAD_DOWN_RIGHT, m_nPlaNum) ? INPUT2 : INPUT_NOT2;
 		//右下
-		Key |= (pInput->Press(DIK_D) && pInput->Press(DIK_S)) || pInput->Press(KEY_DOWN_RIGHT) ? INPUT3 : INPUT_NOT3;
+		Key |= (pInput->Press(DIK_D) && pInput->Press(DIK_S)) || pInput->Press(JOYPAD_DOWN_RIGHT, m_nPlaNum) ? INPUT3 : INPUT_NOT3;
 		//左
-		Key |= pInput->Press(DIK_A) || pInput->Press(KEY_LEFT) ? INPUT4 : INPUT_NOT4;
+		Key |= pInput->Press(DIK_A) || pInput->Press(JOYPAD_LEFT, m_nPlaNum) || pInput->Press(JOYPAD_DOWN_LEFT, m_nPlaNum) || (pInput->Press(JOYPAD_UP_LEFT, m_nPlaNum)) ? INPUT4 : INPUT_NOT4;
 		//右
-		Key |= pInput->Press(DIK_D) || pInput->Press(KEY_RIGHT) ? INPUT6 : INPUT_NOT6;
+		Key |= pInput->Press(DIK_D) || pInput->Press(JOYPAD_RIGHT, m_nPlaNum) || (pInput->Press(JOYPAD_UP_RIGHT, m_nPlaNum)) || pInput->Press(JOYPAD_DOWN_RIGHT, m_nPlaNum) ? INPUT6 : INPUT_NOT6;
 		//左上
-		Key |= (pInput->Press(DIK_A) && pInput->Press(DIK_SPACE)) || pInput->Press(KEY_UP_LEFT) ? INPUT7 : INPUT_NOT7;
+		Key |= (pInput->Press(DIK_A) && pInput->Press(DIK_SPACE)) || (pInput->Press(JOYPAD_UP_LEFT, m_nPlaNum)) ? INPUT7 : INPUT_NOT7;
 		//上
-		Key |= pInput->Press(DIK_SPACE) || pInput->Press(KEY_UP) || pInput->Press(KEY_UP_LEFT) || pInput->Press(KEY_UP_RIGHT) ? INPUT8 : INPUT_NOT8;
+		Key |= pInput->Press(DIK_SPACE) || pInput->Press(JOYPAD_UP, m_nPlaNum) || (pInput->Press(JOYPAD_UP_RIGHT, m_nPlaNum)) || (pInput->Press(JOYPAD_UP_LEFT, m_nPlaNum)) ? INPUT8 : INPUT_NOT8;
 		//右上
-		Key |= (pInput->Press(DIK_D) && pInput->Press(DIK_SPACE)) || pInput->Press(KEY_UP_RIGHT) ? INPUT9 : INPUT_NOT9;
+		Key |= (pInput->Press(DIK_D) && pInput->Press(DIK_SPACE)) || (pInput->Press(JOYPAD_UP_RIGHT, m_nPlaNum)) ? INPUT9 : INPUT_NOT9;
 
 		//ニュートラル
 		Key |= (m_anInput[0] & INPUT_NOT6) == INPUT_NOT6 && (m_anInput[0] & INPUT_NOT2) == INPUT_NOT2 && (m_anInput[0] & INPUT_NOT4) == INPUT_NOT4 && (m_anInput[0] & INPUT_NOT8) == INPUT_NOT8 ? INPUT_NOT5 : INPUT5;
 
 		//攻撃
 		//弱
-		Key |= pInput->Press(DIK_U) || pInput->Press(JOYPAD_A) ? INPUT_LATK : INPUT_NOT_LATK;
+		Key |= pInput->Press(DIK_U) || pInput->Press(JOYPAD_A, m_nPlaNum) ? INPUT_LATK : INPUT_NOT_LATK;
 		//中
-		Key |= pInput->Press(DIK_I) || pInput->Press(JOYPAD_B) ? INPUT_MATK : INPUT_NOT_MATK;
+		Key |= pInput->Press(DIK_I) || pInput->Press(JOYPAD_B, m_nPlaNum) ? INPUT_MATK : INPUT_NOT_MATK;
 		//強
-		Key |= pInput->Press(DIK_O) || pInput->Press(JOYPAD_R1) ? INPUT_HATK : INPUT_NOT_HATK;
+		Key |= pInput->Press(DIK_O) || pInput->Press(JOYPAD_R1, m_nPlaNum) ? INPUT_HATK : INPUT_NOT_HATK;
 	}
 
 	//コマンド入れ替え処理
@@ -1722,7 +1712,10 @@ bool CPlayer::ColJudge(int hurtnumber, int colnum)
 	HurtWidth = m_apMotion[m_Motion].aKey[m_nCurKey].HurtCol[hurtnumber]->GetWidth();
 	colWidth = m_pEne->m_apMotion[m_pEne->m_Motion].aKey[m_pEne->m_nCurKey].Collision[colnum]->GetWidth();
 
-	if (Hurt.x + HurtWidth.x / 2 >=col.x - colWidth.x / 2 &&Hurt.x - HurtWidth.x / 2 <=col.x + colWidth.x / 2 &&Hurt.y + HurtWidth.y / 2 >=	col.y - colWidth.y / 2 &&Hurt.y - HurtWidth.y / 2 <=col.y + colWidth.y / 2)
+	if (Hurt.x + HurtWidth.x / 2 >= col.x - colWidth.x / 2 &&
+		Hurt.x - HurtWidth.x / 2 <= col.x + colWidth.x / 2 &&
+		Hurt.y + HurtWidth.y / 2 >= col.y - colWidth.y / 2 &&
+		Hurt.y - HurtWidth.y / 2 <= col.y + colWidth.y / 2)
 	{
 		return true;
 	}
@@ -1753,13 +1746,16 @@ void CPlayer::Down()
 }
 
 //==============================================
-//ダウン時の処理
+//被弾時の処理時の処理
 //==============================================
 void CPlayer::Damage_Cal(int Damage, CCollision::EDAMAGE_POINT pro,int HitRig,int GuardRig)
 {
 	if (Guard(pro) == false)
 	{//ヒット
 		m_nLife -= Damage;
+		m_bAttack = false;
+		m_bMotion = false;
+
 		switch (m_State)
 		{//やられ状態へ移行
 		case CPlayer::PST_STAND:
@@ -1780,7 +1776,6 @@ void CPlayer::Damage_Cal(int Damage, CCollision::EDAMAGE_POINT pro,int HitRig,in
 		//ヒット硬直の値を代入
 		m_nRig = HitRig;
 		
-
 		//弱打撃
 		if (m_pEne->m_Motion == PM_JP_LATTACK || m_pEne->m_Motion == PM_ST_LATTACK || m_pEne->m_Motion == PM_CR_LATTACK)
 		{
@@ -1804,6 +1799,15 @@ void CPlayer::Damage_Cal(int Damage, CCollision::EDAMAGE_POINT pro,int HitRig,in
 				m_Motion = PM_JP_HURT;
 				m_State = PST_AIR;
 				m_move.y = 5.0f;
+				if (m_pos.x < m_pEne->m_pos.x)
+				{
+					m_move.x = -10.0f;
+				}
+				else
+				{
+					m_move.x = 10.0f;
+				}
+				
 				break;
 
 			case PM_CR_HATTACK:
@@ -1825,7 +1829,6 @@ void CPlayer::Damage_Cal(int Damage, CCollision::EDAMAGE_POINT pro,int HitRig,in
 
 }
 
-
 //==============================================
 //死亡時の処理
 //==============================================
@@ -1845,7 +1848,8 @@ void CPlayer::Die()
 			m_Motion = PM_JP_HURT;
 			break;
 		}
-		if (m_pos.y <= 0.0f&&m_Motion==PM_JP_HURT&&m_move.y<=0.0f)
+
+		if ((m_pos.y <= 0.0f) && (m_Motion == PM_JP_HURT) && (m_move.y <= 0.0f))
 		{//空中で死んだときの処理
 			m_pos.y = 0.0f;
 			m_move.y = 0.0f;
@@ -1861,10 +1865,10 @@ void CPlayer::Die()
 void CPlayer::FireBall()
 {
 	D3DXVECTOR3 move;
-	int life;
+	int life = 0;
 
 	if (m_bBullet == false)
-	{
+	{//弾発射モーションに応じて性能を変化させる
 		if (m_Motion == PM_236L)
 		{
 			move = D3DXVECTOR3(2.0f, 0.0f, 0.0f);
@@ -1890,16 +1894,22 @@ void CPlayer::FireBall()
 
 		if (m_Motion == PM_236L || m_Motion == PM_236M || m_Motion == PM_236H)
 		{
-			CBullet::Create(
+			m_pBullet = CBullet::Create(
 				m_pos,
 				D3DXVECTOR3(50.0, 10.0f, 70.0f),
 				D3DXCOLOR(1.0f, 0.5f, 0.0f, 1.5f),
 				move,
 				fangle,
 				life,
-				m_nPlayerNumber);
+				m_nPlaNum);
 			m_bBullet = true;
 		}
 	}
 }
 
+//==============================================
+//通常投げ
+//==============================================
+void CPlayer::Slow()
+{
+}

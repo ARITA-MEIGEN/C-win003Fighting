@@ -2,6 +2,8 @@
 //
 // 入力処理 [input.cpp]
 // Author1 : KOZUNA HIROHITO
+// Author2 : YUDA KAITO
+// Author3 : KARASAKI YUTO
 //
 //=============================================================================
 
@@ -16,29 +18,27 @@
 //-----------------------------------------------------------------------------
 //静的メンバ変数宣言
 //-----------------------------------------------------------------------------
-CInput *CInput::m_pInput = nullptr;//このクラスの情報
+CInput *CInput::m_pInput = nullptr;	// このクラスの情報
 
-//*************************************************************************************
+//-----------------------------------------------------------------------------
 //コンストラクタ
-//*************************************************************************************
+//-----------------------------------------------------------------------------
 CInput::CInput()
 {
-	m_pKeyboard = nullptr;		//キーボードの情報
-	m_pJoyPad = nullptr;		//ジョイパッドの情報
-	m_pMouse = nullptr;			//マウスの情報
-	m_nOldInputType = INPUT_TYPE_KEYBOARD;
+	m_pKeyboard = nullptr;	// キーボードの情報
+	m_pJoyPad = nullptr;	// ジョイパッドの情報
 }
 
-//*************************************************************************************
+//-----------------------------------------------------------------------------
 //デストラクタ
-//*************************************************************************************
+//-----------------------------------------------------------------------------
 CInput::~CInput()
 {
 }
 
-//*************************************************************************************
+//-----------------------------------------------------------------------------
 //初期化
-//*************************************************************************************
+//-----------------------------------------------------------------------------
 HRESULT CInput::Init(HINSTANCE hInstance, HWND hWnd)
 {
 	//DirectInputオブジェクトの生成
@@ -56,10 +56,10 @@ HRESULT CInput::Init(HINSTANCE hInstance, HWND hWnd)
 		return E_FAIL;
 	}
 
-	//ジョイパッドの生成
+	//DirectXジョイパッドの生成
 	m_pJoyPad = new CInputJoyPad;
 
-	//ジョイパッドの初期化処理
+	//DirectXジョイパッドの初期化処理
 	if (FAILED(m_pJoyPad->Init(hInstance, hWnd)))
 	{
 		return E_FAIL;
@@ -81,7 +81,7 @@ void CInput::Uninit()
 		m_pKeyboard = nullptr;
 	}
 
-	//ジョイパッドの破棄
+	//DirectXジョイパッドの破棄
 	if (m_pJoyPad != nullptr)
 	{
 		m_pJoyPad->Uninit();
@@ -109,16 +109,6 @@ void CInput::Update()
 	m_pKeyboard->Update();
 	//ジョイパッドの更新
 	m_pJoyPad->Update();
-
-	//最後に触ったデバイス
-	if (m_pJoyPad->GetPressAll())
-	{
-		m_nOldInputType = INPUT_TYPE_JOYPAD;
-	}
-	else if (m_pKeyboard->GetAllPress())
-	{
-		m_nOldInputType = INPUT_TYPE_KEYBOARD;
-	}
 }
 
 //*************************************************************************************
@@ -127,267 +117,320 @@ void CInput::Update()
 CInput *CInput::Create()
 {
 	//Inputの自己生成
-	m_pInput = new CInput;
+	if (m_pInput == nullptr)
+	{
+		m_pInput = new CInput;
+	}
+
 	return m_pInput;
 }
 
 //*************************************************************************************
-//プレス処理(総合)
+// 全デバイスの入力を確認
 //*************************************************************************************
-bool CInput::Press(STAN_DART_INPUT_KEY key)
+bool CInput::KeyChackAll(STAN_DART_INPUT_KEY key, int type)
 {
+	// Standart
+	auto Standart = [this, type](STAN_DART_INPUT_KEY a)
+	{
+		switch (type)
+		{
+		case 1:
+			return Press(a);
+			break;
+		case 2:
+			return Trigger(a);
+			break;
+		case 3:
+			return Release(a);
+			break;
+		default:
+			break;
+		}
+		return false;
+	};
+
+	// keyboard
+	auto Keyboard = [this, type](int a)
+	{
+		switch (type)
+		{
+		case 1:
+			return Press(a);
+			break;
+		case 2:
+			return Trigger(a);
+			break;
+		case 3:
+			return Release(a);
+			break;
+		default:
+			break;
+		}
+		return false;
+	};
+
+	// Joupad
+	auto Joypad = [this, type](DirectJoypad a)
+	{
+		switch (type)
+		{
+		case 1:
+			return Press(a);
+			break;
+		case 2:
+			return Trigger(a);
+			break;
+		case 3:
+			return Release(a);
+			break;
+		default:
+			break;
+		}
+		return false;
+	};
+
 	switch (key)
 	{
 	case KEY_UP:
-		if (m_pKeyboard->GetPress(DIK_W)
-			|| m_pKeyboard->GetPress(DIK_UP)
-			|| m_pJoyPad->GetPressAll(JOYPAD_UP))
-		{
-			return true;
-		}
+		return Keyboard(DIK_W) || Keyboard(DIK_UP) || Joypad(JOYPAD_UP);
 		break;
 	case KEY_UP_LEFT:
-		if ((m_pKeyboard->GetPress(DIK_W) && m_pKeyboard->GetPress(DIK_A))
-			|| (m_pKeyboard->GetPress(DIK_UP) && m_pKeyboard->GetPress(DIK_LEFT))
-			|| m_pJoyPad->GetPressAll(JOYPAD_UP_LEFT))
-		{
-			return true;
-		}
+		return (Keyboard(DIK_W) && Keyboard(DIK_A)) || (Keyboard(DIK_UP) && Keyboard(DIK_LEFT)) || Joypad(JOYPAD_UP_LEFT);
 		break;
 	case KEY_UP_RIGHT:
-		if ((m_pKeyboard->GetPress(DIK_W) && m_pKeyboard->GetPress(DIK_D))
-			|| (m_pKeyboard->GetPress(DIK_UP) && m_pKeyboard->GetPress(DIK_RIGHT))
-			|| m_pJoyPad->GetPressAll(JOYPAD_UP_RIGHT))
-		{
-			return true;
-		}
+		return (Keyboard(DIK_W) && Keyboard(DIK_D)) || (Keyboard(DIK_UP) && Keyboard(DIK_RIGHT))|| Joypad(JOYPAD_UP_RIGHT);
 		break;
 	case KEY_DOWN:
-		if (m_pKeyboard->GetPress(DIK_S)
-			|| m_pKeyboard->GetPress(DIK_DOWN)
-			|| m_pJoyPad->GetPressAll(JOYPAD_DOWN))
-		{
-			return true;
-		}
+		return Keyboard(DIK_S) || Keyboard(DIK_DOWN) || Joypad(JOYPAD_DOWN);
 		break;
 	case KEY_DOWN_LEFT:
-		if ((m_pKeyboard->GetPress(DIK_S) && m_pKeyboard->GetPress(DIK_A))
-			|| (m_pKeyboard->GetPress(DIK_DOWN) && m_pKeyboard->GetPress(DIK_LEFT))
-			|| m_pJoyPad->GetPressAll(JOYPAD_DOWN_LEFT))
-		{
-			return true;
-		}
+		return (Keyboard(DIK_S) && Keyboard(DIK_A)) || (Keyboard(DIK_DOWN) && Keyboard(DIK_LEFT)) || Joypad(JOYPAD_DOWN_LEFT);
 		break;
 	case KEY_DOWN_RIGHT:
-		if ((m_pKeyboard->GetPress(DIK_S) && m_pKeyboard->GetPress(DIK_D))
-			|| (m_pKeyboard->GetPress(DIK_DOWN) && m_pKeyboard->GetPress(DIK_RIGHT))
-			|| m_pJoyPad->GetPressAll(JOYPAD_DOWN_RIGHT))
-		{
-			return true;
-		}
+		return  (Keyboard(DIK_S) && Keyboard(DIK_D)) || (Keyboard(DIK_DOWN) && Keyboard(DIK_RIGHT)) || Joypad(JOYPAD_DOWN_RIGHT);
 		break;
 	case KEY_LEFT:
-		if (m_pKeyboard->GetPress(DIK_A)
-			|| m_pKeyboard->GetPress(DIK_LEFT)
-			|| m_pJoyPad->GetPressAll(JOYPAD_LEFT))
-		{
-			return true;
-		}
+		return Keyboard(DIK_A) || Keyboard(DIK_LEFT) || Joypad(JOYPAD_LEFT);
 		break;
 	case KEY_RIGHT:
-		if (m_pKeyboard->GetPress(DIK_D)
-			|| m_pKeyboard->GetPress(DIK_RIGHT)
-			|| m_pJoyPad->GetPressAll(JOYPAD_RIGHT))
-		{
-			return true;
-		}
+		return Keyboard(DIK_D) || Keyboard(DIK_RIGHT) || Joypad(JOYPAD_RIGHT);
 		break;
 	case KEY_DECISION:
-		if (m_pKeyboard->GetPress(DIK_RETURN)
-			|| m_pJoyPad->GetPressAll(JOYPAD_A))
-		{
-			return true;
-		}
+		return Keyboard(DIK_RETURN) || Joypad(JOYPAD_A);
 		break;
 	case KEY_SHOT:
-		if (m_pKeyboard->GetPress(DIK_SPACE)
-			|| m_pJoyPad->GetPressAll(JOYPAD_R1))
-		{
-			return true;
-		}
+		return Keyboard(DIK_SPACE) || Joypad(JOYPAD_R1);
 		break;
 	case KEY_BACK:
-		if (m_pKeyboard->GetPress(DIK_BACKSPACE)
-			|| m_pKeyboard->GetPress(DIK_B)
-			|| m_pJoyPad->GetPressAll(JOYPAD_BACK)
-			|| m_pJoyPad->GetPressAll(JOYPAD_B))
-		{
-			return true;
-		}
+		return Keyboard(DIK_BACKSPACE) || Keyboard(DIK_B) || Joypad(JOYPAD_BACK) || Joypad(JOYPAD_B);
 		break;
 	case KEY_SHIFT:
-		if (m_pKeyboard->GetPress(DIK_RSHIFT)
-			|| m_pKeyboard->GetPress(DIK_LSHIFT)
-			|| m_pJoyPad->GetPressAll(JOYPAD_L1))
-		{
-			return true;
-		}
+		return Keyboard(DIK_RSHIFT) || Keyboard(DIK_LSHIFT) || Joypad(JOYPAD_L1);
 		break;
 	case KEY_MOVE:
-		if (Press(KEY_UP) || Press(KEY_DOWN) || Press(KEY_LEFT) || Press(KEY_RIGHT))
-		{
-			return true;
-		}
+		return Standart(KEY_UP) || Standart(KEY_DOWN) || Standart(KEY_LEFT) || Standart(KEY_RIGHT);
 		break;
 	case KEY_PAUSE:
-		if (m_pKeyboard->GetPress(DIK_P)
-			|| m_pJoyPad->GetPressAll(JOYPAD_START))
-		{
-			return true;
-		}
-		break;
-	case KEY_ALL:
-		if (m_pKeyboard->GetAllPress()
-			|| m_pJoyPad->GetPressAll())
-		{
-			return true;
-		}
+		return Keyboard(DIK_P) || Joypad(JOYPAD_START);
 		break;
 	default:
 		break;
 	}
 
+	// 予定されてないキーが呼ばれた
+	assert(false);
 	return false;
 }
 
 //*************************************************************************************
-//トリガー処理(総合)
+// 指定したデバイスの入力を確認
 //*************************************************************************************
-bool CInput::Trigger(STAN_DART_INPUT_KEY key)
+bool CInput::KeyChackNum(STAN_DART_INPUT_KEY key, int type, int nNum)
 {
+	// Standart
+	auto Standart = [this, type](STAN_DART_INPUT_KEY key, int num)
+	{
+		switch (type)
+		{
+		case 1:
+			return Press(key, num);
+			break;
+		case 2:
+			return Trigger(key, num);
+			break;
+		case 3:
+			return Release(key, num);
+			break;
+		default:
+			break;
+		}
+		return false;
+	};
+
+	// keyboard
+	auto Keyboard = [this, type](int key)
+	{
+		switch (type)
+		{
+		case 1:
+			return Press(key);
+			break;
+		case 2:
+			return Trigger(key);
+			break;
+		case 3:
+			return Release(key);
+			break;
+		default:
+			break;
+		}
+		return false;
+	};
+
+	// Joupad
+	auto Joypad = [this, type](DirectJoypad key, int num)
+	{
+		switch (type)
+		{
+		case 1:
+			return Press(key, num);
+			break;
+		case 2:
+			return Trigger(key, num);
+			break;
+		case 3:
+			return Release(key, num);
+			break;
+		default:
+			break;
+		}
+		return false;
+	};
+
 	switch (key)
 	{
 	case KEY_UP:
-		if (m_pKeyboard->GetTrigger(DIK_W)
-			|| m_pKeyboard->GetTrigger(DIK_UP)
-			|| m_pJoyPad->GetTriggerAll(JOYPAD_UP))
-		{
-			return true;
-		}
+		return nNum == -1 ? Keyboard(DIK_W) || Keyboard(DIK_UP) : Joypad(JOYPAD_UP, nNum);
 		break;
 	case KEY_UP_LEFT:
-		if ((m_pKeyboard->GetTrigger(DIK_W) && m_pKeyboard->GetTrigger(DIK_A))
-			|| (m_pKeyboard->GetTrigger(DIK_UP) && m_pKeyboard->GetTrigger(DIK_LEFT))
-			|| m_pJoyPad->GetTriggerAll(JOYPAD_UP_LEFT))
-		{
-			return true;
-		}
+		return nNum == -1 ? (Keyboard(DIK_W) && Keyboard(DIK_A)) || (Keyboard(DIK_UP) && Keyboard(DIK_LEFT)) : Joypad(JOYPAD_UP_LEFT, nNum);
 		break;
 	case KEY_UP_RIGHT:
-		if ((m_pKeyboard->GetTrigger(DIK_W) && m_pKeyboard->GetTrigger(DIK_D))
-			|| (m_pKeyboard->GetTrigger(DIK_UP) && m_pKeyboard->GetTrigger(DIK_RIGHT))
-			|| m_pJoyPad->GetTriggerAll(JOYPAD_UP_RIGHT))
-		{
-			return true;
-		}
+		return nNum == -1 ? (Keyboard(DIK_W) && Keyboard(DIK_D)) || (Keyboard(DIK_UP) && Keyboard(DIK_RIGHT)) : Joypad(JOYPAD_UP_RIGHT, nNum);
 		break;
 	case KEY_DOWN:
-		if (m_pKeyboard->GetTrigger(DIK_S)
-			|| m_pKeyboard->GetTrigger(DIK_DOWN)
-			|| m_pJoyPad->GetTriggerAll(JOYPAD_DOWN))
-		{
-			return true;
-		}
+		return nNum == -1 ? Keyboard(DIK_S) || Keyboard(DIK_DOWN) : Joypad(JOYPAD_DOWN, nNum);
 		break;
 	case KEY_DOWN_LEFT:
-		if ((m_pKeyboard->GetTrigger(DIK_S) && m_pKeyboard->GetTrigger(DIK_A))
-			|| (m_pKeyboard->GetTrigger(DIK_DOWN) && m_pKeyboard->GetTrigger(DIK_LEFT))
-			|| m_pJoyPad->GetTriggerAll(JOYPAD_DOWN_LEFT))
-		{
-			return true;
-		}
+		return nNum == -1 ? (Keyboard(DIK_S) && Keyboard(DIK_A)) || (Keyboard(DIK_DOWN) && Keyboard(DIK_LEFT)) : Joypad(JOYPAD_DOWN_LEFT, nNum);
 		break;
 	case KEY_DOWN_RIGHT:
-		if ((m_pKeyboard->GetTrigger(DIK_S) && m_pKeyboard->GetTrigger(DIK_D))
-			|| (m_pKeyboard->GetTrigger(DIK_DOWN) && m_pKeyboard->GetTrigger(DIK_RIGHT))
-			|| m_pJoyPad->GetTriggerAll(JOYPAD_DOWN_RIGHT))
-		{
-			return true;
-		}
+		return nNum == -1 ? (Keyboard(DIK_S) && Keyboard(DIK_D)) || (Keyboard(DIK_DOWN) && Keyboard(DIK_RIGHT)) : Joypad(JOYPAD_DOWN_RIGHT, nNum);
 		break;
 	case KEY_LEFT:
-		if (m_pKeyboard->GetTrigger(DIK_A)
-			|| m_pKeyboard->GetTrigger(DIK_LEFT)
-			|| m_pJoyPad->GetTriggerAll(JOYPAD_LEFT))
-		{
-			return true;
-		}
+		return nNum == -1 ? Keyboard(DIK_A) || Keyboard(DIK_LEFT) : Joypad(JOYPAD_LEFT, nNum);
 		break;
 	case KEY_RIGHT:
-		if (m_pKeyboard->GetTrigger(DIK_D)
-			|| m_pKeyboard->GetTrigger(DIK_RIGHT)
-			|| m_pJoyPad->GetTriggerAll(JOYPAD_RIGHT))
-		{
-			return true;
-		}
+		return nNum == -1 ? Keyboard(DIK_D) || Keyboard(DIK_RIGHT) : Joypad(JOYPAD_RIGHT, nNum);
 		break;
 	case KEY_DECISION:
-		if (m_pKeyboard->GetTrigger(DIK_RETURN)
-			|| m_pJoyPad->GetTriggerAll(JOYPAD_A))
-		{
-			return true;
-		}
+		return nNum == -1 ? Keyboard(DIK_RETURN) : Joypad(JOYPAD_A, nNum);
 		break;
 	case KEY_SHOT:
-		if (m_pKeyboard->GetTrigger(DIK_SPACE)
-			|| m_pJoyPad->GetTriggerAll(JOYPAD_R1))
-		{
-			return true;
-		}
+		return nNum == -1 ? Keyboard(DIK_SPACE) : Joypad(JOYPAD_R1, nNum);
 		break;
 	case KEY_BACK:
-		if (m_pKeyboard->GetTrigger(DIK_BACKSPACE)
-			|| m_pKeyboard->GetTrigger(DIK_B)
-			|| m_pJoyPad->GetTriggerAll(JOYPAD_BACK)
-			|| m_pJoyPad->GetTriggerAll(JOYPAD_B))
-		{
-			return true;
-		}
-		break;
-	case KEY_SHIFT:
-		if (m_pKeyboard->GetTrigger(DIK_RSHIFT)
-			|| m_pKeyboard->GetTrigger(DIK_LSHIFT)
-			|| m_pJoyPad->GetTriggerAll(JOYPAD_A))
-		{
-			return true;
-		}
+		return nNum == -1 ? Keyboard(DIK_BACKSPACE) || Keyboard(DIK_B) : Joypad(JOYPAD_BACK, nNum) || Joypad(JOYPAD_B, nNum);
 		break;
 	case KEY_MOVE:
-		if (Trigger(KEY_UP) || Trigger(KEY_DOWN) || Trigger(KEY_LEFT) || Trigger(KEY_RIGHT))
-		{
-			return true;
-		}
+		return Standart(KEY_UP, nNum) || Standart(KEY_DOWN, nNum) || Standart(KEY_LEFT, nNum) || Standart(KEY_RIGHT, nNum);
 		break;
 	case KEY_PAUSE:
-		if (m_pKeyboard->GetTrigger(DIK_P)
-			|| m_pJoyPad->GetTriggerAll(JOYPAD_START)
-			|| m_pJoyPad->GetTriggerAll(JOYPAD_HOME))
-		{
-			return true;
-		}
-		break;
-	case KEY_ALL:
-		if (m_pKeyboard->GetAllTrigger()
-			|| m_pJoyPad->GetTriggerAll())
-		{
-			return true;
-		}
+		return nNum == -1 ? Keyboard(DIK_P) : Joypad(JOYPAD_START, nNum) || Joypad(JOYPAD_HOME, nNum);
 		break;
 	default:
 		break;
 	}
 
+	// 予定されてないキーが呼ばれた
+	assert(false);
 	return false;
+}
+
+//*************************************************************************************
+// 入力したデバイスの番号を取得 (Press)
+//*************************************************************************************
+std::vector<int> CInput::PressDevice(STAN_DART_INPUT_KEY key)
+{
+	std::vector<int> inputedDeviceIndex;
+
+	// キーボード入力の調査
+	if (Release(key, -1))
+	{
+		inputedDeviceIndex.push_back(-1);
+	}
+
+	// JoyPad入力の調査
+	for (int i = 0;i < m_pJoyPad->GetJoyPadNumMax();i++)
+	{
+		if (Release(key, i))
+		{
+			inputedDeviceIndex.push_back(i);
+		}
+	}
+	
+	return inputedDeviceIndex;
+}
+
+//*************************************************************************************
+// 入力したデバイスの番号を取得 (Trigger)
+//*************************************************************************************
+std::vector<int> CInput::TriggerDevice(STAN_DART_INPUT_KEY key)
+{
+	std::vector<int> inputedDeviceIndex;
+
+	// キーボード入力の調査
+	if (Trigger(key, -1))
+	{
+		inputedDeviceIndex.push_back(-1);
+	}
+
+	// JoyPad入力の調査
+	for (int i = 0; i < m_pJoyPad->GetJoyPadNumMax(); i++)
+	{
+		if (Trigger(key, i))
+		{
+			inputedDeviceIndex.push_back(i);
+		}
+	}
+
+	return inputedDeviceIndex;
+}
+
+//*************************************************************************************
+// 入力したデバイスの番号を取得 (Release)
+//*************************************************************************************
+std::vector<int> CInput::ReleaseDevice(STAN_DART_INPUT_KEY key)
+{
+	std::vector<int> inputedDeviceIndex;
+
+	// キーボード入力の調査
+	if (Release(key, -1))
+	{
+		inputedDeviceIndex.push_back(-1);
+	}
+
+	// JoyPad入力の調査
+	for (int i = 0; i < m_pJoyPad->GetJoyPadNumMax(); i++)
+	{
+		if (Release(key, i))
+		{
+			inputedDeviceIndex.push_back(i);
+		}
+	}
+
+	return inputedDeviceIndex;
 }
 
 //*************************************************************************************
@@ -414,6 +457,21 @@ bool CInput::Release(int nkey)
 	return m_pKeyboard->GetRelease(nkey);
 }
 
+bool CInput::Press(DirectJoypad key)
+{
+	return m_pJoyPad->GetPressAll(key);
+}
+
+bool CInput::Trigger(DirectJoypad key)
+{
+	return m_pJoyPad->GetTriggerAll(key);
+}
+
+bool CInput::Release(DirectJoypad key)
+{
+	return m_pJoyPad->GetReleaseAll(key);
+}
+
 //*************************************************************************************
 //プレス処理(ジョイパッド)
 //*************************************************************************************
@@ -431,22 +489,24 @@ bool CInput::Trigger(DirectJoypad key, int nNum)
 }
 
 //*************************************************************************************
+//リリース処理(ジョイパッド)
+//*************************************************************************************
+bool CInput::Release(DirectJoypad key, int nNum)
+{
+	return m_pJoyPad->GetRelease(key, nNum);
+}
+
+//*************************************************************************************
 //十字キーのベクトル
 //*************************************************************************************
-D3DXVECTOR3 CInput::VectorMoveKey(int nNum)
+D3DXVECTOR3 CInput::VectorMoveKey()
 {
 	D3DXVECTOR3 VectorMove = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
 	if (m_pJoyPad->GetJoyPadNumMax() == 0)
 	{
 		return VectorMove;
 	}
-
-	if (m_pJoyPad->GetJoyPadNumMax() <= nNum)
-	{
-		return VectorMove;
-	}
-
-	int nCheck = m_pJoyPad->GetCross(nNum);
+	int nCheck = m_pJoyPad->GetCross();
 
 	if (nCheck > 360 || nCheck < 0)
 	{//十字キーの角度が指定外だったら０を返す
@@ -502,7 +562,7 @@ D3DXVECTOR3 CInput::VectorMoveKeyAll()
 //*************************************************************************************
 //ジョイスティックのベクトル
 //*************************************************************************************
-D3DXVECTOR3 CInput::VectorMoveJoyStick(int nNum, bool bleftandright)
+D3DXVECTOR3 CInput::VectorMoveJoyStick(bool bleftandright, int nNum)
 {
 	D3DXVECTOR3 VectorMove = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
 	if (m_pJoyPad->GetJoyPadNumMax() == 0)
@@ -510,29 +570,13 @@ D3DXVECTOR3 CInput::VectorMoveJoyStick(int nNum, bool bleftandright)
 		return VectorMove;
 	}
 
-	VectorMove = m_pJoyPad->GetJoyStickData(nNum, bleftandright);
+	VectorMove = m_pJoyPad->GetJoyStickData(bleftandright, nNum);
 	//長さ１のベクトル変換
 	D3DXVec3Normalize(&VectorMove, &VectorMove);
 	return VectorMove;
 }
 
-//*************************************************************************************
-//ジョイスティックのベクトル
-//*************************************************************************************
-D3DXVECTOR3 CInput::VectorMoveJoyStickAll(bool bleftandright)
+int CInput::GetAcceptJoyPadCount()
 {
-	D3DXVECTOR3 VectorNull = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
-	for (int nCnt = 0; nCnt < 2; nCnt++)
-	{
-		D3DXVECTOR3 VectorMove = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
-		VectorMove = m_pJoyPad->GetJoyStickData(nCnt, bleftandright);
-		//長さ１のベクトル変換
-		D3DXVec3Normalize(&VectorMove, &VectorMove);
-		if (VectorNull != VectorMove)
-		{
-			return  VectorMove;
-		}
-	}
-
-	return VectorNull;
+	return m_pJoyPad->GetJoyPadNumMax();
 }

@@ -15,7 +15,7 @@
 //マクロ定義
 #define EFFECT_HEIGHT	(35)		//プレイヤーの高さ
 #define EFFECT_WIDTH	(40)		//プレイヤーの幅	
-#define EFFECT_TEX		(4)			//テクスチャの枚数
+#define EFFECT_TEX		(2)			//テクスチャの枚数
 
 //前方宣言
 

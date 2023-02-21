@@ -195,13 +195,8 @@ HRESULT CEffect::Load()
 
 	//テクスチャの読み込み
 	D3DXCreateTextureFromFile(pDevice,
-		"data\\TEXTURE\\Reppuuken03.png",
+		"data\\TEXTURE\\Flash01.png",
 		&m_apTexture[1]);
-
-	//テクスチャの読み込み
-	D3DXCreateTextureFromFile(pDevice,
-		"data\\TEXTURE\\Reppuuken04.png",
-		&m_apTexture[2]);
 
 	return S_OK;
 }

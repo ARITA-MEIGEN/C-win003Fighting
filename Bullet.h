@@ -6,7 +6,7 @@
 #include"Object.h"
 
 #define KAKUDO	(-100)			//移動方向
-#define KAKUSANDO (22)			//幅の角度
+#define KAKUSANDO (20)			//幅の角度
 #define KAKUSANDOB (10)			//幅の角度
 #define	POS_ADJUSTMENT	(30.0f)	//微調整用
 #define	DAMAGE	(70)	//微調整用
@@ -29,7 +29,8 @@ public:
 
 	bool Hit();	//パーティクルの情報の取得
 
-
+	//ゲッター
+	D3DXVECTOR3	GetPos() { return m_pos; };
 
 private:
 	D3DXVECTOR3 m_pos;		//位置

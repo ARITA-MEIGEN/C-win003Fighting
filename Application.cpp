@@ -14,7 +14,6 @@
 #include"Object.h"
 #include"Fade.h"
 #include"sound.h"
-
 #include"Title.h"
 #include"Game.h"
 #include"Result.h"
@@ -25,14 +24,17 @@
 CRenderer*CApplication::m_pRenderer = nullptr;
 CDebugProc*CApplication::m_pDebugProc = nullptr;
 CFade* CApplication::m_pFade = nullptr;
+int CApplication::m_nWinner = 0;
 
 //コントローラー周り
 CInput*CApplication::m_pInput = nullptr;
+
 //画面遷移周り
 CApplication::MODE CApplication::m_mode;
 CTitle*CApplication::m_pTitle = nullptr;
 CGame*CApplication::m_pGame = nullptr;
 CResult*CApplication::m_pResult = nullptr;
+
 //====================================
 //コンストラクタ
 //====================================
@@ -178,8 +180,9 @@ void CApplication::Uninit()
 //====================================
 void CApplication::Update()
 {
+#ifdef _DEBUG
 	LPDIRECT3DDEVICE9 pDevice = CApplication::GetRenderer()->GetDevice();	//デバイスへのポインタ
-	//ワイヤーフレーム
+																			//ワイヤーフレーム
 	if (m_pInput->Trigger(DIK_1))
 	{
 		pDevice->SetRenderState(D3DRS_FILLMODE, D3DFILL_WIREFRAME);
@@ -188,10 +191,11 @@ void CApplication::Update()
 	{
 		pDevice->SetRenderState(D3DRS_FILLMODE, D3DFILL_SOLID);
 	}
+#endif // _DEBUG
 
 	//レンダラー更新
 	m_pRenderer->Update();
-	
+
 	//キーボードとジョイパッドの更新
 	if (m_pInput != nullptr)
 	{

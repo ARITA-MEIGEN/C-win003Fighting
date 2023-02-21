@@ -209,8 +209,10 @@ END_AXIS
 		MOTION = data/TXT/Player01/JP_DIE.txt		
 		MOTION = data/TXT/Player01/CR_DIE.txt		
 		
+		//投げ
+		MOTION = data/TXT/Player01/SLOW.txt
 		MOTION = data/TXT/Player01/DOWN.txt	
-		MOTION = data/TXT/Player01/STANDUP.txt		#[41]
+		MOTION = data/TXT/Player01/STANDUP.txt		#[42]
 		
 	END_MOTIONSET
 END_SCRIPT		# この行は絶対消さないこと！

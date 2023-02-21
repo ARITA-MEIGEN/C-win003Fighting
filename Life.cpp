@@ -47,13 +47,11 @@ HRESULT CLife::Init(float Width, float Height)
 		}
 	}
 	m_apObject2D[0]->SetSiz(D3DXVECTOR2(0.0f, 40.0f));
-	m_apObject2D[NUM_TEXLIFE]->SetSiz(D3DXVECTOR2(0.0f, 40.0f));
-
-
 	m_apObject2D[0]->SetPos(D3DXVECTOR3(LIFE_POS - 10, LIFE_POS_Y, 0.0f));
 	m_apObject2D[1]->SetPos(D3DXVECTOR3(LIFE_POS, LIFE_POS_Y, 0.0f));
 	m_apObject2D[2]->SetPos(D3DXVECTOR3(LIFE_POS, LIFE_POS_Y, 0.0f));
 
+	m_apObject2D[3]->SetSiz(D3DXVECTOR2(0.0f, 40.0f));
 	m_apObject2D[3]->SetPos(D3DXVECTOR3(SCREEN_WIDTH - (LIFE_POS - 10), LIFE_POS_Y, 0.0f));
 	m_apObject2D[4]->SetPos(D3DXVECTOR3(SCREEN_WIDTH - LIFE_POS, LIFE_POS_Y, 0.0f));
 	m_apObject2D[5]->SetPos(D3DXVECTOR3(SCREEN_WIDTH - LIFE_POS, LIFE_POS_Y, 0.0f));
@@ -70,8 +68,8 @@ HRESULT CLife::Init(float Width, float Height)
 	m_apObject2D[0]->SetPosR(CGame::GetPlayer(0)->GetLife() *(LIFEBAR_WIDTH / CGame::GetPlayer(0)->GetLife()) + 20.0f);
 	m_apObject2D[NUM_TEXLIFE]->SetPosL(CGame::GetPlayer(1)->GetLife() *(LIFEBAR_WIDTH / CGame::GetPlayer(1)->GetLife()) + 20.0f);
 
-	m_anMAX[0] = CGame::GetPlayer(0)->GetLife();
-	m_anMAX[1] = CGame::GetPlayer(1)->GetLife();
+	m_anMAX[0] = CGame::GetPlayer(1)->GetLife();
+	m_anMAX[1] = CGame::GetPlayer(0)->GetLife();
 
 	return S_OK;
 }
@@ -97,8 +95,8 @@ void CLife::Uninit()
 //=============================================================================
 void CLife::Update()
 {
-	m_apObject2D[2]->SetPosR(CGame::GetPlayer(0)->GetLife() *(LIFEBAR_WIDTH / m_anMAX[0]));
-	m_apObject2D[5]->SetPosL(CGame::GetPlayer(1)->GetLife() *(LIFEBAR_WIDTH / m_anMAX[1]));
+	m_apObject2D[2]->SetPosR(CGame::GetPlayer(1)->GetLife() *(LIFEBAR_WIDTH / m_anMAX[0]));
+	m_apObject2D[5]->SetPosL(CGame::GetPlayer(0)->GetLife() *(LIFEBAR_WIDTH / m_anMAX[1]));
 }
 
 //=============================================================================

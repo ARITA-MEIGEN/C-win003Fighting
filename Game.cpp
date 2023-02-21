@@ -58,8 +58,8 @@ HRESULT CGame::Init()
 	CEffect::Load();
 
 	//プレイヤーの生成
-	m_pPlayer[0] = CPlayer::Create(D3DXVECTOR3(-50.0f, 0.0f, 0.0f), D3DXVECTOR3(0.0f, -D3DX_PI*0.5f, 0.0f));
-	m_pPlayer[1] = CPlayer::Create(D3DXVECTOR3(50.0f, 0.0f, 0.0f), D3DXVECTOR3(0.0f, D3DX_PI*0.5f, 0.0f));
+	m_pPlayer[0] = CPlayer::Create(D3DXVECTOR3(50.0f, 0.0f, 0.0f), D3DXVECTOR3(0.0f, D3DX_PI*0.5f, 0.0f));
+	m_pPlayer[1] = CPlayer::Create(D3DXVECTOR3(-50.0f, 0.0f, 0.0f), D3DXVECTOR3(0.0f, -D3DX_PI*0.5f, 0.0f));
 	m_pPlayer[0]->SetEnemy(m_pPlayer[1]);
 	m_pPlayer[1]->SetEnemy(m_pPlayer[0]);
 
@@ -91,6 +91,8 @@ HRESULT CGame::Init()
 	bDebugCamera = false;
 
 	PlaySound(SOUND_LABEL_BGM_BATTLE001);
+
+	m_Timer = 0;
 
 	return S_OK;
 }
@@ -161,6 +163,24 @@ void CGame::Update()
 	m_pCamera->Update();
 	m_pLight->Update();
 	m_Life->Update();
+
+	//片方死んだ場合タイマー加算
+	if (m_pPlayer[0]->GetLife() <= 0)
+	{
+		CApplication::SetWinner(0);
+		m_Timer++;
+	}
+	else if (m_pPlayer[1]->GetLife() <= 0)
+	{
+		CApplication::SetWinner(1);
+		m_Timer++;
+	}
+
+	//タイマーが一定値以上でリザルトへ移行
+	if (m_Timer >= END_TIMER&&CApplication::GetFade()->GetFade() == CFade::FADE_NONE)
+	{
+		CApplication::GetFade()->SetFade(CApplication::MODE_RESULT);
+	}
 }
 
 //====================================

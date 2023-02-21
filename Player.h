@@ -19,6 +19,7 @@
 //前方宣言
 class CShadow;
 class CModel;
+class CBullet;
 
 //マクロ定義
 #define MAX_MOTION			(5)				//モーションの数
@@ -36,6 +37,8 @@ class CModel;
 #define MAX_KEYMEMORY		(60)			//記憶するキーの数
 #define	DASH_SPEED			(5.0f)			//ダッシュ速度
 #define BULLET_ANGLE		(1.0f)			//弾の角度
+#define	BACKSTEP_MOVE_X		(5.0f)			//バックステップの移動量
+#define	BACKSTEP_MOVE_Y		(2.0f)			//バックステップの移動量
 
 
 class CPlayer :public CObject
@@ -121,6 +124,7 @@ public:
 		PM_CR_DIE,			//死
 		PM_JP_DIE,			//死
 
+		PM_SLOW,			//投げ
 		PM_DOWN,			//死亡&ダウン時モーション
 		PM_STANDUP,			//起き上がり
 		PM_MAX
@@ -146,7 +150,7 @@ public:
 	static CPlayer*	Create(D3DXVECTOR3 pos, D3DXVECTOR3 rot);	
 	D3DXMATRIX		GetMtx() { return m_mtxWorld; };		//マトリックスの取得
 	void			ReadMotion();
-	void			MotionPlayer(int nNumber);				//モーションの再生　引数は再生するモーションの番号
+	void			MotionPlayer();							//モーションの再生　引数は再生するモーションの番号
 	void			MotionManager();						//状態に合わせてモーション再生する
 	void			PlayFirstMotion();						//前と状態が違う場合のみ最初のモーションを設定する
 	void			DrawCollision();						//当たり判定の設定
@@ -166,16 +170,20 @@ public:
 	void			Damage_Cal(int Damage, CCollision::EDAMAGE_POINT pro, int HitRig, int GuardRig);							//ダメージ設定
 	void			Die();
 	void			FireBall();								//遠距離技
+	void			Slow();									//投げ
 
 	//セッター
 	void			SetPos(D3DXVECTOR3 pos) { m_pos = pos; };						//位置の設定
 	void			SetRot(D3DXVECTOR3 rot) { m_rot = rot; };						//向きの設定
 	void			SetEnemy(CPlayer* ene) { m_pEne = ene; };						//敵のポインタ
-	void			SetBullet(bool bullet) { m_bBullet = bullet; };						//敵のポインタ
+	void			SetBullet(bool bullet) { m_bBullet = bullet; };					//弾を使用しているかどうか
+	void			SetAttack(bool atk) { m_bAttack = atk; };						//弾を使用しているかどうか
+
 
 	//ゲッター
 	D3DXVECTOR3		GetPos() { return m_pos; };
 	int				GetLife() { return m_nLife; };	//体力
+
 	//当たり判定の取得
 	CCollision*		GetCollision(int number) { return m_apMotion[m_Motion].aKey[m_nCurKey].Collision[number]; };
 
@@ -204,8 +212,8 @@ private:
 
 	bool			m_bMotion;						//モーション再生中かどうか
 	static int		m_nNumPlayer;					//プレイヤーの数
-	int				m_nPlayerNumber;				//自分のプレイヤー番号
-	CPlayer*		m_pEne;						//対戦相手のポインタ
+	int				m_nPlaNum;						//自分のプレイヤー番号
+	CPlayer*		m_pEne;							//対戦相手のポインタ
 	PLAYER_STATE	m_State;						//プレイヤーの状態
 	bool			m_bAttack;						//攻撃中かどうか
 	int				m_nLife;						//体力
@@ -214,6 +222,7 @@ private:
 	int				m_nNowKey;						//キー保存用
 	int				m_nHitStop;						//ヒットストップの時間
 	bool			m_bBullet;						//飛び道具を使用しているか？
+	CBullet*		m_pBullet;						//飛び道具
 
 	//押し出し判定関連
 	CCollision* 	m_AxisBox;						//押し出し判定(プレイヤーの軸)

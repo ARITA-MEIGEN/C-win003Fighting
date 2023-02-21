@@ -12,6 +12,8 @@
 
 #define MAX_PLAYER (2)
 #define STAGE_WIDTH	(350)	//中央から端までの長さ
+#define END_TIMER	(120)	//プレイヤーが死んでから終わるまでの時間
+
 
 //前方宣言
 class CPlayer;
@@ -61,6 +63,7 @@ private:
 	static CFloor*m_pFloor;
 	static CMesh*m_pMesh;
 	static  bool bDebugCamera;
+	int m_Timer;
 
 };
 

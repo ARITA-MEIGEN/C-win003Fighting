@@ -10,11 +10,11 @@
 #include"input.h"
 #include"Fade.h"
 #include"Application.h"
+#include"renderer.h"
+#include"sound.h"
 
 //静的メンバ変数
-CBg*CResult::m_pBg = nullptr;
-CScore*CResult::m_pScore=nullptr;
-
+CObject2D*CResult::m_pBg = nullptr;
 //====================================
 //コンストラクタ
 //====================================
@@ -35,9 +35,30 @@ CResult::~CResult()
 //====================================
 HRESULT CResult::Init()
 {
+	LPDIRECT3DDEVICE9 pDevice;
+	pDevice = CApplication::GetRenderer()->GetDevice();
+
 	//テクスチャの読み込み
+	LPDIRECT3DTEXTURE9 tex[2];
 
 	//背景の生成
+	m_pBg = new CObject2D(CObject::OBJTYPE_UI);
+	m_pBg->Init();
+	m_pBg->SetPos(D3DXVECTOR3(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, 0.0f));
+	m_pBg->SetSiz(D3DXVECTOR2(SCREEN_WIDTH, SCREEN_HEIGHT));
+	m_pBg->SetCol(D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f));
+
+	//テクスチャの読み込み
+	D3DXCreateTextureFromFile(pDevice,
+		"data\\TEXTURE\\Result000.png",
+		&tex[0]);
+
+	//テクスチャの読み込み
+	D3DXCreateTextureFromFile(pDevice,
+		"data\\TEXTURE\\Result001.png",
+		&tex[1]);
+
+	m_pBg->BindTexture(tex[CApplication::GetWinner()]);
 
 
 	return S_OK;
@@ -63,7 +84,7 @@ void CResult::Update()
 		if (pInput->Trigger(DIK_RETURN) == true)		//ENTERキー
 		{//エンターでランキングに
 		 //モード設定
-			//PlaySound(SOUND_LABEL_SE_GAMESTART);
+			PlaySound(SOUND_LABEL_SE_START);
 			CApplication::GetFade()->SetFade(CApplication::MODE_TITLE);
 		}
 	}
@@ -75,20 +96,4 @@ void CResult::Update()
 void CResult::Draw()
 {
 
-}
-
-//====================================
-//背景の取得
-//====================================
-CBg * CResult::GetBg()
-{
-	return m_pBg;
-}
-
-//====================================
-//スコアの取得
-//====================================
-CScore*CResult::GetScore()
-{
-	return m_pScore;
 }

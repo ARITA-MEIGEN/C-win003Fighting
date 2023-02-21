@@ -41,6 +41,8 @@ SOUNDPARAM g_aParam[SOUND_LABEL_MAX] =
 	{ "data/SOUND/SE/Fire.wav.", 0 },		// 炎
 	{ "data/SOUND/SE/SPECIAL.wav.", 0 },	// 必殺技ヒット
 	{ "data/SOUND/SE/START.wav.", 0 },		// スタート
+	{ "data/SOUND/SE/BACKSTEP.wav.", 0 },	// バックステップ
+
 };
 //=============================================================================
 // 初期化処理

@@ -18,8 +18,7 @@ CInputJoyPad::CInputJoyPad()
 {
 	ZeroMemory(&m_JoyPadData, sizeof(m_JoyPadData));
 	m_nJoyNumCnt = 0;
-	m_AllOldKeyTrigger = JOYPAD_MAX;
-	m_AllOldKeyRelease = JOYPAD_MAX;
+	m_AllOldKey = DirectJoypad::JOYPAD_MAX;
 }
 
 //*************************************************************************************
@@ -48,7 +47,7 @@ BOOL CALLBACK CInputJoyPad::EnumJoysticksCallback(const DIDEVICEINSTANCE *pdidIn
 	{
 		return E_FAIL;
 	}
-
+	
 	pThis->SetInputDevice(pInputDevice);
 
 	//次のデバイスを調べるときはDIENUM_CONTINUE最初の一回のみの場合はDIENUM_STOP
@@ -98,7 +97,7 @@ BOOL CALLBACK CInputJoyPad::EnumAxesCallback(const DIDEVICEOBJECTINSTANCE *pdido
 //*************************************************************************************
 HRESULT CInputJoyPad::Init(HINSTANCE hInstance, HWND hWnd)
 {
-
+	
 	// デバイスの列挙
 	if (FAILED(m_pInput->EnumDevices(
 		DI8DEVCLASS_GAMECTRL,
@@ -188,13 +187,8 @@ void CInputJoyPad::Update(void)
 		{
 			for (int nButtons = 0; nButtons < MAX_JOY_KEY; nButtons++)
 			{
-				//トリガー情報を保存
-				m_JoyPadData[nCnt].aKeyStateTrigger.rgbButtons[nButtons] = ~m_JoyPadData[nCnt].aKeyState.rgbButtons[nButtons] & JoyKey.rgbButtons[nButtons];
-
-				//リリース情報を保存
-				m_JoyPadData[nCnt].aKeyStateRelease.rgbButtons[nButtons] = m_JoyPadData[nCnt].aKeyState.rgbButtons[nButtons] & ~JoyKey.rgbButtons[nButtons];
-
-
+				m_JoyPadData[nCnt].aKeyStateTrigger.rgbButtons[nButtons] = ~m_JoyPadData[nCnt].aKeyState.rgbButtons[nButtons] & JoyKey.rgbButtons[nButtons]; //トリガー情報を保存
+				m_JoyPadData[nCnt].aKeyStateRelease.rgbButtons[nButtons] = m_JoyPadData[nCnt].aKeyState.rgbButtons[nButtons] & ~JoyKey.rgbButtons[nButtons]; //トリガー情報を保存
 			}
 			m_JoyPadData[nCnt].aKeyState = JoyKey;//プレス処理の保管
 			m_JoyPadData[nCnt].nCrossPressRot = (int)(m_JoyPadData[nCnt].aKeyState.rgdwPOV[0] / 100.0f);//ジョイパッドの十字キーの押されている方向
@@ -203,7 +197,7 @@ void CInputJoyPad::Update(void)
 }
 
 //プレス処理
-bool CInputJoyPad::GetPress(DirectJoypad eKey, int nNum)
+bool CInputJoyPad::GetPress(DirectJoypad eKey,int nNum)
 {
 	if (m_JoyPadData[nNum].pInputDevice == nullptr)
 	{
@@ -229,10 +223,11 @@ bool CInputJoyPad::GetTrigger(DirectJoypad eKey, int nNum)
 	{
 		return GetCrossTrigger(eKey, nNum);
 	}
+
 	return (m_JoyPadData[nNum].aKeyStateTrigger.rgbButtons[eKey] & 0x80) ? true : false;
 }
 
-//リリース処理
+// リリース処理
 bool CInputJoyPad::GetRelease(DirectJoypad eKey, int nNum)
 {
 	if (m_JoyPadData[nNum].pInputDevice == nullptr)
@@ -244,6 +239,7 @@ bool CInputJoyPad::GetRelease(DirectJoypad eKey, int nNum)
 	{
 		return GetCrossRelease(eKey, nNum);
 	}
+
 	return (m_JoyPadData[nNum].aKeyStateRelease.rgbButtons[eKey] & 0x80) ? true : false;
 }
 
@@ -336,19 +332,19 @@ bool CInputJoyPad::GetCrossTrigger(DirectJoypad eKey, int nNum)
 		return false;
 	}
 
-	if (m_JoyPadData[nNum].aOldKeyTrigger != eKey
+	if (m_JoyPadData[nNum].aOldKey != eKey
 		&& GetCrossPress(eKey, nNum))
 	{
-		m_JoyPadData[nNum].aOldKeyTrigger = eKey;
+		m_JoyPadData[nNum].aOldKey = eKey;
 		return true;
 	}
-	else if (m_JoyPadData[nNum].aOldKeyTrigger == eKey
+	else if (m_JoyPadData[nNum].aOldKey == eKey
 		&& GetCrossPress(eKey, nNum))
 	{
 		return false;
 	}
 
-	m_JoyPadData[nNum].aOldKeyTrigger = DirectJoypad::JOYPAD_MAX;
+	m_JoyPadData[nNum].aOldKey = DirectJoypad::JOYPAD_MAX;
 	return false;
 }
 
@@ -360,21 +356,18 @@ bool CInputJoyPad::GetCrossRelease(DirectJoypad eKey, int nNum)
 		return false;
 	}
 
-	if (GetPress(eKey, nNum))
+	if (m_JoyPadData[nNum].aOldKey != eKey && !GetCrossPress(eKey, nNum))
 	{
-		m_JoyPadData[nNum].aOldKeyRelease = eKey;
 		return false;
 	}
-	else if(m_JoyPadData[nNum].aOldKeyRelease == eKey
-		&& !GetPress(eKey, nNum)
-		&& m_JoyPadData[nNum].aOldKeyRelease != JOYPAD_MAX
-		)
+
+	else if (m_JoyPadData[nNum].aOldKey == eKey && !GetCrossPress(eKey, nNum))
 	{
-		m_JoyPadData[nNum].aOldKeyRelease = JOYPAD_MAX;
+		m_JoyPadData[nNum].aOldKey = eKey;
 		return true;
 	}
-	
-	m_JoyPadData[nNum].aOldKeyRelease = JOYPAD_MAX;
+
+	m_JoyPadData[nNum].aOldKey = DirectJoypad::JOYPAD_MAX;
 	return false;
 }
 
@@ -396,9 +389,9 @@ bool CInputJoyPad::GetTriggerAll(DirectJoypad eKey)
 {
 	for (int nCnt = 0; nCnt < JOYPAD_DATA_MAX; nCnt++)
 	{
-		if (GetPress(eKey, nCnt) && m_AllOldKeyTrigger == JOYPAD_MAX)
+		if (GetPress(eKey, nCnt) && m_AllOldKey == JOYPAD_MAX)
 		{
-			m_AllOldKeyTrigger = eKey;
+			m_AllOldKey = eKey;
 			return true;
 		}
 	}
@@ -408,36 +401,28 @@ bool CInputJoyPad::GetTriggerAll(DirectJoypad eKey)
 		return false;
 	}
 
-	m_AllOldKeyTrigger = JOYPAD_MAX;
+	m_AllOldKey = JOYPAD_MAX;
 	return false;
 }
 
-//オールリリース処理（キー指定あり、プレイヤー指定なし）
+//オールリリース処理	（キー指定あり、プレイヤー指定なし）
 bool CInputJoyPad::GetReleaseAll(DirectJoypad eKey)
 {
 	for (int nCnt = 0; nCnt < JOYPAD_DATA_MAX; nCnt++)
 	{
-		if (GetPress(eKey, nCnt))
+		if (GetRelease(eKey, nCnt) && m_AllOldKey == JOYPAD_MAX)
 		{
-			m_AllOldKeyRelease = eKey;
-			return false;
-		}
-
-		if (!GetPressAll() 
-			&& m_AllOldKeyRelease == eKey
-			&& m_AllOldKeyRelease != JOYPAD_MAX)
-		{
-			m_AllOldKeyRelease = JOYPAD_MAX;
+			m_AllOldKey = eKey;
 			return true;
 		}
 	}
 
-	if (GetPressAll())
+	if (GetReleaseAll())
 	{//誰かがキーを押していたら
 		return false;
 	}
 
-	m_AllOldKeyRelease = JOYPAD_MAX;
+	m_AllOldKey = JOYPAD_MAX;
 	return false;
 }
 
@@ -466,21 +451,21 @@ bool CInputJoyPad::GetTriggerAll(int nNum)
 	{
 		return false;
 	}
-
+	
 	for (int nCntKey = 0; nCntKey < JOYPAD_MAX; nCntKey++)
 	{
-		if (GetPress((DirectJoypad)nCntKey, nNum) && m_JoyPadData[nNum].aOldKeyTrigger != nCntKey)
+		if (GetPress((DirectJoypad)nCntKey,nNum) && m_JoyPadData[nNum].aOldKey != nCntKey)
 		{
-			m_JoyPadData[nNum].aOldKeyTrigger = (DirectJoypad)nCntKey;
+			m_JoyPadData[nNum].aOldKey = (DirectJoypad)nCntKey;
 			return true;
 		}
-		else if (GetPress((DirectJoypad)nCntKey, nNum) && m_JoyPadData[nNum].aOldKeyTrigger == nCntKey)
+		else if (GetPress((DirectJoypad)nCntKey, nNum) && m_JoyPadData[nNum].aOldKey == nCntKey)
 		{
 			return false;
 		}
 	}
 
-	m_JoyPadData[nNum].aOldKeyTrigger = JOYPAD_MAX;
+	m_JoyPadData[nNum].aOldKey = JOYPAD_MAX;
 	return false;
 }
 
@@ -494,19 +479,18 @@ bool CInputJoyPad::GetReleaseAll(int nNum)
 
 	for (int nCntKey = 0; nCntKey < JOYPAD_MAX; nCntKey++)
 	{
-		if (!GetPressAll() && m_JoyPadData[nNum].aOldKeyRelease == nCntKey)
+		if (GetRelease((DirectJoypad)nCntKey, nNum) && m_JoyPadData[nNum].aOldKey != nCntKey)
 		{
-			m_JoyPadData[nNum].aOldKeyRelease = JOYPAD_MAX;
+			m_JoyPadData[nNum].aOldKey = (DirectJoypad)nCntKey;
 			return true;
 		}
-		else if (GetPress((DirectJoypad)nCntKey, nNum))
+		else if (GetRelease((DirectJoypad)nCntKey, nNum) && m_JoyPadData[nNum].aOldKey == nCntKey)
 		{
-			m_JoyPadData[nNum].aOldKeyRelease = (DirectJoypad)nCntKey;
 			return false;
 		}
 	}
 
-	m_JoyPadData[nNum].aOldKeyRelease = JOYPAD_MAX;
+	m_JoyPadData[nNum].aOldKey = JOYPAD_MAX;
 	return false;
 }
 
@@ -542,20 +526,20 @@ bool CInputJoyPad::GetTriggerAll()
 		{
 			if (GetPress((DirectJoypad)nCntKey, nCnt))
 			{
-				if (m_AllOldKeyTrigger != nCntKey)
+				if (m_AllOldKey != nCntKey)
 				{
-					m_AllOldKeyTrigger = (DirectJoypad)nCntKey;
+					m_AllOldKey = (DirectJoypad)nCntKey;
 					return true;
 				}
-				else if (m_AllOldKeyTrigger == nCntKey)
+				else if (m_AllOldKey == nCntKey)
 				{
 					return false;
-				}
+				}				
 			}
 		}
 	}
 
-	m_AllOldKeyTrigger =JOYPAD_MAX;
+	m_AllOldKey = DirectJoypad::JOYPAD_MAX;
 	return false;
 }
 
@@ -564,53 +548,52 @@ bool CInputJoyPad::GetReleaseAll()
 {
 	for (int nCnt = 0; nCnt < JOYPAD_DATA_MAX; nCnt++)
 	{
-		for (int nKey = 0; nKey < MAX_JOY_KEY; nKey++)
+		if (m_JoyPadData[nCnt].pInputDevice == nullptr)
 		{
-			if (GetPress((DirectJoypad)nKey, nCnt))
-			{
-				m_AllOldKeyRelease = (DirectJoypad)nKey;
-				return false;
-			}
+			continue;
+		}
 
-			if (!GetPressAll()
-				&& m_AllOldKeyRelease == (DirectJoypad)nKey
-				&& m_AllOldKeyRelease != JOYPAD_MAX)
+		for (int nCntKey = 0; nCntKey < JOYPAD_MAX; nCntKey++)
+		{
+			if (GetRelease((DirectJoypad)nCntKey, nCnt))
 			{
-				m_AllOldKeyRelease = JOYPAD_MAX;
-				return true;
+				if (m_AllOldKey != nCntKey)
+				{
+					m_AllOldKey = (DirectJoypad)nCntKey;
+					return true;
+				}
+				else if (m_AllOldKey == nCntKey)
+				{
+					return false;
+				}
 			}
 		}
 	}
 
-	if (GetPressAll())
-	{//誰かがキーを押していたら
-		return false;
-	}
-
-	m_AllOldKeyRelease = JOYPAD_MAX;
+	m_AllOldKey = DirectJoypad::JOYPAD_MAX;
 	return false;
 }
 
+
 //ジョイスティックの値を返す
-D3DXVECTOR3 CInputJoyPad::GetJoyStickData(int nNum, bool bleftandright)
+D3DXVECTOR3 CInputJoyPad::GetJoyStickData(bool bleftandright, int nNum)
 {
 	if (bleftandright)
 	{//スティックの右左(true  = 右、false = 左)
-		if (m_JoyPadData[nNum].aKeyState.lRz != 0
-			|| m_JoyPadData[nNum].aKeyState.lZ != 0)
+		if (m_JoyPadData[nNum].aKeyState.lRx != 0
+			|| m_JoyPadData[nNum].aKeyState.lRy != 0)
 		{
-			return D3DXVECTOR3((float)m_JoyPadData[nNum].aKeyState.lZ, (float)m_JoyPadData[nNum].aKeyState.lRz, 0.0f);
+			return D3DXVECTOR3((float)m_JoyPadData[nNum].aKeyState.lRx, (float)m_JoyPadData[nNum].aKeyState.lRy, 0.0f);
 		}
 
 		return D3DXVECTOR3(0.0f, 0.0f, 0.0f);
 	}
 
-
-	if (m_JoyPadData[nNum].aKeyState.lY != 0
+	if (m_JoyPadData[nNum].aKeyState.lY != 0 
 		|| m_JoyPadData[nNum].aKeyState.lX != 0)
 	{
-		return D3DXVECTOR3((float)m_JoyPadData[nNum].aKeyState.lX, (float)m_JoyPadData[nNum].aKeyState.lY, 0.0f);
+		return D3DXVECTOR3((float)m_JoyPadData[nNum].aKeyState.lX, (float)m_JoyPadData[nNum].aKeyState.lY,0.0f);
 	}
-
-	return D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+	
+	return D3DXVECTOR3(0.0f,0.0f,0.0f);
 }

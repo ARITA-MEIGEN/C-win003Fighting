@@ -94,7 +94,7 @@ void CFloor::Load()
 
 	//テクスチャの読み込み処理
 	D3DXCreateTextureFromFile(pDevice,
-		"data\\TEXTURE\\TestFloor.png",
+		"data\\TEXTURE\\Floor.png",
 		&m_pTexture);
 }
 

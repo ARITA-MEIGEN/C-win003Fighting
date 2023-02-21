@@ -10,10 +10,9 @@
 //インクルード
 #include"main.h"
 #include"Application.h"
+#include"Object2D.h"
 
 //前方宣言
-class CBg;
-class CScore;
 
 class CResult
 {
@@ -25,12 +24,11 @@ public:
 	void Uninit();
 	void Update();
 	void Draw();
-	static CBg*GetBg();
-	static CScore*GetScore();
 
+	//ゲッター
+	static CObject2D*GetBg() { return m_pBg; };
 private:
-	static CBg*m_pBg;
-	static CScore*m_pScore;
+	static CObject2D*m_pBg;
 };
 
 #endif // !_OBJECT_H_
