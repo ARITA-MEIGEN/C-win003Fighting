@@ -14,7 +14,7 @@
 #include "Time.h"
 
 
-LPDIRECT3DTEXTURE9 CTimer::m_apTexture[NUM_TEXLIFE] = {};
+LPDIRECT3DTEXTURE9 CTimer::m_apTexture[NUM_TEXTIME] = {};
 //=============================================================================
 // コンストラクタ
 //=============================================================================
@@ -117,7 +117,7 @@ HRESULT CTimer::Load()
 //=============================================================================
 void CTimer::Unload()
 {
-	for (int i = 0; i <NUM_TEXLIFE; i++)
+	for (int i = 0; i <NUM_TEXTIME; i++)
 	{
 		if (m_apTexture[i] != nullptr)
 		{//テクスチャの破棄

@@ -155,7 +155,7 @@ CLife * CLife::Create()
 	pLife = new CLife;
 	if (pLife != nullptr)
 	{// ƒ|ƒŠƒSƒ“‚Ì‰Šú‰»ˆ—
-		pLife->Init(SCREEN_WIDTH, SCREEN_HEIGHT);
+		pLife->Init((float)SCREEN_WIDTH, (float)SCREEN_HEIGHT);
 	}
 	return pLife;
 }

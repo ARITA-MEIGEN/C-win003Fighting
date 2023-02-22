@@ -17,7 +17,7 @@
 class Player;
 
 //É}ÉNÉçíËã`
-#define NUM_TEXLIFE		(2)
+#define NUM_TEXTIME		(2)
 
 class CTimer :public CObject
 {
@@ -40,7 +40,7 @@ private:
 	CObject2D* m_pObject2D;
 	CObject2D* m_apNumber[2];
 
-	static LPDIRECT3DTEXTURE9 m_apTexture[NUM_TEXLIFE];
+	static LPDIRECT3DTEXTURE9 m_apTexture[NUM_TEXTIME];
 	int m_nTimer;
 	int m_nCreateTimer;
 

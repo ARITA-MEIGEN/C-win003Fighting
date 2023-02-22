@@ -1110,17 +1110,20 @@ void CPlayer::Command()
 				m_move.z = cosf(D3DX_PI*-0.5f)*PLAYER_SPEED;
 				m_Motion = PM_ST_MOVE;
 
-				if (m_pEne->m_bAttack == true && m_pos.x <= m_pEne->m_pos.x)
+				if (m_pos.x <= m_pEne->m_pos.x)
 				{
-					m_Motion = PM_ST_GUARD;
-					m_move = { 0.0f,0.0f,0.0f };
-				}
-				else if (m_pEne->m_pBullet != nullptr)
-				{//’e‚Ì–hŒäˆ—
-					if (m_pEne->m_pBullet->GetPos().x - m_pos.x <= 100.0f&&m_pEne->m_pBullet->GetPos().x - m_pos.x >= -100.0f)
+					if (m_pEne->m_bAttack == true)
 					{
 						m_Motion = PM_ST_GUARD;
 						m_move = { 0.0f,0.0f,0.0f };
+					}
+					else if (m_pEne->m_pBullet != nullptr)
+					{//’e‚Ì–hŒäˆ—
+						if (m_pEne->m_pBullet->GetPos().x - m_pos.x <= 100.0f&&m_pEne->m_pBullet->GetPos().x - m_pos.x >= -100.0f)
+						{
+							m_Motion = PM_ST_GUARD;
+							m_move = { 0.0f,0.0f,0.0f };
+						}
 					}
 				}
 				break;
@@ -1136,17 +1139,20 @@ void CPlayer::Command()
 				m_move.x = sinf(D3DX_PI*0.5f)*PLAYER_SPEED;
 				m_move.z = cosf(D3DX_PI*0.5f)*PLAYER_SPEED;
 				m_Motion = PM_ST_MOVE;
-				if (m_pEne->m_bAttack == true && m_pos.x >= m_pEne->m_pos.x)
+				if (m_pos.x >= m_pEne->m_pos.x)
 				{
-					m_Motion = PM_ST_GUARD;
-					m_move = { 0.0f,0.0f,0.0f };
-				}
-				else if (m_pEne->m_pBullet != nullptr)
-				{//’e‚Ì–hŒäˆ—
-					if (m_pEne->m_pBullet->GetPos().x - m_pos.x <= 100.0f&&m_pEne->m_pBullet->GetPos().x - m_pos.x >= -100.0f)
+					if (m_pEne->m_bAttack == true)
 					{
 						m_Motion = PM_ST_GUARD;
 						m_move = { 0.0f,0.0f,0.0f };
+					}
+					else if (m_pEne->m_pBullet != nullptr)
+					{//’e‚Ì–hŒäˆ—
+						if (m_pEne->m_pBullet->GetPos().x - m_pos.x <= 100.0f&&m_pEne->m_pBullet->GetPos().x - m_pos.x >= -100.0f)
+						{
+							m_Motion = PM_ST_GUARD;
+							m_move = { 0.0f,0.0f,0.0f };
+						}
 					}
 				}
 				break;
