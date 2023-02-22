@@ -10,7 +10,7 @@
 //インクルード
 #include"Application.h"
 
-#define MAX_PLAYER (2)
+#define MAX_PLAYER	(2)
 #define STAGE_WIDTH	(350)	//中央から端までの長さ
 #define END_TIMER	(120)	//プレイヤーが死んでから終わるまでの時間
 
@@ -18,12 +18,10 @@
 //前方宣言
 class CPlayer;
 class CLife;				//体力ゲージ
-
-
 class CCamera;
 class CLight;
 class CFloor;
-class CMesh;
+class CTimer;
 
 class CGame
 {
@@ -48,22 +46,21 @@ public:
 	static GAME GetGame();
 	static CCamera * GetCamera();
 	static CFloor*GetFloor();
-	static CMesh*GetMesh();
 	static CLight*GetLight();
 	static bool GetDebugCamera() { return bDebugCamera; };
 	static CPlayer*GetPlayer(int number) { return m_pPlayer[number]; };
 
 private:
-	static CPlayer*m_pPlayer[MAX_PLAYER];
-	static CLife*m_Life;				//体力ゲージ
-	static GAME m_gamestate;			//ゲームの状態
+	static	CPlayer*m_pPlayer[MAX_PLAYER];
+	static	CLife*m_Life;				//体力ゲージ
+	static	GAME m_gamestate;			//ゲームの状態
 
-	static CCamera*m_pCamera;
-	static CLight*m_pLight;
-	static CFloor*m_pFloor;
-	static CMesh*m_pMesh;
+	static	CCamera*m_pCamera;
+	static	CLight*m_pLight;
+	static	CFloor*m_pFloor;
 	static  bool bDebugCamera;
-	int m_Timer;
+	static	CTimer*m_pTimer;
+	int		m_Timer;
 
 };
 

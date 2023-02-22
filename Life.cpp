@@ -68,8 +68,8 @@ HRESULT CLife::Init(float Width, float Height)
 	m_apObject2D[0]->SetPosL(CGame::GetPlayer(0)->GetLife() *(LIFEBAR_WIDTH / CGame::GetPlayer(0)->GetLife()) + 20.0f);
 	m_apObject2D[NUM_TEXLIFE]->SetPosR(CGame::GetPlayer(1)->GetLife() *(LIFEBAR_WIDTH / CGame::GetPlayer(1)->GetLife()) + 20.0f);
 
-	m_anMAX[0] = CGame::GetPlayer(1)->GetLife();
-	m_anMAX[1] = CGame::GetPlayer(0)->GetLife();
+	m_anMAX[0] = CGame::GetPlayer(0)->GetLife();
+	m_anMAX[1] = CGame::GetPlayer(1)->GetLife();
 
 	return S_OK;
 }
@@ -95,8 +95,8 @@ void CLife::Uninit()
 //=============================================================================
 void CLife::Update()
 {
-	m_apObject2D[2]->SetPosL(CGame::GetPlayer(1)->GetLife() *(LIFEBAR_WIDTH / m_anMAX[0]));
-	m_apObject2D[5]->SetPosR(CGame::GetPlayer(0)->GetLife() *(LIFEBAR_WIDTH / m_anMAX[1]));
+	m_apObject2D[2]->SetPosL(CGame::GetPlayer(0)->GetLife() *(LIFEBAR_WIDTH / m_anMAX[0]));
+	m_apObject2D[5]->SetPosR(CGame::GetPlayer(1)->GetLife() *(LIFEBAR_WIDTH / m_anMAX[1]));
 }
 
 //=============================================================================

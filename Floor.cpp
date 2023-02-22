@@ -74,7 +74,7 @@ void  CFloor::Draw()
 CFloor * CFloor::Create(D3DXVECTOR3 pos, D3DXVECTOR3 siz, D3DXVECTOR3 rot)
 {
 	CFloor*pFloor;
-	pFloor = new CFloor(2);
+	pFloor = new CFloor(0);
 	pFloor->Init();
 	pFloor->SetPos(pos);
 	pFloor->SetSiz(siz);

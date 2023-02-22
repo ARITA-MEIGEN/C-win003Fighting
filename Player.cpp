@@ -66,6 +66,7 @@ HRESULT CPlayer::Init()
 	}
 
 	m_AxisBox = CCollision::Create(m_pos, CCollision::COLLI_AXIS);						//押し出し判定(プレイヤーの軸)
+	m_pShadow = CShadow::Create(m_pos, D3DXVECTOR3(80.0f, 0.0f, 80.0f));
 
 	//モデルとモーションの読み込み
 	ReadMotion();
@@ -75,6 +76,15 @@ HRESULT CPlayer::Init()
 		//プレイヤーの生成
 		m_apModel[i]->SetPos(m_apMotion[0].aKey[0].aKey[i].fPos + m_apModel[i]->GetDPos());	//初期位置の設定
 		m_apModel[i]->SetRot(m_apMotion[0].aKey[0].aKey[i].fRot + m_apModel[i]->GetDRot());	//差分の取得
+
+		if (m_nPlaNum == 0)
+		{
+			m_apModel[i]->SetCol(D3DXCOLOR(1.0f, 0.0f, 0.0f, 1.0f));
+		}
+		else
+		{
+			m_apModel[i]->SetCol(D3DXCOLOR(0.0f, 0.0f, 1.0f, 1.0f));
+		}
 	}
 
 	//デバッグ用設定後でファイル入出力できるようにする
@@ -100,7 +110,11 @@ void CPlayer::Uninit(void)
 	{
 		m_pBullet = nullptr;
 	}
-	
+
+	if (m_pShadow != nullptr)
+	{
+		m_pShadow = nullptr;
+	}	
 
 	CObject::Release();
 }
@@ -111,10 +125,15 @@ void CPlayer::Uninit(void)
 void CPlayer::Update(void)
 {
 	Input();					//入力処理
-	if ((m_nHitStop <= 0 && m_pEne->m_nHitStop <= 0)&&m_nRig<=0)
+	if ((m_nHitStop <= 0 && m_pEne->m_nHitStop <= 0) && m_nRig <= 0)
 	{//ヒットストップがない場合
 		Down();					//ダウン＆起き上がり
 		Updatepos();			//座標更新
+		//カメラ端
+		if (m_pos.x - m_pEne->GetPos().x > FIELD_WIDTH || m_pos.x - m_pEne->GetPos().x < -FIELD_WIDTH)
+		{//一定以上離れると1フレーム前の位置に移動
+			m_pos.x = m_posold.x;
+		}
 
 		if (m_nLife > 0 && m_Motion != PM_DOWN&&m_Motion != PM_STANDUP)
 		{//体力が残っててダウンしていない場合
@@ -153,6 +172,7 @@ void CPlayer::Update(void)
 	Die();					//死亡処理
 	MotionManager();		//モーション再生
 	Normalization();		//角度の正規化
+	m_pShadow->SetPos({m_pos.x, 1.0f, m_pos.z});
 
 #ifdef _DEBUG
 	CDebugProc::Print("現在のプレイヤーの座標:%f %f %f", m_pos.x, m_pos.y, m_pos.z);
@@ -1765,7 +1785,7 @@ void CPlayer::Damage_Cal(int Damage, CCollision::EDAMAGE_POINT pro,int HitRig,in
 
 		//ヒット硬直の値を代入
 		m_nRig = HitRig;
-		
+
 		//弱打撃
 		if (m_pEne->m_Motion == PM_JP_LATTACK || m_pEne->m_Motion == PM_ST_LATTACK || m_pEne->m_Motion == PM_CR_LATTACK)
 		{
@@ -1817,10 +1837,22 @@ void CPlayer::Damage_Cal(int Damage, CCollision::EDAMAGE_POINT pro,int HitRig,in
 		if (m_pos.x < m_pEne->m_pos.x)
 		{
 			m_pos.x -= 8.0f;	//ヒットバックのつもり
+
+			if (m_pos.x - m_AxisBox->GetWidth().x * 2 <= -FIELD_WIDTH)
+			{
+				m_pos.x += 8.0f;
+				m_pEne->m_pos.x += 8.0f;	//ヒットバックのつもり
+			}
 		}
 		else
 		{
 			m_pos.x += 8.0f;	//ヒットバックのつもり
+
+			if (m_pos.x + m_AxisBox->GetWidth().x * 2 >= FIELD_WIDTH)
+			{
+				m_pos.x -= 8.0f;
+				m_pEne->m_pos.x -= 8.0f;	//ヒットバックのつもり
+			}
 		}
 	}
 	else
@@ -1951,12 +1983,6 @@ void CPlayer::Normalization()
 //==============================================
 void CPlayer::StageEdge()
 {
-	//カメラ端
-	if (m_pos.x - m_pEne->GetPos().x > FIELD_WIDTH || m_pos.x - m_pEne->GetPos().x < -FIELD_WIDTH)
-	{//一定以上離れると1フレーム前の位置に移動
-		m_pos.x = m_posold.x;
-	}
-
 	//ステージの端
 	if (m_pos.x - m_AxisBox->GetWidth().x * 2 <= -FIELD_WIDTH)
 	{

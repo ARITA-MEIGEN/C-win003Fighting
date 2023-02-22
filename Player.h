@@ -185,6 +185,9 @@ public:
 	//ゲッター
 	D3DXVECTOR3		GetPos() { return m_pos; };
 	int				GetLife() { return m_nLife; };	//体力
+	bool			GetBullet() { return m_bBullet ; };					//弾を使用しているかどうか
+	CBullet*		GetBulletState() { return m_pBullet; };	//弾の情報取得
+
 
 	//当たり判定の取得
 	CCollision*		GetCollision(int number) { return m_apMotion[m_Motion].aKey[m_nCurKey].Collision[number]; };
@@ -225,6 +228,7 @@ private:
 	int				m_nHitStop;						//ヒットストップの時間
 	bool			m_bBullet;						//飛び道具を使用しているか？
 	CBullet*		m_pBullet;						//飛び道具
+	CShadow*		m_pShadow;						//影
 
 	//押し出し判定関連
 	CCollision* 	m_AxisBox;						//押し出し判定(プレイヤーの軸)

@@ -25,7 +25,7 @@
 //===========================
 CModel::CModel() 
 {
-
+	m_col = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f);
 }
 
 //===========================
@@ -114,6 +114,8 @@ void CModel::Draw(D3DXMATRIX pMtx)
 		//マテリアルの描画
 		for (int nCnt2 = 0; nCnt2 < (int)m_nNumMat; nCnt2++)
 		{
+			pMat[nCnt2].MatD3D.Emissive = m_col;
+
 			//マテリアルの設定
 			pDevice->SetMaterial(&pMat[nCnt2].MatD3D);
 

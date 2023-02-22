@@ -11,7 +11,6 @@
 #define	POS_ADJUSTMENT	(30.0f)	//微調整用
 #define	DAMAGE	(70)	//微調整用
 
-
 class CCollision;
 
 class CBullet:public CObject
@@ -27,7 +26,7 @@ public:
 
 	static CBullet * Create(D3DXVECTOR3 pos, D3DXVECTOR3 siz, D3DXCOLOR col, D3DXVECTOR3 move,float rot,int life, int PlayerNumber);	//パーティクルの情報の取得
 
-	bool Hit();	//パーティクルの情報の取得
+	void Hit();	//パーティクルの情報の取得
 
 	//ゲッター
 	D3DXVECTOR3	GetPos() { return m_pos; };

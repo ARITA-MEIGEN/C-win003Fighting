@@ -20,6 +20,7 @@
 #include"sound.h"
 #include"input.h"
 #include"effect.h"
+#include"Time.h"
 
 //静的メンバ変数
 CPlayer*CGame::m_pPlayer[2] = {};
@@ -30,7 +31,7 @@ bool CGame::bDebugCamera = nullptr;
 CCamera*CGame::m_pCamera = nullptr;
 CLight*CGame::m_pLight = nullptr;
 CFloor*CGame::m_pFloor = nullptr;
-CMesh*CGame::m_pMesh = nullptr;
+CTimer*CGame::m_pTimer = nullptr;
 //====================================
 //コンストラクタ
 //====================================
@@ -56,10 +57,12 @@ HRESULT CGame::Init()
 	CFloor::Load();
 	CLife::Load();
 	CEffect::Load();
+	CTimer::Load();
+	CShadow::Load();
 
 	//プレイヤーの生成
-	m_pPlayer[0] = CPlayer::Create(D3DXVECTOR3(50.0f, 0.0f, 0.0f), D3DXVECTOR3(0.0f, D3DX_PI*0.5f, 0.0f));
-	m_pPlayer[1] = CPlayer::Create(D3DXVECTOR3(-50.0f, 0.0f, 0.0f), D3DXVECTOR3(0.0f, -D3DX_PI*0.5f, 0.0f));
+	m_pPlayer[0] = CPlayer::Create(D3DXVECTOR3(-50.0f, 0.0f, 0.0f), D3DXVECTOR3(0.0f, -D3DX_PI*0.5f, 0.0f));
+	m_pPlayer[1] = CPlayer::Create(D3DXVECTOR3(50.0f, 0.0f, 0.0f), D3DXVECTOR3(0.0f, D3DX_PI*0.5f, 0.0f));
 	m_pPlayer[0]->SetEnemy(m_pPlayer[1]);
 	m_pPlayer[1]->SetEnemy(m_pPlayer[0]);
 
@@ -92,6 +95,7 @@ HRESULT CGame::Init()
 
 	PlaySound(SOUND_LABEL_BGM_BATTLE001);
 
+	m_pTimer = CTimer::Create();
 	m_Timer = 0;
 
 	return S_OK;
@@ -107,6 +111,8 @@ void CGame::Uninit()
 	CFloor::Unload();
 	CLife::Unload();
 	CEffect::Unload();
+	CTimer::Unload();
+	CShadow::Unload();
 
 	//カメラの設定
 	if (m_pCamera != nullptr)
@@ -165,15 +171,17 @@ void CGame::Update()
 	m_Life->Update();
 
 	//片方死んだ場合タイマー加算
-	if (m_pPlayer[0]->GetLife() <= 0)
+	if (m_pPlayer[0]->GetLife() <= 0 || m_pPlayer[1]->GetLife() <= 0 || m_pTimer->GetTimer() <= 0)
 	{
-		CApplication::SetWinner(0);
 		m_Timer++;
-	}
-	else if (m_pPlayer[1]->GetLife() <= 0)
-	{
-		CApplication::SetWinner(1);
-		m_Timer++;
+		if (m_pPlayer[0]->GetLife() <= m_pPlayer[1]->GetLife())
+		{
+			CApplication::SetWinner(1);
+		}
+		else if (m_pPlayer[1]->GetLife() <= m_pPlayer[0]->GetLife())
+		{
+			CApplication::SetWinner(0);
+		}
 	}
 
 	//タイマーが一定値以上でリザルトへ移行
@@ -221,14 +229,6 @@ CCamera * CGame::GetCamera()
 CFloor * CGame::GetFloor()
 {
 	return m_pFloor;
-}
-
-//====================================
-//床の情報
-//====================================
-CMesh * CGame::GetMesh()
-{
-	return m_pMesh;
 }
 
 //====================================

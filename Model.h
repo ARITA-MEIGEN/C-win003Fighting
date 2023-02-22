@@ -32,21 +32,27 @@ public:
 	static		CModel*Create();
 	void		Shadow();
 	void		Siz();
+
+	//セッター
 	void		SetModel(char* Filename);
 	void		SetParent(CModel*pModel) ;
+	void		SetRot(D3DXVECTOR3 rot);	
+	void		SetPos(D3DXVECTOR3 pos);
+	void		SetIdx(int Idx) { m_nIdx = Idx; };
+	void		SetDPos(D3DXVECTOR3 pos) { m_DefaultPos = pos; };
+	void		SetDRot(D3DXVECTOR3 rot) { m_DefaultRot = rot; };
+	void		SetCol(D3DXCOLOR col) { m_col = col; };
+
+	//ゲッター
 	CModel*		GetParent();
 	D3DXMATRIX	GetMtx();
-	void		SetRot(D3DXVECTOR3 rot);	
 	D3DXVECTOR3 GetRot();
-	void		SetPos(D3DXVECTOR3 pos);
 	D3DXVECTOR3	GetPos();
 	float		GetWidth();
-	void		SetIdx(int Idx) { m_nIdx = Idx; };
 	int			GetIdx() { return m_nIdx; };
-	void		SetDPos(D3DXVECTOR3 pos) { m_DefaultPos = pos; };
 	D3DXVECTOR3	GetDPos() { return m_DefaultPos; };
-	void		SetDRot(D3DXVECTOR3 rot) { m_DefaultRot = rot; };
 	D3DXVECTOR3	GetDRot() { return m_DefaultRot; };
+	D3DXCOLOR	GetCol() { return m_col; };
 
 
 
@@ -67,6 +73,7 @@ private:
 	CModel*				m_pParent;		//親のモデルへのポインタ
 	D3DXVECTOR3			m_DefaultPos;	//初期位置
 	D3DXVECTOR3			m_DefaultRot;	//初期位置
+	D3DXCOLOR			m_col;			//色
 };
 
 #endif

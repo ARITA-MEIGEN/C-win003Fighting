@@ -48,6 +48,7 @@
     <ClCompile Include="Result.cpp" />
     <ClCompile Include="Shadow.cpp" />
     <ClCompile Include="sound.cpp" />
+    <ClCompile Include="Time.cpp" />
     <ClCompile Include="Title.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -83,6 +84,7 @@
     <ClInclude Include="Result.h" />
     <ClInclude Include="Shadow.h" />
     <ClInclude Include="sound.h" />
+    <ClInclude Include="Time.h" />
     <ClInclude Include="Title.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

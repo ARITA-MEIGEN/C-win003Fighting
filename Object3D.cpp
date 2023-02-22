@@ -176,7 +176,6 @@ void  CObject3D::Draw()
 	//頂点フォーマットの設定
 	pDevice->SetFVF(FVF_VERTEX_3D);
 
-
 	//ポリゴンの描画       
 	pDevice->DrawPrimitive(D3DPT_TRIANGLESTRIP,	//ポリゴンの形
 		0,										//頂点の開始場所

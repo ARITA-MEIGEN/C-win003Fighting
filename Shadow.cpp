@@ -87,7 +87,7 @@ void  CShadow::Draw()
 CShadow * CShadow::Create(D3DXVECTOR3 pos, D3DXVECTOR3 siz)
 {
 	CShadow*pShadow;
-	pShadow = new CShadow(0);
+	pShadow = new CShadow(1);
 	pShadow->Init();
 	pShadow->SetPos(pos);
 	pShadow->SetSiz(siz);
