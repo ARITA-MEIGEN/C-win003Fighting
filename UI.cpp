@@ -12,6 +12,8 @@
 #include"Application.h"
 #include"renderer.h"
 #include"sound.h"
+#include"Game.h"
+
 
 //Ã“Iƒƒ“ƒo•Ï”
 CObject2D*CUI::m_pStart[2] = {};
@@ -80,6 +82,7 @@ void CUI::Update()
 	if (m_timer >= 120)
 	{
 		m_pStart[1]->SetCol(D3DXCOLOR(1.0f, 1.0f, 1.0f, 0.0f));
+		CGame::SetGame(CGame::GAME_ROUND1);
 	}
 	else  if (m_timer >= 60)
 	{

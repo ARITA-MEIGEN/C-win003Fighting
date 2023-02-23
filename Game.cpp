@@ -100,7 +100,10 @@ HRESULT CGame::Init()
 	m_pTimer = CTimer::Create();
 	m_Timer = 0;
 
+	//UI生成
 	m_pUI = CUI::Create();
+
+	m_gamestate = GAME_START;
 
 	return S_OK;
 }
@@ -182,6 +185,11 @@ void CGame::Update()
 	//片方死んだ場合タイマー加算
 	if (m_pPlayer[0]->GetLife() <= 0 || m_pPlayer[1]->GetLife() <= 0 || m_pTimer->GetTimer() <= 0)
 	{
+		if (m_pPlayer[0]->GetNowMotion() == CPlayer::PM_DOWN|| m_pPlayer[1]->GetNowMotion() == CPlayer::PM_DOWN|| m_pTimer->GetTimer() <= 0)
+		{
+			CGame::SetGame(CGame::GAME_END);
+		}
+
 		m_Timer++;
 		if (m_pPlayer[1]->GetLife() == m_pPlayer[0]->GetLife())
 		{
@@ -196,11 +204,17 @@ void CGame::Update()
 			CApplication::SetWinner(0);
 		}
 	}
+
 	//タイマーが一定値以上でリザルトへ移行
 	if (m_Timer >= END_TIMER&&CApplication::GetFade()->GetFade() == CFade::FADE_NONE)
 	{
 		CApplication::GetFade()->SetFade(CApplication::MODE_RESULT);
 	}
+
+	if (CGame::GetTimer()->GetTimer() == DEFAULT_TIME&& CGame::GetTimer()->GetTimer() < 0)
+	{
+		m_gamestate = GAME_END;
+	}	
 }
 
 //====================================

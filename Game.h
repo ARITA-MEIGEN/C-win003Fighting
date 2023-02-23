@@ -30,16 +30,10 @@ public:
 	enum GAME
 	{
 		GAME_NONE = 0,
-		GAME_NORMAL,
-		GAME_END
-	};
-
-	enum EROUND
-	{
-		GAME_START = 0,
+		GAME_START,
 		GAME_ROUND1,
 		GAME_ROUND2,
-		GAME_MAX
+		GAME_END
 	};
 
 	CGame();
@@ -49,6 +43,8 @@ public:
 	void Uninit();
 	void Update();
 	void Draw();
+
+	//セッター
 	static void SetGame(GAME gamestate);
 
 	//ゲッター

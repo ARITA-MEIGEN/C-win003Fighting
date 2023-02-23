@@ -97,7 +97,7 @@ MOTIONSET
 				POS = -15.00 59.00 0.00 
 				SIZ = 30.00 13.00 50.00 
 				DAMAGE_POINT = 1
-				HIT = 15
+				HIT = 20
 				GUARD = 10
 			END_COLLISIONSET
 			#1番目の判定

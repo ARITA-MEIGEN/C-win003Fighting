@@ -187,7 +187,7 @@ public:
 	int				GetLife() { return m_nLife; };	//‘Ì—Í
 	bool			GetBullet() { return m_bBullet ; };					//’e‚ğg—p‚µ‚Ä‚¢‚é‚©‚Ç‚¤‚©
 	CBullet*		GetBulletState() { return m_pBullet; };	//’e‚Ìî•ñæ“¾
-
+	PLAYER_MOTION	GetNowMotion() { return m_Motion; };
 
 	//“–‚½‚è”»’è‚Ìæ“¾
 	CCollision*		GetCollision(int number) { return m_apMotion[m_Motion].aKey[m_nCurKey].Collision[number]; };

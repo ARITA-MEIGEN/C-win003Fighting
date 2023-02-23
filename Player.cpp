@@ -125,9 +125,11 @@ void CPlayer::Uninit(void)
 //===========================
 void CPlayer::Update(void)
 {
-	if (CGame::GetTimer()->GetTimer() < DEFAULT_TIME&& CGame::GetTimer()->GetTimer() > 0)
+	if (CGame::GetGame()!=CGame::GAME_END&&CGame::GetGame()!=CGame::GAME_START)
 	{
+		
 		Input();					//入力処理
+			
 		if ((m_nHitStop <= 0 && m_pEne->m_nHitStop <= 0) && m_nRig <= 0)
 		{//ヒットストップがない場合
 			Down();					//ダウン＆起き上がり
@@ -1094,338 +1096,340 @@ bool CPlayer::Guard(CCollision::EDAMAGE_POINT dp)
 //=====================
 void CPlayer::Command()
 {
-	//移動
-	if (m_State != PST_AIR)
+	if (m_pEne->m_nLife >= 0)
 	{
-		//ニュートラル
-		if ((m_anInput[0] & INPUT5) == INPUT5)
+		//移動
+		if (m_State != PST_AIR)
 		{
-			m_Motion = PM_ST_NEUTRAL;
-			m_move.x = 0.0f;
-		}
-
-		//左
-		if ((m_anInput[0] & INPUT4) == INPUT4)
-		{
-			switch (m_State)
+			//ニュートラル
+			if ((m_anInput[0] & INPUT5) == INPUT5)
 			{
-			case CPlayer::PST_STAND:
-				m_move.x = sinf(D3DX_PI*-0.5f)*PLAYER_SPEED;
-				m_move.z = cosf(D3DX_PI*-0.5f)*PLAYER_SPEED;
-				m_Motion = PM_ST_MOVE;
+				m_Motion = PM_ST_NEUTRAL;
+				m_move.x = 0.0f;
+			}
 
-				if (m_pos.x <= m_pEne->m_pos.x)
+			//左
+			if ((m_anInput[0] & INPUT4) == INPUT4)
+			{
+				switch (m_State)
 				{
-					if (m_pEne->m_bAttack == true)
+				case CPlayer::PST_STAND:
+					m_move.x = sinf(D3DX_PI*-0.5f)*PLAYER_SPEED;
+					m_move.z = cosf(D3DX_PI*-0.5f)*PLAYER_SPEED;
+					m_Motion = PM_ST_MOVE;
+
+					if (m_pos.x <= m_pEne->m_pos.x)
 					{
-						m_Motion = PM_ST_GUARD;
-						m_move = { 0.0f,0.0f,0.0f };
-					}
-					else if (m_pEne->m_pBullet != nullptr)
-					{//弾の防御処理
-						if (m_pEne->m_pBullet->GetPos().x - m_pos.x <= 100.0f&&m_pEne->m_pBullet->GetPos().x - m_pos.x >= -100.0f)
+						if (m_pEne->m_bAttack == true)
 						{
 							m_Motion = PM_ST_GUARD;
 							m_move = { 0.0f,0.0f,0.0f };
 						}
+						else if (m_pEne->m_pBullet != nullptr)
+						{//弾の防御処理
+							if (m_pEne->m_pBullet->GetPos().x - m_pos.x <= 100.0f&&m_pEne->m_pBullet->GetPos().x - m_pos.x >= -100.0f)
+							{
+								m_Motion = PM_ST_GUARD;
+								m_move = { 0.0f,0.0f,0.0f };
+							}
+						}
 					}
+					break;
 				}
-				break;
 			}
-		}
 
-		//右
-		if ((m_anInput[0] & INPUT6) == INPUT6)
-		{
-			switch (m_State)
+			//右
+			if ((m_anInput[0] & INPUT6) == INPUT6)
 			{
-			case PST_STAND:
-				m_move.x = sinf(D3DX_PI*0.5f)*PLAYER_SPEED;
-				m_move.z = cosf(D3DX_PI*0.5f)*PLAYER_SPEED;
-				m_Motion = PM_ST_MOVE;
-				if (m_pos.x >= m_pEne->m_pos.x)
+				switch (m_State)
 				{
-					if (m_pEne->m_bAttack == true)
+				case PST_STAND:
+					m_move.x = sinf(D3DX_PI*0.5f)*PLAYER_SPEED;
+					m_move.z = cosf(D3DX_PI*0.5f)*PLAYER_SPEED;
+					m_Motion = PM_ST_MOVE;
+					if (m_pos.x >= m_pEne->m_pos.x)
 					{
-						m_Motion = PM_ST_GUARD;
-						m_move = { 0.0f,0.0f,0.0f };
-					}
-					else if (m_pEne->m_pBullet != nullptr)
-					{//弾の防御処理
-						if (m_pEne->m_pBullet->GetPos().x - m_pos.x <= 100.0f&&m_pEne->m_pBullet->GetPos().x - m_pos.x >= -100.0f)
+						if (m_pEne->m_bAttack == true)
 						{
 							m_Motion = PM_ST_GUARD;
 							m_move = { 0.0f,0.0f,0.0f };
 						}
+						else if (m_pEne->m_pBullet != nullptr)
+						{//弾の防御処理
+							if (m_pEne->m_pBullet->GetPos().x - m_pos.x <= 100.0f&&m_pEne->m_pBullet->GetPos().x - m_pos.x >= -100.0f)
+							{
+								m_Motion = PM_ST_GUARD;
+								m_move = { 0.0f,0.0f,0.0f };
+							}
+						}
 					}
+					break;
 				}
-				break;
 			}
-		}
 
-		//右右
-		if (CheckInput(CMD66) == true && m_State == PST_STAND)
-		{
-			if (m_pos.x <= m_pEne->m_pos.x&&m_Motion != PM_ST_DASH)
-			{//右向きの場合
-				//前ダッシュ
-				m_Motion = PM_ST_DASH;
-			}
-			else
-			{//左向き(2P側)の場合
-				//バックステップ
-				m_Motion = PM_ST_BACKSTEP;
-				m_State = PST_AIR;
-				m_move = { BACKSTEP_MOVE_X,BACKSTEP_MOVE_Y,0.0f };
-				m_bJump = true;
-				m_nJumpCount = 1;
-				PlaySound(SOUND_LABEL_SE_BACKSTEP);
-			}
-		}
-
-		if (CheckInput(CMD44) == true && m_State == PST_STAND)
-		{
-			if (m_pos.x > m_pEne->m_pos.x&&m_Motion != PM_ST_DASH)
-			{//左向き(2P側)の場合
-			 //前ダッシュ
-				m_Motion = PM_ST_DASH;
-			}
-			else
-			{//右向きの場合
-			 //バックステップ
-				m_Motion = PM_ST_BACKSTEP;
-				m_move = { -BACKSTEP_MOVE_X,BACKSTEP_MOVE_Y,0.0f };
-				m_State = PST_AIR;
-				m_nJumpCount = 1;
-				m_bJump = true;
-				PlaySound(SOUND_LABEL_SE_BACKSTEP);
-			}
-		}
-
-		//左右同時押しでニュートラル
-		if ((m_anInput[0] & INPUT6) == INPUT6 && (m_anInput[0] & INPUT4) == INPUT4)
-		{
-			m_Motion = PM_ST_NEUTRAL;
-
-			m_move.x = 0.0f;
-			m_move.z = 0.0f;
-		}
-
-		//下(しゃがみ)
-		if ((m_anInput[0] & INPUT2) == INPUT2)
-		{
-			if (m_State != PST_AIR)
+			//右右
+			if (CheckInput(CMD66) == true && m_State == PST_STAND)
 			{
-				m_Motion = PM_CR_NEUTRAL;
-				m_State = PST_CROUCH;
-				m_move = { 0.0f,0.0f,0.0f };
+				if (m_pos.x <= m_pEne->m_pos.x&&m_Motion != PM_ST_DASH)
+				{//右向きの場合
+					//前ダッシュ
+					m_Motion = PM_ST_DASH;
+				}
+				else
+				{//左向き(2P側)の場合
+					//バックステップ
+					m_Motion = PM_ST_BACKSTEP;
+					m_State = PST_AIR;
+					m_move = { BACKSTEP_MOVE_X,BACKSTEP_MOVE_Y,0.0f };
+					m_bJump = true;
+					m_nJumpCount = 1;
+					PlaySound(SOUND_LABEL_SE_BACKSTEP);
+				}
+			}
 
-				if ((m_pos.x >= m_pEne->m_pos.x && (m_anInput[0] & INPUT6) == INPUT6) || (m_pos.x < m_pEne->m_pos.x && (m_anInput[0] & INPUT4) == INPUT4))
+			if (CheckInput(CMD44) == true && m_State == PST_STAND)
+			{
+				if (m_pos.x > m_pEne->m_pos.x&&m_Motion != PM_ST_DASH)
+				{//左向き(2P側)の場合
+				 //前ダッシュ
+					m_Motion = PM_ST_DASH;
+				}
+				else
+				{//右向きの場合
+				 //バックステップ
+					m_Motion = PM_ST_BACKSTEP;
+					m_move = { -BACKSTEP_MOVE_X,BACKSTEP_MOVE_Y,0.0f };
+					m_State = PST_AIR;
+					m_nJumpCount = 1;
+					m_bJump = true;
+					PlaySound(SOUND_LABEL_SE_BACKSTEP);
+				}
+			}
+
+			//左右同時押しでニュートラル
+			if ((m_anInput[0] & INPUT6) == INPUT6 && (m_anInput[0] & INPUT4) == INPUT4)
+			{
+				m_Motion = PM_ST_NEUTRAL;
+
+				m_move.x = 0.0f;
+				m_move.z = 0.0f;
+			}
+
+			//下(しゃがみ)
+			if ((m_anInput[0] & INPUT2) == INPUT2)
+			{
+				if (m_State != PST_AIR)
 				{
-					if (m_pEne->m_bAttack == true)
+					m_Motion = PM_CR_NEUTRAL;
+					m_State = PST_CROUCH;
+					m_move = { 0.0f,0.0f,0.0f };
+
+					if ((m_pos.x >= m_pEne->m_pos.x && (m_anInput[0] & INPUT6) == INPUT6) || (m_pos.x < m_pEne->m_pos.x && (m_anInput[0] & INPUT4) == INPUT4))
 					{
-						m_Motion = PM_CR_GUARD;
-						m_move = { 0.0f,0.0f,0.0f };
-					}
-					else if (m_pEne->m_pBullet != nullptr)
-					{//弾の防御処理
-						if (m_pEne->m_pBullet->GetPos().x - m_pos.x <= 100.0f&&m_pEne->m_pBullet->GetPos().x - m_pos.x >= -100.0f)
+						if (m_pEne->m_bAttack == true)
 						{
 							m_Motion = PM_CR_GUARD;
 							m_move = { 0.0f,0.0f,0.0f };
 						}
+						else if (m_pEne->m_pBullet != nullptr)
+						{//弾の防御処理
+							if (m_pEne->m_pBullet->GetPos().x - m_pos.x <= 100.0f&&m_pEne->m_pBullet->GetPos().x - m_pos.x >= -100.0f)
+							{
+								m_Motion = PM_CR_GUARD;
+								m_move = { 0.0f,0.0f,0.0f };
+							}
+						}
 					}
+				}
+			}
+
+			//上(ジャンプ)
+			if ((m_anInput[0] & INPUT8) == INPUT8)
+			{
+				m_Motion = PM_JP_NEUTRAL;
+				m_State = PST_AIR;
+				m_bJump = true;
+
+			}
+
+			//右上
+			if ((m_anInput[0] & INPUT9) == INPUT9)
+			{
+				if (m_pos.x <= m_pEne->m_pos.x)
+				{//1P側
+					m_Motion = PM_JP_MOVEFORWARD;
+				}
+				else
+				{//2P側
+					m_Motion = PM_JP_MOVEBACK;
+				}
+			}
+
+			//左上
+			if ((m_anInput[0] & INPUT7) == INPUT7)
+			{
+				if (m_pos.x <= m_pEne->m_pos.x)
+				{//1P側
+					m_Motion = PM_JP_MOVEBACK;
+				}
+				else
+				{//2P側
+					m_Motion = PM_JP_MOVEFORWARD;
 				}
 			}
 		}
 
-		//上(ジャンプ)
-		if ((m_anInput[0] & INPUT8) == INPUT8)
+		//攻撃
+		if (m_Motion != PM_ST_BACKSTEP)
 		{
-			m_Motion = PM_JP_NEUTRAL;
-			m_State = PST_AIR;
-			m_bJump = true;
+			//弱攻撃
+			if ((m_anInput[0] & INPUT_LATK) == INPUT_LATK && (m_anInput[1] & INPUT_NOT_LATK) == INPUT_NOT_LATK)
+			{
+				switch (m_State)
+				{
 
-		}
+				case CPlayer::PST_STAND:
+					m_Motion = PM_ST_LATTACK;
+					break;
 
-		//右上
-		if ((m_anInput[0] & INPUT9) == INPUT9)
-		{
-			if (m_pos.x <= m_pEne->m_pos.x)
-			{//1P側
-				m_Motion = PM_JP_MOVEFORWARD;
-			}
-			else
-			{//2P側
-				m_Motion = PM_JP_MOVEBACK;
-			}
-		}
+				case CPlayer::PST_AIR:
+					m_Motion = PM_JP_LATTACK;
+					break;
 
-		//左上
-		if ((m_anInput[0] & INPUT7) == INPUT7)
-		{
-			if (m_pos.x <= m_pEne->m_pos.x)
-			{//1P側
-				m_Motion = PM_JP_MOVEBACK;
+				case CPlayer::PST_CROUCH:
+					m_Motion = PM_CR_LATTACK;
+					break;
+
+				}
+				m_bAttack = true;
+				m_bMotion = true;
 			}
-			else
-			{//2P側
-				m_Motion = PM_JP_MOVEFORWARD;
+
+			//中攻撃
+			if ((m_anInput[0] & INPUT_MATK) == INPUT_MATK && (m_anInput[1] & INPUT_NOT_MATK) == INPUT_NOT_MATK)
+			{
+				switch (m_State)
+				{
+				case CPlayer::PST_STAND:
+					m_Motion = PM_ST_MATTACK;
+					break;
+
+				case CPlayer::PST_AIR:
+					m_Motion = PM_JP_MATTACK;
+					break;
+
+				case CPlayer::PST_CROUCH:
+					m_Motion = PM_CR_MATTACK;
+					break;
+
+				}
+				m_bAttack = true;
+				m_bMotion = true;
+			}
+
+			//強攻撃
+			if ((m_anInput[0] & INPUT_HATK) == INPUT_HATK && (m_anInput[1] & INPUT_NOT_HATK) == INPUT_NOT_HATK)
+			{
+				switch (m_State)
+				{
+				case CPlayer::PST_STAND:
+					m_Motion = PM_ST_HATTACK;
+					break;
+
+				case CPlayer::PST_AIR:
+					m_Motion = PM_JP_HATTACK;
+					break;
+
+				case CPlayer::PST_CROUCH:
+					m_Motion = PM_CR_HATTACK;
+					break;
+
+				}
+				m_bAttack = true;
+				m_bMotion = true;
+			}
+
+			//波動拳・竜巻
+			//強
+			if (CheckInput(CMD236H) == true && m_State != PST_AIR)
+			{
+				if (m_pos.x <= m_pEne->m_pos.x&&m_bBullet == false)
+				{
+					m_Motion = PM_236H;
+				}
+				else if (m_pos.x > m_pEne->m_pos.x)
+				{
+				}
+			}
+
+			//中
+			if (CheckInput(CMD236M) == true && m_State != PST_AIR)
+			{
+				if (m_pos.x <= m_pEne->m_pos.x&&m_bBullet == false)
+				{
+					m_Motion = PM_236M;
+				}
+				else if (m_pos.x > m_pEne->m_pos.x)
+				{
+
+				}
+			}
+
+			//弱
+			if (CheckInput(CMD236L) == true && m_State != PST_AIR)
+			{
+				if (m_pos.x <= m_pEne->m_pos.x&&m_bBullet == false)
+				{
+					m_Motion = PM_236L;
+				}
+				else if (m_pos.x > m_pEne->m_pos.x)
+				{
+
+				}
+			}
+
+			//2P側
+			//強
+			if (CheckInput(CMD214H) == true && m_State != PST_AIR)
+			{
+				if (m_pos.x <= m_pEne->m_pos.x)
+				{
+
+				}
+				else if (m_pos.x > m_pEne->m_pos.x&&m_bBullet == false)
+				{
+					m_Motion = PM_236H;
+				}
+			}
+
+			//中
+			if (CheckInput(CMD214M) == true && m_State != PST_AIR)
+			{
+				if (m_pos.x <= m_pEne->m_pos.x)
+				{
+
+				}
+				else if (m_pos.x > m_pEne->m_pos.x&&m_bBullet == false)
+				{
+					m_Motion = PM_236M;
+				}
+			}
+
+			//弱
+			if (CheckInput(CMD214L) == true && m_State != PST_AIR)
+			{
+				if (m_pos.x <= m_pEne->m_pos.x)
+				{
+
+				}
+				else if (m_pos.x > m_pEne->m_pos.x&&m_bBullet == false)
+				{
+					m_Motion = PM_236L;
+				}
 			}
 		}
+		StateManagement();	//状態管理
 	}
-
-	//攻撃
-	if (m_Motion != PM_ST_BACKSTEP)
-	{
-		//弱攻撃
-		if ((m_anInput[0] & INPUT_LATK) == INPUT_LATK && (m_anInput[1] & INPUT_NOT_LATK) == INPUT_NOT_LATK)
-		{
-			switch (m_State)
-			{
-
-			case CPlayer::PST_STAND:
-				m_Motion = PM_ST_LATTACK;
-				break;
-
-			case CPlayer::PST_AIR:
-				m_Motion = PM_JP_LATTACK;
-				break;
-
-			case CPlayer::PST_CROUCH:
-				m_Motion = PM_CR_LATTACK;
-				break;
-
-			}
-			m_bAttack = true;
-			m_bMotion = true;
-		}
-
-		//中攻撃
-		if ((m_anInput[0] & INPUT_MATK) == INPUT_MATK && (m_anInput[1] & INPUT_NOT_MATK) == INPUT_NOT_MATK)
-		{
-			switch (m_State)
-			{
-			case CPlayer::PST_STAND:
-				m_Motion = PM_ST_MATTACK;
-				break;
-
-			case CPlayer::PST_AIR:
-				m_Motion = PM_JP_MATTACK;
-				break;
-
-			case CPlayer::PST_CROUCH:
-				m_Motion = PM_CR_MATTACK;
-				break;
-
-			}
-			m_bAttack = true;
-			m_bMotion = true;
-		}
-
-		//強攻撃
-		if ((m_anInput[0] & INPUT_HATK) == INPUT_HATK && (m_anInput[1] & INPUT_NOT_HATK) == INPUT_NOT_HATK)
-		{
-			switch (m_State)
-			{
-			case CPlayer::PST_STAND:
-				m_Motion = PM_ST_HATTACK;
-				break;
-
-			case CPlayer::PST_AIR:
-				m_Motion = PM_JP_HATTACK;
-				break;
-
-			case CPlayer::PST_CROUCH:
-				m_Motion = PM_CR_HATTACK;
-				break;
-
-			}
-			m_bAttack = true;
-			m_bMotion = true;
-		}
-
-		//波動拳・竜巻
-		//強
-		if (CheckInput(CMD236H) == true && m_State != PST_AIR)
-		{
-			if (m_pos.x <= m_pEne->m_pos.x&&m_bBullet == false)
-			{
-				m_Motion = PM_236H;
-			}
-			else if (m_pos.x > m_pEne->m_pos.x)
-			{
-			}
-		}
-
-		//中
-		if (CheckInput(CMD236M) == true && m_State != PST_AIR)
-		{
-			if (m_pos.x <= m_pEne->m_pos.x&&m_bBullet == false)
-			{
-				m_Motion = PM_236M;
-			}
-			else if (m_pos.x > m_pEne->m_pos.x)
-			{
-
-			}
-		}
-
-		//弱
-		if (CheckInput(CMD236L) == true && m_State != PST_AIR)
-		{
-			if (m_pos.x <= m_pEne->m_pos.x&&m_bBullet == false)
-			{
-				m_Motion = PM_236L;
-			}
-			else if (m_pos.x > m_pEne->m_pos.x)
-			{
-
-			}
-		}
-
-		//2P側
-		//強
-		if (CheckInput(CMD214H) == true && m_State != PST_AIR)
-		{
-			if (m_pos.x <= m_pEne->m_pos.x)
-			{
-
-			}
-			else if (m_pos.x > m_pEne->m_pos.x&&m_bBullet == false)
-			{
-				m_Motion = PM_236H;
-			}
-		}
-
-		//中
-		if (CheckInput(CMD214M) == true && m_State != PST_AIR)
-		{
-			if (m_pos.x <= m_pEne->m_pos.x)
-			{
-
-			}
-			else if (m_pos.x > m_pEne->m_pos.x&&m_bBullet == false)
-			{
-				m_Motion = PM_236M;
-			}
-		}
-
-		//弱
-		if (CheckInput(CMD214L) == true && m_State != PST_AIR)
-		{
-			if (m_pos.x <= m_pEne->m_pos.x)
-			{
-
-			}
-			else if (m_pos.x > m_pEne->m_pos.x&&m_bBullet == false)
-			{
-				m_Motion = PM_236L;
-			}
-		}
-	}
-
-	StateManagement();	//状態管理
 }
 
 //==============================================

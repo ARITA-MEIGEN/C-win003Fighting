@@ -97,7 +97,7 @@ MOTIONSET
 				POS = -21.00 15.00 0.00 
 				SIZ = 24.00 11.00 50.00 
 				DAMAGE_POINT = 1
-				HIT = 10
+				HIT = 15
 				GUARD = 10
 			END_COLLISIONSET
 			
