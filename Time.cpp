@@ -52,7 +52,7 @@ HRESULT CTimer::Init()
 	}
 	m_apNumber[0]->SetPos(D3DXVECTOR3(SCREEN_WIDTH / 2 - 17.0f, 70.0f, 0.0f));
 	m_apNumber[1]->SetPos(D3DXVECTOR3(SCREEN_WIDTH / 2 + 17.0f, 70.0f, 0.0f));
-	m_nTimer = 99;
+	m_nTimer = DEFAULT_TIME;
 	m_apNumber[0]->SetUV(0.1f*(m_nTimer / 10), 0.1f*((m_nTimer / 10) + 1), 0.0f, 1.0f);
 	m_apNumber[1]->SetUV(0.1f*(m_nTimer % 10), 0.1f*((m_nTimer % 10) + 1), 0.0f, 1.0f);
 	return S_OK;
@@ -63,7 +63,7 @@ HRESULT CTimer::Init()
 //=============================================================================
 void CTimer::Uninit()
 {
-	CObject::Release();
+
 }
 
 //=============================================================================

@@ -16,6 +16,7 @@
 #include"Collision.h"
 #include"sound.h"
 #include"Bullet.h"
+#include"Time.h"
 
 //静的メンバ変数
 int CPlayer::m_nNumPlayer = 0;	//プレイヤーの数
@@ -124,63 +125,66 @@ void CPlayer::Uninit(void)
 //===========================
 void CPlayer::Update(void)
 {
-	Input();					//入力処理
-	if ((m_nHitStop <= 0 && m_pEne->m_nHitStop <= 0) && m_nRig <= 0)
-	{//ヒットストップがない場合
-		Down();					//ダウン＆起き上がり
-		Updatepos();			//座標更新
-		//カメラ端
-		if (m_pos.x - m_pEne->GetPos().x > FIELD_WIDTH || m_pos.x - m_pEne->GetPos().x < -FIELD_WIDTH)
-		{//一定以上離れると1フレーム前の位置に移動
-			m_pos.x = m_posold.x;
-		}
-
-		if (m_nLife > 0 && m_Motion != PM_DOWN&&m_Motion != PM_STANDUP)
-		{//体力が残っててダウンしていない場合
-			if (m_bMotion == false && m_bJump == false)
-			{
-				m_Motion = PM_ST_NEUTRAL;
+	if (CGame::GetTimer()->GetTimer() < DEFAULT_TIME&& CGame::GetTimer()->GetTimer() > 0)
+	{
+		Input();					//入力処理
+		if ((m_nHitStop <= 0 && m_pEne->m_nHitStop <= 0) && m_nRig <= 0)
+		{//ヒットストップがない場合
+			Down();					//ダウン＆起き上がり
+			Updatepos();			//座標更新
+			//カメラ端
+			if (m_pos.x - m_pEne->GetPos().x > FIELD_WIDTH || m_pos.x - m_pEne->GetPos().x < -FIELD_WIDTH)
+			{//一定以上離れると1フレーム前の位置に移動
+				m_pos.x = m_posold.x;
 			}
 
-			ControlPlayer();		//操作
-			Axis();					//軸の押し出し判定
-			Jump();					//ジャンプ
-			AutoTurn();				//自動振り向き
+			if (m_nLife > 0 && m_Motion != PM_DOWN&&m_Motion != PM_STANDUP)
+			{//体力が残っててダウンしていない場合
+				if (m_bMotion == false && m_bJump == false)
+				{
+					m_Motion = PM_ST_NEUTRAL;
+				}
 
-			if (m_NextMotion != PM_ST_NEUTRAL)
-			{
-				m_Motion = m_NextMotion;
-				m_NextMotion = PM_ST_NEUTRAL;	//PM_ST_NEUTRALは使っていない状態
+				ControlPlayer();		//操作
+				Axis();					//軸の押し出し判定
+				Jump();					//ジャンプ
+				AutoTurn();				//自動振り向き
+
+				if (m_NextMotion != PM_ST_NEUTRAL)
+				{
+					m_Motion = m_NextMotion;
+					m_NextMotion = PM_ST_NEUTRAL;	//PM_ST_NEUTRALは使っていない状態
+				}
 				FireBall();
 			}
+			if (m_State == PST_AIR)
+			{//重力
+				m_move.y -= 0.25f;				//少しずつ減速
+			}
+			StageEdge();		//ステージの端の処理
 		}
-		if (m_State == PST_AIR)
-		{//重力
-			m_move.y -= 0.25f;				//少しずつ減速
+		else
+		{//ヒットストップもしくは硬直中の場合
+			m_nHitStop--;
+			Cancel();				//攻撃キャンセル
+			m_nRig--;
 		}
-		StageEdge();		//ステージの端の処理
-	}
-	else
-	{//ヒットストップもしくは硬直中の場合
-		m_nHitStop--;
-		Cancel();				//攻撃キャンセル
-		m_nRig--;
-	}
 
-	DrawCollision();		//当たり判定表示
-	Damage();				//ダメージ処理
-	Die();					//死亡処理
-	MotionManager();		//モーション再生
-	Normalization();		//角度の正規化
-	m_pShadow->SetPos({m_pos.x, 1.0f, m_pos.z});
+		DrawCollision();		//当たり判定表示
+		Damage();				//ダメージ処理
+		Die();					//死亡処理
+		MotionManager();		//モーション再生
+		Normalization();		//角度の正規化
+		m_pShadow->SetPos({ m_pos.x, 1.0f, m_pos.z });
 
 #ifdef _DEBUG
-	CDebugProc::Print("現在のプレイヤーの座標:%f %f %f", m_pos.x, m_pos.y, m_pos.z);
-	CDebugProc::Print("現在のモーション:%d ", (int)m_Motion);
-	CDebugProc::Print("現在の状態:%d ", (int)m_State);
-	CDebugProc::Print("現在のフレーム:%d", m_frame);
+		CDebugProc::Print("現在のプレイヤーの座標:%f %f %f", m_pos.x, m_pos.y, m_pos.z);
+		CDebugProc::Print("現在のモーション:%d ", (int)m_Motion);
+		CDebugProc::Print("現在の状態:%d ", (int)m_State);
+		CDebugProc::Print("現在のフレーム:%d", m_frame);
 
 #endif // _DEBUG
+	}
 }
 
 //===========================
@@ -1348,11 +1352,9 @@ void CPlayer::Command()
 			if (m_pos.x <= m_pEne->m_pos.x&&m_bBullet == false)
 			{
 				m_Motion = PM_236H;
-				FireBall();
 			}
 			else if (m_pos.x > m_pEne->m_pos.x)
 			{
-			//	m_Motion = PM_214H;
 			}
 		}
 
@@ -1362,11 +1364,10 @@ void CPlayer::Command()
 			if (m_pos.x <= m_pEne->m_pos.x&&m_bBullet == false)
 			{
 				m_Motion = PM_236M;
-				FireBall();
 			}
 			else if (m_pos.x > m_pEne->m_pos.x)
 			{
-			//	m_Motion = PM_214M;
+
 			}
 		}
 
@@ -1376,11 +1377,10 @@ void CPlayer::Command()
 			if (m_pos.x <= m_pEne->m_pos.x&&m_bBullet == false)
 			{
 				m_Motion = PM_236L;
-				FireBall();
 			}
 			else if (m_pos.x > m_pEne->m_pos.x)
 			{
-			//	m_Motion = PM_214L;
+
 			}
 		}
 
@@ -1390,12 +1390,11 @@ void CPlayer::Command()
 		{
 			if (m_pos.x <= m_pEne->m_pos.x)
 			{
-		//		m_Motion = PM_214H;
+
 			}
 			else if (m_pos.x > m_pEne->m_pos.x&&m_bBullet == false)
 			{
 				m_Motion = PM_236H;
-				FireBall();
 			}
 		}
 
@@ -1404,13 +1403,11 @@ void CPlayer::Command()
 		{
 			if (m_pos.x <= m_pEne->m_pos.x)
 			{
-			//	m_Motion = PM_214M;
 
 			}
 			else if (m_pos.x > m_pEne->m_pos.x&&m_bBullet == false)
 			{
 				m_Motion = PM_236M;
-				FireBall();
 			}
 		}
 
@@ -1419,12 +1416,11 @@ void CPlayer::Command()
 		{
 			if (m_pos.x <= m_pEne->m_pos.x)
 			{
-			//	m_Motion = PM_214L;
+
 			}
 			else if (m_pos.x > m_pEne->m_pos.x&&m_bBullet == false)
 			{
 				m_Motion = PM_236L;
-				FireBall();
 			}
 		}
 	}
@@ -1569,6 +1565,11 @@ void CPlayer::Cancel()
 			if ((m_anInput[0] & INPUT_MATK) == INPUT_MATK)
 			{
 				m_NextMotion = PM_ST_MATTACK;
+
+				if ((m_anInput[0] & INPUT2) == INPUT2)
+				{
+					m_NextMotion = PM_CR_MATTACK;
+				}
 			}
 			break;
 
@@ -1576,6 +1577,10 @@ void CPlayer::Cancel()
 			if ((m_anInput[0] & INPUT_HATK) == INPUT_HATK)
 			{
 				m_NextMotion = PM_ST_HATTACK;
+				if ((m_anInput[0] & INPUT2) == INPUT2)
+				{
+					m_NextMotion = PM_CR_HATTACK;
+				}
 			}
 			break;
 
@@ -1588,10 +1593,6 @@ void CPlayer::Cancel()
 				{
 					m_NextMotion = PM_236H;
 				}
-				else if(m_pos.x > m_pEne->m_pos.x)
-				{
-					m_NextMotion = PM_214H;
-				}
 			}
 
 			//中
@@ -1600,10 +1601,6 @@ void CPlayer::Cancel()
 				if (m_pos.x <= m_pEne->m_pos.x)
 				{
 					m_NextMotion = PM_236M;
-				}
-				else if (m_pos.x > m_pEne->m_pos.x)
-				{
-					m_NextMotion = PM_214M;
 				}
 			}
 
@@ -1614,10 +1611,6 @@ void CPlayer::Cancel()
 				{
 					m_NextMotion = PM_236L;
 				}
-				else if (m_pos.x > m_pEne->m_pos.x)
-				{
-					m_NextMotion = PM_214L;
-				}
 			}
 
 			//2P側
@@ -1626,7 +1619,7 @@ void CPlayer::Cancel()
 			{
 				if (m_pos.x <= m_pEne->m_pos.x)
 				{
-					m_NextMotion = PM_214H;
+
 				}
 				else if (m_bBullet == false)
 				{
@@ -1639,7 +1632,6 @@ void CPlayer::Cancel()
 			{
 				if (m_pos.x <= m_pEne->m_pos.x)
 				{
-					m_NextMotion = PM_214M;
 
 				}
 				else if (m_bBullet == false)
@@ -1653,7 +1645,7 @@ void CPlayer::Cancel()
 			{
 				if (m_pos.x <= m_pEne->m_pos.x)
 				{
-					m_Motion = PM_214L;
+
 				}
 				else if (m_bBullet == false)
 				{
@@ -1676,9 +1668,9 @@ void CPlayer::Cancel()
 				{
 					m_NextMotion = PM_CR_MATTACK;
 				}
-				else if ((m_anInput[0] & INPUT_LATK) == INPUT_LATK)
+				else
 				{
-					m_NextMotion = PM_CR_LATTACK;
+					m_NextMotion = PM_ST_MATTACK;
 				}
 			}
 			break;
@@ -1689,6 +1681,89 @@ void CPlayer::Cancel()
 				if ((m_anInput[0] & INPUT2) == INPUT2)
 				{
 					m_NextMotion = PM_CR_HATTACK;
+				}
+				else
+				{
+					m_NextMotion = PM_ST_HATTACK;
+				}
+			}
+			//波動拳・竜巻
+			//強
+			if (CheckInput(CMD236H) == true && m_State != PST_AIR)
+			{
+				if (m_pos.x <= m_pEne->m_pos.x&&m_bBullet == false)
+				{
+					m_NextMotion = PM_236H;
+				}
+				else if (m_pos.x > m_pEne->m_pos.x)
+				{
+
+				}
+			}
+
+			//中
+			if (CheckInput(CMD236M) == true && m_State != PST_AIR)
+			{
+				if (m_pos.x <= m_pEne->m_pos.x&&m_bBullet == false)
+				{
+					m_NextMotion = PM_236M;
+				}
+				else if (m_pos.x > m_pEne->m_pos.x)
+				{
+
+				}
+			}
+
+			//弱
+			if (CheckInput(CMD236L) == true && m_State != PST_AIR)
+			{
+				if (m_pos.x <= m_pEne->m_pos.x&&m_bBullet == false)
+				{
+					m_NextMotion = PM_236L;
+				}
+				else if (m_pos.x > m_pEne->m_pos.x)
+				{
+
+				}
+			}
+
+			//2P側
+			//強
+			if (CheckInput(CMD214H) == true && m_State != PST_AIR)
+			{
+				if (m_pos.x <= m_pEne->m_pos.x)
+				{
+
+				}
+				else if (m_bBullet == false)
+				{
+					m_NextMotion = PM_236H;
+				}
+			}
+
+			//中
+			if (CheckInput(CMD214M) == true && m_State != PST_AIR)
+			{
+				if (m_pos.x <= m_pEne->m_pos.x)
+				{
+
+				}
+				else if (m_bBullet == false)
+				{
+					m_NextMotion = PM_236M;
+				}
+			}
+
+			//弱
+			if (CheckInput(CMD214L) == true && m_State != PST_AIR&&m_bBullet == false)
+			{
+				if (m_pos.x <= m_pEne->m_pos.x)
+				{
+
+				}
+				else if (m_bBullet == false)
+				{
+					m_Motion = PM_236L;
 				}
 			}
 			break;
@@ -1946,7 +2021,7 @@ void CPlayer::FireBall()
 			fangle *= -1;
 		}
 
-		if (m_Motion == PM_236L || m_Motion == PM_236M || m_Motion == PM_236H)
+		if (m_MotionOld!=m_Motion&&(m_Motion == PM_236L || m_Motion == PM_236M || m_Motion == PM_236H))
 		{
 			m_pBullet = CBullet::Create(
 				m_pos,

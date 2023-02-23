@@ -18,8 +18,9 @@ class Player;
 
 //É}ÉNÉçíËã`
 #define NUM_TEXTIME		(2)
+#define	DEFAULT_TIME	(99)
 
-class CTimer :public CObject
+class CTimer
 {
 public:
 	explicit CTimer(int nPriority = 3);
@@ -38,7 +39,7 @@ public:
 
 private:
 	CObject2D* m_pObject2D;
-	CObject2D* m_apNumber[2];
+	CObject2D* m_apNumber[NUM_TEXTIME];
 
 	static LPDIRECT3DTEXTURE9 m_apTexture[NUM_TEXTIME];
 	int m_nTimer;

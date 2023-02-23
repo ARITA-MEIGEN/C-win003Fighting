@@ -21,6 +21,7 @@
 #include"input.h"
 #include"effect.h"
 #include"Time.h"
+#include"UI.h"
 
 //静的メンバ変数
 CPlayer*CGame::m_pPlayer[2] = {};
@@ -32,6 +33,7 @@ CCamera*CGame::m_pCamera = nullptr;
 CLight*CGame::m_pLight = nullptr;
 CFloor*CGame::m_pFloor = nullptr;
 CTimer*CGame::m_pTimer = nullptr;
+CUI*CGame::m_pUI = nullptr;
 //====================================
 //コンストラクタ
 //====================================
@@ -98,6 +100,8 @@ HRESULT CGame::Init()
 	m_pTimer = CTimer::Create();
 	m_Timer = 0;
 
+	m_pUI = CUI::Create();
+
 	return S_OK;
 }
 
@@ -134,6 +138,18 @@ void CGame::Uninit()
 		delete m_Life;
 	}
 
+	if (m_pUI != nullptr)
+	{
+		m_pUI->Uninit();
+		delete m_pUI;
+	}
+	
+	if (m_pTimer != nullptr)
+	{
+		m_pTimer->Uninit();
+		delete m_pTimer;
+	}
+
 	StopSound();
 }
 
@@ -143,29 +159,22 @@ void CGame::Uninit()
 void CGame::Update()
 {
 	CInput* pInput = CApplication::GetInput();
-#ifdef _DEBUG
-	//指定のキーが押されたかどうか
 	if (CApplication::GetFade()->GetFade() == CFade::FADE_NONE)
 	{
-		if (pInput->Trigger(DIK_RETURN))
-		{
-			CApplication::GetFade()->SetFade(CApplication::MODE_RESULT);
-		}
-	}
-	if (pInput->Trigger(DIK_F2))
-	{//カメラのON/OFF
-		bDebugCamera = !bDebugCamera;
-	}
-	if (bDebugCamera == true)
-	{
-		CDebugProc::Print("F2:カメラモード");
-	}
-	else
-	{
-		CDebugProc::Print("F2:プレイヤーモード");
-	}
-#endif // !_DEBUG
+		m_pUI->Update();	//UI
+		m_pTimer->Update();
 
+#ifdef _DEBUG
+		//指定のキーが押されたかどうか
+		if (CApplication::GetFade()->GetFade() == CFade::FADE_NONE)
+		{
+			if (pInput->Trigger(DIK_RETURN))
+			{
+				CApplication::GetFade()->SetFade(CApplication::MODE_RESULT);
+			}
+		}
+#endif // !_DEBUG
+	}
 	m_pCamera->Update();
 	m_pLight->Update();
 	m_Life->Update();
@@ -174,16 +183,19 @@ void CGame::Update()
 	if (m_pPlayer[0]->GetLife() <= 0 || m_pPlayer[1]->GetLife() <= 0 || m_pTimer->GetTimer() <= 0)
 	{
 		m_Timer++;
-		if (m_pPlayer[0]->GetLife() <= m_pPlayer[1]->GetLife())
+		if (m_pPlayer[1]->GetLife() == m_pPlayer[0]->GetLife())
+		{
+			CApplication::SetWinner(2);
+		}
+		else if (m_pPlayer[0]->GetLife() < m_pPlayer[1]->GetLife())
 		{
 			CApplication::SetWinner(1);
 		}
-		else if (m_pPlayer[1]->GetLife() <= m_pPlayer[0]->GetLife())
+		else if (m_pPlayer[1]->GetLife() < m_pPlayer[0]->GetLife())
 		{
 			CApplication::SetWinner(0);
 		}
 	}
-
 	//タイマーが一定値以上でリザルトへ移行
 	if (m_Timer >= END_TIMER&&CApplication::GetFade()->GetFade() == CFade::FADE_NONE)
 	{

@@ -22,6 +22,7 @@ class CCamera;
 class CLight;
 class CFloor;
 class CTimer;
+class CUI;
 
 class CGame
 {
@@ -31,6 +32,14 @@ public:
 		GAME_NONE = 0,
 		GAME_NORMAL,
 		GAME_END
+	};
+
+	enum EROUND
+	{
+		GAME_START = 0,
+		GAME_ROUND1,
+		GAME_ROUND2,
+		GAME_MAX
 	};
 
 	CGame();
@@ -49,17 +58,18 @@ public:
 	static CLight*GetLight();
 	static bool GetDebugCamera() { return bDebugCamera; };
 	static CPlayer*GetPlayer(int number) { return m_pPlayer[number]; };
+	static CTimer*GetTimer() { return m_pTimer; };
 
 private:
 	static	CPlayer*m_pPlayer[MAX_PLAYER];
 	static	CLife*m_Life;				//ëÃóÕÉQÅ[ÉW
 	static	GAME m_gamestate;			//ÉQÅ[ÉÄÇÃèÛë‘
-
 	static	CCamera*m_pCamera;
 	static	CLight*m_pLight;
 	static	CFloor*m_pFloor;
 	static  bool bDebugCamera;
 	static	CTimer*m_pTimer;
+	static	CUI*m_pUI;
 	int		m_Timer;
 
 };

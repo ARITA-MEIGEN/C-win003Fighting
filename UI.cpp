@@ -6,7 +6,7 @@
 //=============================================================================
 //インクルード
 #include"main.h"
-#include"Result.h"
+#include"UI.h"
 #include"input.h"
 #include"Fade.h"
 #include"Application.h"
@@ -14,18 +14,19 @@
 #include"sound.h"
 
 //静的メンバ変数
-CObject2D*CResult::m_pBg = nullptr;
+CObject2D*CUI::m_pStart[2] = {};
+
 //====================================
 //コンストラクタ
 //====================================
-CResult::CResult()
+CUI::CUI(int nPriority)
 {
 }
 
 //====================================
 //デストラクタ
 //====================================
-CResult::~CResult()
+CUI::~CUI()
 {
 
 }
@@ -33,72 +34,71 @@ CResult::~CResult()
 //====================================
 //初期化
 //====================================
-HRESULT CResult::Init()
+HRESULT CUI::Init()
 {
 	LPDIRECT3DDEVICE9 pDevice;
 	pDevice = CApplication::GetRenderer()->GetDevice();
 
 	//テクスチャの読み込み
-	LPDIRECT3DTEXTURE9 tex[3];
-
-	//背景の生成
-	m_pBg = new CObject2D(CObject::OBJTYPE_UI);
-	m_pBg->Init();
-	m_pBg->SetPos(D3DXVECTOR3((float)SCREEN_WIDTH / 2, (float)SCREEN_HEIGHT / 2, 0.0f));
-	m_pBg->SetSiz(D3DXVECTOR2((float)SCREEN_WIDTH, (float)SCREEN_HEIGHT));
-	m_pBg->SetCol(D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f));
-
-	//テクスチャの読み込み
+	LPDIRECT3DTEXTURE9 tex[2];
 	D3DXCreateTextureFromFile(pDevice,
-		"data\\TEXTURE\\Result000.png",
+		"data\\TEXTURE\\READY.png",
 		&tex[0]);
 
-	//テクスチャの読み込み
 	D3DXCreateTextureFromFile(pDevice,
-		"data\\TEXTURE\\Result001.png",
+		"data\\TEXTURE\\FIGHT.png",
 		&tex[1]);
 
-	//テクスチャの読み込み
-	D3DXCreateTextureFromFile(pDevice,
-		"data\\TEXTURE\\Result002.png",
-		&tex[2]);
+	//背景の生成
+	for (int i = 0; i < 2; i++)
+	{
+		m_pStart[i] = new CObject2D(CObject::OBJTYPE_UI);
+		m_pStart[i]->Init();
+		m_pStart[i]->SetPos(D3DXVECTOR3((float)SCREEN_WIDTH / 2, (float)SCREEN_HEIGHT / 2, 0.0f));
+		m_pStart[i]->SetSiz(D3DXVECTOR2((float)SCREEN_WIDTH, (float)SCREEN_HEIGHT));
+		m_pStart[i]->SetCol(D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f - i));
+		m_pStart[i]->BindTexture(tex[i]);
+	}
 
-	m_pBg->BindTexture(tex[CApplication::GetWinner()]);
-
-
+	m_timer = 0;
 	return S_OK;
 }
 
 //====================================
 //終了
 //====================================
-void CResult::Uninit()
+void CUI::Uninit()
 {
-	//テクスチャの破棄
 }
 
 //====================================
 //更新
 //====================================
-void CResult::Update()
+void CUI::Update()
 {
-	CInput* pInput = CApplication::GetInput();
-
-	if (CApplication::GetFade()->GetFade() == CFade::FADE_NONE)
+	m_timer++;
+	if (m_timer >= 120)
 	{
-		if ((pInput->Trigger(KEY_ALL)) == true)		//ENTERキー
-		{//エンターでランキングに
-		 //モード設定
-			PlaySound(SOUND_LABEL_SE_START);
-			CApplication::GetFade()->SetFade(CApplication::MODE_TITLE);
-		}
+		m_pStart[1]->SetCol(D3DXCOLOR(1.0f, 1.0f, 1.0f, 0.0f));
+	}
+	else  if (m_timer >= 60)
+	{
+		m_pStart[0]->SetCol(D3DXCOLOR(1.0f, 1.0f, 1.0f, 0.0f));
+		m_pStart[1]->SetCol(D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f));
+	}
+	else  if (m_timer >= 30)
+	{
+		m_pStart[0]->SetCol(D3DXCOLOR(1.0f, 1.0f, 1.0f, m_pStart[0]->GetCol().a - 0.05f));
 	}
 }
 
 //====================================
-//描画
+//生成
 //====================================
-void CResult::Draw()
+CUI * CUI::Create()
 {
-
+	CUI* pUI;
+	pUI = new CUI;
+	pUI->Init();
+	return pUI;
 }

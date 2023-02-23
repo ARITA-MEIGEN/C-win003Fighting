@@ -50,6 +50,7 @@
     <ClCompile Include="sound.cpp" />
     <ClCompile Include="Time.cpp" />
     <ClCompile Include="Title.cpp" />
+    <ClCompile Include="UI.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application.h" />
@@ -86,6 +87,7 @@
     <ClInclude Include="sound.h" />
     <ClInclude Include="Time.h" />
     <ClInclude Include="Title.h" />
+    <ClInclude Include="UI.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{7233D566-879E-4434-8AF9-F3F519F04301}</ProjectGuid>
