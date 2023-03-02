@@ -34,7 +34,6 @@ CEffect::~CEffect()
 HRESULT  CEffect::Init()
 {
 	CObject3D::Init();
-	//SetRot(D3DXVECTOR3(D3DX_PI*-0.5f,0.0f,0.0f));
 	return S_OK;
 }
 
@@ -58,11 +57,11 @@ void  CEffect::Update()
 	D3DXCOLOR col = GetCol();
 
 	Siz -= {1.0f, 0.0f, 1.0f};
-	m_Life--;
-	col.a -= 0.1f;
+	m_nLife--;
+	col.a -= fAlphagain;
 
 	//色(アルファ値を変化させる)
-	if (col.a <= 0.0f || Siz.x <= 0.0f || Siz.y <= 0.0f || m_Life <= 0)
+	if (col.a <= 0.0f || Siz.x <= 0.0f || Siz.y <= 0.0f || m_nLife <= 0)
 	{//アルファ値が0以下の場合強制終了
 		Uninit();
 		return;
@@ -164,18 +163,19 @@ void  CEffect::Draw()
 CEffect* CEffect::Create(D3DXVECTOR3 pos, D3DXVECTOR3 siz, float lot, D3DXVECTOR3 move, int nLife, D3DXCOLOR col,int texnumber,bool alpha)
 {
 	CEffect*pEffect;
-	pEffect = new CEffect();
+	pEffect = new CEffect(5);
 	if (pEffect != nullptr)
 	{// ポリゴンの初期化処理
 		pEffect->Init();
 		pEffect->SetPos(pos);
 		pEffect->SetRot(D3DXVECTOR3(lot, D3DX_PI*-0.5f, D3DX_PI*0.5f));
-		pEffect->m_Life = nLife;
+		pEffect->m_nLife = nLife;
 		pEffect->SetCol(col);
 		pEffect->m_move = move;
 		pEffect->SetSiz(siz);
 		pEffect->BindTexture(m_apTexture[texnumber]);	//テクスチャの設定
 		pEffect->m_bAlpha = alpha;
+		pEffect->fAlphagain = col.a / nLife;
 	}
 	return pEffect;
 }

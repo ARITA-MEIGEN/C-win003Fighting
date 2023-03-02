@@ -35,13 +35,13 @@ public:
 	static CEffect *Create(D3DXVECTOR3 pos, D3DXVECTOR3 siz, float lot, D3DXVECTOR3 move, int nLife, D3DXCOLOR col, int texnumber, bool alpha);
 	static HRESULT Load();
 	static void Unload();
-
 private:
 	//メンバ関数
 	static LPDIRECT3DTEXTURE9 m_apTexture[EFFECT_TEX];
-	int m_Life;						//寿命
+	int m_nLife;						//寿命
 	D3DXVECTOR3 m_move;
 	D3DXMATRIX mtx;					//マトリックス
+	float fAlphagain;				//生成時のアルファ減少量
 	bool m_bAlpha;
 };
 #endif // !_OBJECT_H_

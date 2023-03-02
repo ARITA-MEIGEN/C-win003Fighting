@@ -8,6 +8,12 @@
 class CParticle :public CObject
 {
 public:
+
+	enum Particle
+	{
+		PAR_FIREFLOWER = 0,	//火花型
+		MAX_PARTICLE
+	};
 	explicit CParticle(int nPriority = 0);
 	~CParticle();
 	//プロトタイプ宣言
@@ -15,7 +21,7 @@ public:
 	void Uninit(void);		//パーティクルの終了処理
 	void Update(void);		//パーティクルの更新処理
 	void Draw(void);		//パーティクルの更新処理
-	static CParticle * Create(D3DXVECTOR3 pos, D3DXVECTOR3 siz, D3DXCOLOR col, float rot, int life,int numeffect);	//パーティクルの情報の取得
+	static CParticle * Create(D3DXVECTOR3 pos, D3DXVECTOR3 siz, D3DXCOLOR col, Particle type);	//パーティクルの情報の取得
 
 	//ゲッター
 	D3DXVECTOR3	GetPos() { return m_pos; };
@@ -33,6 +39,7 @@ private:
 	int nMovewidthMin;		//最低値
 	int nStartRandPosX;	//初期位置の乱数
 	int nStartRandPosY;	//初期位置の乱数
+	Particle m_ParticleType;
 };
 
 

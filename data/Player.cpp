@@ -27,7 +27,7 @@ int CPlayer::m_nNumPlayer = 0;	//プレイヤーの数
 //===========================
 CPlayer::CPlayer(int nPriority) :CObject(nPriority)
 {
-	m_nPlaNum = m_nNumPlayer;
+	m_nPlayerNumber = m_nNumPlayer;
 	m_nNumPlayer++;
 }
 
@@ -80,7 +80,7 @@ HRESULT CPlayer::Init()
 		m_apModel[i]->SetPos(m_apMotion[0].aKey[0].aKey[i].fPos + m_apModel[i]->GetDPos());	//初期位置の設定
 		m_apModel[i]->SetRot(m_apMotion[0].aKey[0].aKey[i].fRot + m_apModel[i]->GetDRot());	//差分の取得
 
-		if (m_nPlaNum == 0)
+		if (m_nPlayerNumber == 0)
 		{
 			m_apModel[i]->SetCol(D3DXCOLOR(1.0f, 0.0f, 0.0f, 1.0f));
 		}
@@ -822,70 +822,76 @@ void CPlayer::PlayFirstMotion()
 //===========================
 void CPlayer::DrawCollision()
 {
-	//当たり判定の表示
-	for (int i = 0; i < PM_MAX; i++)
+	//プレイヤー1とプレイヤー2の処理を同時に行うため一回のみ通る
+	if (m_nPlayerNumber == 0)
 	{
-		for (int k = 0; k < m_apMotion[i].nNumKey; k++)
+		//当たり判定の表示
+		for (int i = 0; i < PM_MAX; i++)
 		{
-			//ダメージ判定
-			for (int j = 0; j < m_apMotion[i].aKey[k].nNumCollision; j++)
-			{//違うモーションの当たり判定をオフにする
+			for (int k = 0; k < m_apMotion[i].nNumKey; k++)
+			{//プレイヤー1
+				//ダメージ判定
+				for (int j = 0; j < m_apMotion[i].aKey[k].nNumCollision; j++)
+				{//違うモーションの当たり判定をオフにする
 
-				 //攻撃判定再設定
-				if (m_bSide == false)
-				{//敵より右側の場合
-					m_apMotion[i].aKey[k].Collision[j]->SetPos(m_pos + m_apMotion[i].aKey[k].Collision[j]->GetDPos());
-				}
-				else
-				{//1P側
-					m_apMotion[i].aKey[k].Collision[j]->SetPos(D3DXVECTOR3(
-						m_pos.x - m_apMotion[i].aKey[k].Collision[j]->GetDPos().x,				//X
-						m_pos.y + m_apMotion[i].aKey[k].Collision[j]->GetDPos().y,
-						m_pos.z - m_apMotion[i].aKey[k].Collision[j]->GetDPos().z));
-				}
+					 //攻撃判定再設定
+					if (m_bSide == false)
+					{//敵より右側の場合
+						//プレイヤー1
+						m_apMotion[i].aKey[k].Collision[j]->SetPos(m_pos + m_apMotion[i].aKey[k].Collision[j]->GetDPos());
+					}
+					else
+					{//右向き
 
+						//プレイヤー1
+						m_apMotion[i].aKey[k].Collision[j]->SetPos(D3DXVECTOR3(
+							m_pos.x - m_apMotion[i].aKey[k].Collision[j]->GetDPos().x,				//X
+							m_pos.y + m_apMotion[i].aKey[k].Collision[j]->GetDPos().y,
+							m_pos.z - m_apMotion[i].aKey[k].Collision[j]->GetDPos().z));
+					}
 
-				if (m_Motion == i&&m_nCurKey == k&&m_frame >= m_apMotion[i].aKey[k].Collision[j]->GetStartf()&&m_frame <= m_apMotion[i].aKey[k].Collision[j]->GetEndf())
-				{//キーとモーションが一致している場合のみ表示
-					if (m_apMotion[i].aKey[k].Collision[j] != nullptr)
+					if (m_Motion == i&&m_nCurKey == k&&m_frame >= m_apMotion[i].aKey[k].Collision[j]->GetStartf() && m_frame <= m_apMotion[i].aKey[k].Collision[j]->GetEndf())
+					{//キーとモーションが一致している場合のみ表示
+						if (m_apMotion[i].aKey[k].Collision[j] != nullptr)
+						{
+							m_apMotion[i].aKey[k].Collision[j]->SetUse(true);
+						}
+					}
+					else
 					{
-						m_apMotion[i].aKey[k].Collision[j]->SetUse(true);
+						if (m_apMotion[i].aKey[k].Collision[j] != nullptr)
+						{
+							m_apMotion[i].aKey[k].Collision[j]->SetUse(false);
+						}
 					}
 				}
-				else
+
+				//やられ判定
+				for (int j = 0; j < m_apMotion[i].aKey[k].nNumHurtCol; j++)
 				{
-					if (m_apMotion[i].aKey[k].Collision[j] != nullptr)
-					{
-						m_apMotion[i].aKey[k].Collision[j]->SetUse(false);
+					if (m_bSide == true)
+					{//右向き(1P)
+						m_apMotion[i].aKey[k].HurtCol[j]->SetPos(D3DXVECTOR3(
+							m_pos.x - m_apMotion[i].aKey[k].HurtCol[j]->GetDPos().x,
+							m_pos.y + m_apMotion[i].aKey[k].HurtCol[j]->GetDPos().y,
+							m_pos.z + m_apMotion[i].aKey[k].HurtCol[j]->GetDPos().z));
 					}
-				}
-			}
+					else
+					{//左向き(2P)
+						m_apMotion[i].aKey[k].HurtCol[j]->SetPos(m_apMotion[i].aKey[k].HurtCol[j]->GetDPos() + m_pos);
+					}
 
-			//やられ判定
-			for (int j = 0; j < m_apMotion[i].aKey[k].nNumHurtCol; j++)
-			{
-				if (m_bSide == true)
-				{//右向き(1P)
-					m_apMotion[i].aKey[k].HurtCol[j]->SetPos(D3DXVECTOR3(
-						m_pos.x - m_apMotion[i].aKey[k].HurtCol[j]->GetDPos().x,
-						m_pos.y + m_apMotion[i].aKey[k].HurtCol[j]->GetDPos().y,
-						m_pos.z + m_apMotion[i].aKey[k].HurtCol[j]->GetDPos().z));
-				}
-				else
-				{//左向き(2P)
-					m_apMotion[i].aKey[k].HurtCol[j]->SetPos(m_apMotion[i].aKey[k].HurtCol[j]->GetDPos() + m_pos);
-				}
-
-				if (m_Motion == i&&m_nCurKey == k&&m_apMotion[i].aKey[k].HurtCol[j] != nullptr&&
-					m_frame >= m_apMotion[i].aKey[k].HurtCol[j]->GetStartf()&& m_frame <= m_apMotion[i].aKey[k].HurtCol[j]->GetEndf())
-				{
-					m_apMotion[i].aKey[k].HurtCol[j]->SetUse(true);
-				}
-				else
-				{
-					if (m_apMotion[i].aKey[k].HurtCol[j] != nullptr)
+					if (m_Motion == i&&m_nCurKey == k&&m_apMotion[i].aKey[k].HurtCol[j] != nullptr&&
+						m_frame >= m_apMotion[i].aKey[k].HurtCol[j]->GetStartf() && m_frame <= m_apMotion[i].aKey[k].HurtCol[j]->GetEndf())
 					{
-						m_apMotion[i].aKey[k].HurtCol[j]->SetUse(false);
+						m_apMotion[i].aKey[k].HurtCol[j]->SetUse(true);
+					}
+					else
+					{
+						if (m_apMotion[i].aKey[k].HurtCol[j] != nullptr)
+						{
+							m_apMotion[i].aKey[k].HurtCol[j]->SetUse(false);
+						}
 					}
 				}
 			}
@@ -1069,17 +1075,15 @@ bool CPlayer::Guard(CCollision::EDAMAGE_POINT dp)
 	case PM_ST_GUARD:	//立ちガード
 		if (dp == CCollision::DP_LOW)
 		{
-			
+
 			return false;	//ダメージが通る
 		}
 		else
 		{//移動量の設定
-			CParticle::Create(m_pos + D3DXVECTOR3{ 0.0f,30.0f,0.0f },							//位置の設定
-				D3DXVECTOR3{ 30.0f,30.0f ,30.0f },				//半径の大きさの設定
-				D3DXCOLOR(0.05f, 0.05f, 0.05f, 1.5f),				//頂点カラーの設定	
-				D3DX_PI*BULLET_ANGLE,							//画像の角度
-				30,												//寿命
-				300);
+			CParticle::Create(m_pos + D3DXVECTOR3{ -20.0f,30.0f,0.0f },			//位置の設定
+				D3DXVECTOR3{ GUARD_EFFECTSIZ,GUARD_EFFECTSIZ ,GUARD_EFFECTSIZ },		//半径の大きさの設定
+				D3DXCOLOR(0.05f, 0.05f, 0.45f, 1.0f),							//頂点カラーの設定	
+				CParticle::PAR_FIREFLOWER);
 			return true;	//ガード成功
 		}
 
@@ -1090,6 +1094,10 @@ bool CPlayer::Guard(CCollision::EDAMAGE_POINT dp)
 		}
 		else
 		{
+			CParticle::Create(m_pos + D3DXVECTOR3{ -20.0f,20.0f,0.0f },			//位置の設定
+				D3DXVECTOR3{ GUARD_EFFECTSIZ,GUARD_EFFECTSIZ ,GUARD_EFFECTSIZ },		//半径の大きさの設定
+				D3DXCOLOR(0.05f, 0.05f, 0.45f, 1.0f),							//頂点カラーの設定	
+				CParticle::PAR_FIREFLOWER);
 			return true;	//ガード成功
 		}
 
@@ -1099,12 +1107,10 @@ bool CPlayer::Guard(CCollision::EDAMAGE_POINT dp)
 	default:
 
 		//移動量の設定
-			CParticle::Create(m_pos + D3DXVECTOR3{0.0f,30.0f,0.0f},							//位置の設定
-				D3DXVECTOR3{ 30.0f,30.0f ,30.0f },				//半径の大きさの設定
-				D3DXCOLOR(0.1, 0.05f, 0.0f, 1.5f),				//頂点カラーの設定	
-				D3DX_PI*BULLET_ANGLE,							//画像の角度
-				30,												//寿命
-				300);												
+		CParticle::Create(m_pos + D3DXVECTOR3{ 0.0f,30.0f,0.0f },							//位置の設定
+			D3DXVECTOR3{ HIT_EFFECTSIZ,HIT_EFFECTSIZ ,HIT_EFFECTSIZ },				//半径の大きさの設定
+			D3DXCOLOR(0.35f, 0.16f, 0.0f, 1.0f),				//頂点カラーの設定	
+			CParticle::PAR_FIREFLOWER);
 		return false;	//ダメージが通る
 	}
 }
@@ -1527,32 +1533,32 @@ void CPlayer::Input()
 	//レバー
 	{
 		//左下
-		Key |= (pInput->Press(DIK_A) && pInput->Press(DIK_S)) || pInput->Press(JOYPAD_DOWN_LEFT, m_nPlaNum) ? INPUT1 : INPUT_NOT1;
+		Key |= (pInput->Press(DIK_A) && pInput->Press(DIK_S)) || pInput->Press(JOYPAD_DOWN_LEFT, m_nPlayerNumber) ? INPUT1 : INPUT_NOT1;
 		//下
-		Key |= pInput->Press(DIK_S) || pInput->Press(JOYPAD_DOWN, m_nPlaNum)|| pInput->Press(JOYPAD_DOWN_LEFT, m_nPlaNum) || pInput->Press(JOYPAD_DOWN_RIGHT, m_nPlaNum) ? INPUT2 : INPUT_NOT2;
+		Key |= pInput->Press(DIK_S) || pInput->Press(JOYPAD_DOWN, m_nPlayerNumber)|| pInput->Press(JOYPAD_DOWN_LEFT, m_nPlayerNumber) || pInput->Press(JOYPAD_DOWN_RIGHT, m_nPlayerNumber) ? INPUT2 : INPUT_NOT2;
 		//右下
-		Key |= (pInput->Press(DIK_D) && pInput->Press(DIK_S)) || pInput->Press(JOYPAD_DOWN_RIGHT, m_nPlaNum) ? INPUT3 : INPUT_NOT3;
+		Key |= (pInput->Press(DIK_D) && pInput->Press(DIK_S)) || pInput->Press(JOYPAD_DOWN_RIGHT, m_nPlayerNumber) ? INPUT3 : INPUT_NOT3;
 		//左
-		Key |= pInput->Press(DIK_A) || pInput->Press(JOYPAD_LEFT, m_nPlaNum) || pInput->Press(JOYPAD_DOWN_LEFT, m_nPlaNum) || (pInput->Press(JOYPAD_UP_LEFT, m_nPlaNum)) ? INPUT4 : INPUT_NOT4;
+		Key |= pInput->Press(DIK_A) || pInput->Press(JOYPAD_LEFT, m_nPlayerNumber) || pInput->Press(JOYPAD_DOWN_LEFT, m_nPlayerNumber) || (pInput->Press(JOYPAD_UP_LEFT, m_nPlayerNumber)) ? INPUT4 : INPUT_NOT4;
 		//右
-		Key |= pInput->Press(DIK_D) || pInput->Press(JOYPAD_RIGHT, m_nPlaNum) || (pInput->Press(JOYPAD_UP_RIGHT, m_nPlaNum)) || pInput->Press(JOYPAD_DOWN_RIGHT, m_nPlaNum) ? INPUT6 : INPUT_NOT6;
+		Key |= pInput->Press(DIK_D) || pInput->Press(JOYPAD_RIGHT, m_nPlayerNumber) || (pInput->Press(JOYPAD_UP_RIGHT, m_nPlayerNumber)) || pInput->Press(JOYPAD_DOWN_RIGHT, m_nPlayerNumber) ? INPUT6 : INPUT_NOT6;
 		//左上
-		Key |= (pInput->Press(DIK_A) && pInput->Press(DIK_SPACE)) || (pInput->Press(JOYPAD_UP_LEFT, m_nPlaNum)) ? INPUT7 : INPUT_NOT7;
+		Key |= (pInput->Press(DIK_A) && pInput->Press(DIK_SPACE)) || (pInput->Press(JOYPAD_UP_LEFT, m_nPlayerNumber)) ? INPUT7 : INPUT_NOT7;
 		//上
-		Key |= pInput->Press(DIK_SPACE) || pInput->Press(JOYPAD_UP, m_nPlaNum) || (pInput->Press(JOYPAD_UP_RIGHT, m_nPlaNum)) || (pInput->Press(JOYPAD_UP_LEFT, m_nPlaNum)) ? INPUT8 : INPUT_NOT8;
+		Key |= pInput->Press(DIK_SPACE) || pInput->Press(JOYPAD_UP, m_nPlayerNumber) || (pInput->Press(JOYPAD_UP_RIGHT, m_nPlayerNumber)) || (pInput->Press(JOYPAD_UP_LEFT, m_nPlayerNumber)) ? INPUT8 : INPUT_NOT8;
 		//右上
-		Key |= (pInput->Press(DIK_D) && pInput->Press(DIK_SPACE)) || (pInput->Press(JOYPAD_UP_RIGHT, m_nPlaNum)) ? INPUT9 : INPUT_NOT9;
+		Key |= (pInput->Press(DIK_D) && pInput->Press(DIK_SPACE)) || (pInput->Press(JOYPAD_UP_RIGHT, m_nPlayerNumber)) ? INPUT9 : INPUT_NOT9;
 
 		//ニュートラル
 		Key |= (m_anInput[0] & INPUT_NOT6) == INPUT_NOT6 && (m_anInput[0] & INPUT_NOT2) == INPUT_NOT2 && (m_anInput[0] & INPUT_NOT4) == INPUT_NOT4 && (m_anInput[0] & INPUT_NOT8) == INPUT_NOT8 ? INPUT_NOT5 : INPUT5;
 
 		//攻撃
 		//弱
-		Key |= pInput->Press(DIK_U) || pInput->Press(JOYPAD_A, m_nPlaNum) ? INPUT_LATK : INPUT_NOT_LATK;
+		Key |= pInput->Press(DIK_U) || pInput->Press(JOYPAD_A, m_nPlayerNumber) ? INPUT_LATK : INPUT_NOT_LATK;
 		//中
-		Key |= pInput->Press(DIK_I) || pInput->Press(JOYPAD_B, m_nPlaNum) ? INPUT_MATK : INPUT_NOT_MATK;
+		Key |= pInput->Press(DIK_I) || pInput->Press(JOYPAD_B, m_nPlayerNumber) ? INPUT_MATK : INPUT_NOT_MATK;
 		//強
-		Key |= pInput->Press(DIK_O) || pInput->Press(JOYPAD_R1, m_nPlaNum) ? INPUT_HATK : INPUT_NOT_HATK;
+		Key |= pInput->Press(DIK_O) || pInput->Press(JOYPAD_R1, m_nPlayerNumber) ? INPUT_HATK : INPUT_NOT_HATK;
 	}
 
 	//コマンド入れ替え処理
@@ -2061,7 +2067,7 @@ void CPlayer::FireBall()
 				move,
 				fangle,
 				life,
-				m_nPlaNum);
+				m_nPlayerNumber);
 			m_bBullet = true;
 		}
 	}

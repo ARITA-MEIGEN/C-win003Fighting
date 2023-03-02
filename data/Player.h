@@ -39,6 +39,9 @@ class CBullet;
 #define BULLET_ANGLE		(1.0f)			//弾の角度
 #define	BACKSTEP_MOVE_X		(5.0f)			//バックステップの移動量
 #define	BACKSTEP_MOVE_Y		(2.0f)			//バックステップの移動量
+#define HIT_EFFECTSIZ		(25.0f)			//ヒットエフェクトの大きさ
+#define GUARD_EFFECTSIZ		(30.0f)			//ガードエフェクトの大きさ
+
 
 
 class CPlayer :public CObject
@@ -215,7 +218,7 @@ private:
 	PLAYER_MOTION	m_NextMotion;					//キャンセルで発動する技
 	bool			m_bMotion;						//モーション再生中かどうか
 	static int		m_nNumPlayer;					//プレイヤーの数
-	int				m_nPlaNum;						//自分のプレイヤー番号
+	int				m_nPlayerNumber;				//自分のプレイヤー番号
 	CPlayer*		m_pEne;							//対戦相手のポインタ
 	PLAYER_STATE	m_State;						//プレイヤーの状態
 	bool			m_bAttack;						//攻撃中かどうか
