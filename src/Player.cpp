@@ -822,76 +822,72 @@ void CPlayer::PlayFirstMotion()
 //===========================
 void CPlayer::DrawCollision()
 {
-	//プレイヤー1とプレイヤー2の処理を同時に行うため一回のみ通る
-	if (m_nPlayerNumber == 0)
+	//当たり判定の表示
+	for (int i = 0; i < PM_MAX; i++)
 	{
-		//当たり判定の表示
-		for (int i = 0; i < PM_MAX; i++)
-		{
-			for (int k = 0; k < m_apMotion[i].nNumKey; k++)
-			{//プレイヤー1
-				//ダメージ判定
-				for (int j = 0; j < m_apMotion[i].aKey[k].nNumCollision; j++)
-				{//違うモーションの当たり判定をオフにする
+		for (int k = 0; k < m_apMotion[i].nNumKey; k++)
+		{//プレイヤー1
+			//ダメージ判定
+			for (int j = 0; j < m_apMotion[i].aKey[k].nNumCollision; j++)
+			{//違うモーションの当たり判定をオフにする
 
-					 //攻撃判定再設定
-					if (m_bSide == false)
-					{//敵より右側の場合
-						//プレイヤー1
-						m_apMotion[i].aKey[k].Collision[j]->SetPos(m_pos + m_apMotion[i].aKey[k].Collision[j]->GetDPos());
-					}
-					else
-					{//右向き
+				 //攻撃判定再設定
+				if (m_bSide == false)
+				{//敵より右側の場合
+					//プレイヤー1
+					m_apMotion[i].aKey[k].Collision[j]->SetPos(m_pos + m_apMotion[i].aKey[k].Collision[j]->GetDPos());
+				}
+				else
+				{//右向き
 
-						//プレイヤー1
-						m_apMotion[i].aKey[k].Collision[j]->SetPos(D3DXVECTOR3(
-							m_pos.x - m_apMotion[i].aKey[k].Collision[j]->GetDPos().x,				//X
-							m_pos.y + m_apMotion[i].aKey[k].Collision[j]->GetDPos().y,
-							m_pos.z - m_apMotion[i].aKey[k].Collision[j]->GetDPos().z));
-					}
-
-					if (m_Motion == i&&m_nCurKey == k&&m_frame >= m_apMotion[i].aKey[k].Collision[j]->GetStartf() && m_frame <= m_apMotion[i].aKey[k].Collision[j]->GetEndf())
-					{//キーとモーションが一致している場合のみ表示
-						if (m_apMotion[i].aKey[k].Collision[j] != nullptr)
-						{
-							m_apMotion[i].aKey[k].Collision[j]->SetUse(true);
-						}
-					}
-					else
-					{
-						if (m_apMotion[i].aKey[k].Collision[j] != nullptr)
-						{
-							m_apMotion[i].aKey[k].Collision[j]->SetUse(false);
-						}
-					}
+					//プレイヤー1
+					m_apMotion[i].aKey[k].Collision[j]->SetPos(D3DXVECTOR3(
+						m_pos.x - m_apMotion[i].aKey[k].Collision[j]->GetDPos().x,				//X
+						m_pos.y + m_apMotion[i].aKey[k].Collision[j]->GetDPos().y,
+						m_pos.z - m_apMotion[i].aKey[k].Collision[j]->GetDPos().z));
 				}
 
-				//やられ判定
-				for (int j = 0; j < m_apMotion[i].aKey[k].nNumHurtCol; j++)
+				if (m_Motion == i&&m_nCurKey == k&&m_frame >= m_apMotion[i].aKey[k].Collision[j]->GetStartf() && m_frame <= m_apMotion[i].aKey[k].Collision[j]->GetEndf())
+				{//キーとモーションが一致している場合のみ表示
+					if (m_apMotion[i].aKey[k].Collision[j] != nullptr)
+					{
+						m_apMotion[i].aKey[k].Collision[j]->SetUse(true);
+					}
+				}
+				else
 				{
-					if (m_bSide == true)
-					{//右向き(1P)
-						m_apMotion[i].aKey[k].HurtCol[j]->SetPos(D3DXVECTOR3(
-							m_pos.x - m_apMotion[i].aKey[k].HurtCol[j]->GetDPos().x,
-							m_pos.y + m_apMotion[i].aKey[k].HurtCol[j]->GetDPos().y,
-							m_pos.z + m_apMotion[i].aKey[k].HurtCol[j]->GetDPos().z));
+					if (m_apMotion[i].aKey[k].Collision[j] != nullptr)
+					{
+						m_apMotion[i].aKey[k].Collision[j]->SetUse(false);
 					}
-					else
-					{//左向き(2P)
-						m_apMotion[i].aKey[k].HurtCol[j]->SetPos(m_apMotion[i].aKey[k].HurtCol[j]->GetDPos() + m_pos);
-					}
+				}
+			}
 
-					if (m_Motion == i&&m_nCurKey == k&&m_apMotion[i].aKey[k].HurtCol[j] != nullptr&&
-						m_frame >= m_apMotion[i].aKey[k].HurtCol[j]->GetStartf() && m_frame <= m_apMotion[i].aKey[k].HurtCol[j]->GetEndf())
+			//やられ判定
+			for (int j = 0; j < m_apMotion[i].aKey[k].nNumHurtCol; j++)
+			{
+				if (m_bSide == true)
+				{//右向き(1P)
+					m_apMotion[i].aKey[k].HurtCol[j]->SetPos(D3DXVECTOR3(
+						m_pos.x - m_apMotion[i].aKey[k].HurtCol[j]->GetDPos().x,
+						m_pos.y + m_apMotion[i].aKey[k].HurtCol[j]->GetDPos().y,
+						m_pos.z + m_apMotion[i].aKey[k].HurtCol[j]->GetDPos().z));
+				}
+				else
+				{//左向き(2P)
+					m_apMotion[i].aKey[k].HurtCol[j]->SetPos(m_apMotion[i].aKey[k].HurtCol[j]->GetDPos() + m_pos);
+				}
+
+				if (m_Motion == i&&m_nCurKey == k&&m_apMotion[i].aKey[k].HurtCol[j] != nullptr&&
+					m_frame >= m_apMotion[i].aKey[k].HurtCol[j]->GetStartf() && m_frame <= m_apMotion[i].aKey[k].HurtCol[j]->GetEndf())
+				{
+					m_apMotion[i].aKey[k].HurtCol[j]->SetUse(true);
+				}
+				else
+				{
+					if (m_apMotion[i].aKey[k].HurtCol[j] != nullptr)
 					{
-						m_apMotion[i].aKey[k].HurtCol[j]->SetUse(true);
-					}
-					else
-					{
-						if (m_apMotion[i].aKey[k].HurtCol[j] != nullptr)
-						{
-							m_apMotion[i].aKey[k].HurtCol[j]->SetUse(false);
-						}
+						m_apMotion[i].aKey[k].HurtCol[j]->SetUse(false);
 					}
 				}
 			}

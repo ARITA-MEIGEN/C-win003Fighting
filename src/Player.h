@@ -230,6 +230,7 @@ private:
 	bool			m_bBullet;						//飛び道具を使用しているか？
 	CBullet*		m_pBullet;						//飛び道具
 	CShadow*		m_pShadow;						//影
+	bool			m_bDamage;						//ダメージフラグ
 
 	//押し出し判定関連
 	CCollision* 	m_AxisBox;						//押し出し判定(プレイヤーの軸)
@@ -240,7 +241,7 @@ private:
 	int				m_nJumpCount;					//ジャンプカウンター
 	int				m_nJumpRigor;					//ジャンプの着地硬直
 	bool			m_bJump;						//ジャンプ中かどうか
-	int				m_nJumpTransTime;			//ジャンプ移行フレーム
+	int				m_nJumpTransTime;				//ジャンプ移行フレーム
 	//ガード関係
 	int				m_nRig;							//硬直時間
 };

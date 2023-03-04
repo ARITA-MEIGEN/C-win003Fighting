@@ -19,79 +19,79 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="data\Application.cpp" />
-    <ClCompile Include="data\Bullet.cpp" />
-    <ClCompile Include="data\Camera.cpp" />
-    <ClCompile Include="data\Collision.cpp" />
-    <ClCompile Include="data\DebugProc.cpp" />
-    <ClCompile Include="data\DirectInput.cpp" />
-    <ClCompile Include="data\effect.cpp" />
-    <ClCompile Include="data\Fade.cpp" />
-    <ClCompile Include="data\Floor.cpp" />
-    <ClCompile Include="data\Game.cpp" />
-    <ClCompile Include="data\input.cpp" />
-    <ClCompile Include="data\inputcontroller.cpp" />
-    <ClCompile Include="data\InputJoypad.cpp" />
-    <ClCompile Include="data\InputKeyBoard.cpp" />
-    <ClCompile Include="data\Life.cpp" />
-    <ClCompile Include="data\Light.cpp" />
-    <ClCompile Include="data\main.cpp" />
-    <ClCompile Include="data\Mesh.cpp" />
-    <ClCompile Include="data\Model.cpp" />
-    <ClCompile Include="data\Motion.cpp" />
-    <ClCompile Include="data\Object.cpp" />
-    <ClCompile Include="data\Object2D.cpp" />
-    <ClCompile Include="data\Object3D.cpp" />
-    <ClCompile Include="data\ObjectX.cpp" />
-    <ClCompile Include="data\Particle.cpp" />
-    <ClCompile Include="data\Player.cpp" />
-    <ClCompile Include="data\Precompile.cpp" />
-    <ClCompile Include="data\renderer.cpp" />
-    <ClCompile Include="data\Result.cpp" />
-    <ClCompile Include="data\Shadow.cpp" />
-    <ClCompile Include="data\sound.cpp" />
-    <ClCompile Include="data\Time.cpp" />
-    <ClCompile Include="data\Title.cpp" />
-    <ClCompile Include="data\UI.cpp" />
+    <ClCompile Include="src\Application.cpp" />
+    <ClCompile Include="src\Bullet.cpp" />
+    <ClCompile Include="src\Camera.cpp" />
+    <ClCompile Include="src\Collision.cpp" />
+    <ClCompile Include="src\DebugProc.cpp" />
+    <ClCompile Include="src\DirectInput.cpp" />
+    <ClCompile Include="src\effect.cpp" />
+    <ClCompile Include="src\Fade.cpp" />
+    <ClCompile Include="src\Floor.cpp" />
+    <ClCompile Include="src\Game.cpp" />
+    <ClCompile Include="src\input.cpp" />
+    <ClCompile Include="src\inputcontroller.cpp" />
+    <ClCompile Include="src\InputJoypad.cpp" />
+    <ClCompile Include="src\InputKeyBoard.cpp" />
+    <ClCompile Include="src\Life.cpp" />
+    <ClCompile Include="src\Light.cpp" />
+    <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\Mesh.cpp" />
+    <ClCompile Include="src\Model.cpp" />
+    <ClCompile Include="src\Motion.cpp" />
+    <ClCompile Include="src\Object.cpp" />
+    <ClCompile Include="src\Object2D.cpp" />
+    <ClCompile Include="src\Object3D.cpp" />
+    <ClCompile Include="src\ObjectX.cpp" />
+    <ClCompile Include="src\Particle.cpp" />
+    <ClCompile Include="src\Player.cpp" />
+    <ClCompile Include="src\Precompile.cpp" />
+    <ClCompile Include="src\renderer.cpp" />
+    <ClCompile Include="src\Result.cpp" />
+    <ClCompile Include="src\Shadow.cpp" />
+    <ClCompile Include="src\sound.cpp" />
+    <ClCompile Include="src\Time.cpp" />
+    <ClCompile Include="src\Title.cpp" />
+    <ClCompile Include="src\UI.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="data\Application.h" />
-    <ClInclude Include="data\Bullet.h" />
-    <ClInclude Include="data\Camera.h" />
-    <ClInclude Include="data\Collision.h" />
-    <ClInclude Include="data\Command.h" />
-    <ClInclude Include="data\DebugProc.h" />
-    <ClInclude Include="data\DirectInput.h" />
-    <ClInclude Include="data\Easing.h" />
-    <ClInclude Include="data\effect.h" />
-    <ClInclude Include="data\Fade.h" />
-    <ClInclude Include="data\Floor.h" />
-    <ClInclude Include="data\Game.h" />
-    <ClInclude Include="data\input.h" />
-    <ClInclude Include="data\inputcontroller.h" />
-    <ClInclude Include="data\InputJoyPad.h" />
-    <ClInclude Include="data\InputKeyBoard.h" />
-    <ClInclude Include="data\inputkeydata.h" />
-    <ClInclude Include="data\Life.h" />
-    <ClInclude Include="data\Light.h" />
-    <ClInclude Include="data\main.h" />
-    <ClInclude Include="data\Mesh.h" />
-    <ClInclude Include="data\Model.h" />
-    <ClInclude Include="data\Motion.h" />
-    <ClInclude Include="data\Object.h" />
-    <ClInclude Include="data\Object2D.h" />
-    <ClInclude Include="data\Object3D.h" />
-    <ClInclude Include="data\ObjectX.h" />
-    <ClInclude Include="data\Particle.h" />
-    <ClInclude Include="data\Player.h" />
-    <ClInclude Include="data\Precompile.h" />
-    <ClInclude Include="data\renderer.h" />
-    <ClInclude Include="data\Result.h" />
-    <ClInclude Include="data\Shadow.h" />
-    <ClInclude Include="data\sound.h" />
-    <ClInclude Include="data\Time.h" />
-    <ClInclude Include="data\Title.h" />
-    <ClInclude Include="data\UI.h" />
+    <ClInclude Include="src\Application.h" />
+    <ClInclude Include="src\Bullet.h" />
+    <ClInclude Include="src\Camera.h" />
+    <ClInclude Include="src\Collision.h" />
+    <ClInclude Include="src\Command.h" />
+    <ClInclude Include="src\DebugProc.h" />
+    <ClInclude Include="src\DirectInput.h" />
+    <ClInclude Include="src\Easing.h" />
+    <ClInclude Include="src\effect.h" />
+    <ClInclude Include="src\Fade.h" />
+    <ClInclude Include="src\Floor.h" />
+    <ClInclude Include="src\Game.h" />
+    <ClInclude Include="src\input.h" />
+    <ClInclude Include="src\inputcontroller.h" />
+    <ClInclude Include="src\InputJoyPad.h" />
+    <ClInclude Include="src\InputKeyBoard.h" />
+    <ClInclude Include="src\inputkeydata.h" />
+    <ClInclude Include="src\Life.h" />
+    <ClInclude Include="src\Light.h" />
+    <ClInclude Include="src\main.h" />
+    <ClInclude Include="src\Mesh.h" />
+    <ClInclude Include="src\Model.h" />
+    <ClInclude Include="src\Motion.h" />
+    <ClInclude Include="src\Object.h" />
+    <ClInclude Include="src\Object2D.h" />
+    <ClInclude Include="src\Object3D.h" />
+    <ClInclude Include="src\ObjectX.h" />
+    <ClInclude Include="src\Particle.h" />
+    <ClInclude Include="src\Player.h" />
+    <ClInclude Include="src\Precompile.h" />
+    <ClInclude Include="src\renderer.h" />
+    <ClInclude Include="src\Result.h" />
+    <ClInclude Include="src\Shadow.h" />
+    <ClInclude Include="src\sound.h" />
+    <ClInclude Include="src\Time.h" />
+    <ClInclude Include="src\Title.h" />
+    <ClInclude Include="src\UI.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{7233D566-879E-4434-8AF9-F3F519F04301}</ProjectGuid>
@@ -169,6 +169,7 @@
       <SDLCheck>true</SDLCheck>
       <PrecompiledHeaderFile>Precompile.h</PrecompiledHeaderFile>
       <ForcedIncludeFiles>Precompile.h;%(ForcedIncludeFiles)</ForcedIncludeFiles>
+      <AdditionalIncludeDirectories>C:\Users\Student\Documents\Visual Studio 2015\Projects\C++win003Fighting\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -193,7 +194,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
-      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeader>Create</PrecompiledHeader>
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
@@ -202,6 +203,7 @@
       <PrecompiledHeaderFile>Precompile.h</PrecompiledHeaderFile>
       <ForcedIncludeFiles>Precompile.h;%(ForcedIncludeFiles)</ForcedIncludeFiles>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <AdditionalIncludeDirectories>C:\Users\Student\Documents\Visual Studio 2015\Projects\C++win003Fighting\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>

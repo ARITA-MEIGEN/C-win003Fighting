@@ -150,14 +150,14 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/, LPSTR /*lpC
 			}
 		}
 	}
-	//メモリーリーク表示
-	_CrtDumpMemoryLeaks();
 
 	// 終了処理
 	pApplication->Uninit();
 	delete pApplication;
 	pApplication = nullptr;
 
+	//メモリーリーク表示
+	_CrtDumpMemoryLeaks();
 
 	// ウィンドウクラスの登録を解除
 	UnregisterClass(CLASS_NAME, wcex.hInstance);
